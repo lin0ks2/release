@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LEXITRON</title>
+
+  <!-- 🖼️ Apple Touch Icons (iPhone / iPad) -->
+  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon-180x180.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="./apple-touch-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="./apple-touch-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="./apple-touch-icon-76x76.png">
+
+  <!-- 🖼️ Favicon для браузеров -->
+  <link rel="icon" type="image/png" sizes="512x512" href="./logo_512.png">
+  <link rel="icon" type="image/png" sizes="128x128" href="./logo_128.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="./logo_32.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
+  <link rel="icon" href="./favicon.ico" type="image/x-icon">
+
+  <!-- 🖼️ Android/Chrome -->
+  <link rel="icon" sizes="512x512" href="./android-chrome-512x512.png">
+  <link rel="manifest" href="./site.webmanifest">
+
+  <!-- 📱 Метаданные для iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="LEXITRON">
+
+  <!-- 🎨 Стили -->
+  <link rel="stylesheet" href="./style.css?v=1.0.0">
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <img class="logo-mark"
+           src="./logo_32.png"
+           srcset="./logo_64.png 2x, ./logo_128.png 4x"
+           alt="LEXITRON" width="28" height="28"
+           decoding="async" loading="eager"/>
+      <div class="title-wrap">
+        <h1 id="title">Lexitron <span class="ver" id="appVer"></span></h1>
+        <div class="tagline" id="tagline">Він навчить!</div>
+      </div>
+    </div>
+    <div class="controls">
+      <button id="themeToggleBtn" class="iconBtn" title="Theme" aria-label="Theme">🌞</button>
+      <button id="langToggleBtn"  class="iconBtn" title="Language" aria-label="Language">🇺🇦</button>
+      <button id="dictsBtn"       class="iconBtn gear" title="Словники" aria-label="Словники">📚</button>
+    </div>
+  </header>
+
+  <!-- 🔽 ПАНЕЛЬ НАБОРОВ — РОВНО ПОД ШАПКОЙ -->
+  <div id="setsBar" class="setsBar" aria-label="Sets"></div>
+ <!-- <div id="motivationBox" class="motivationBox"></div> -->
+
+  <main>
+    <section class="card">
+      <div class="topRow">
+        <div class="stars" id="stars"></div>
+        <button id="favBtn" class="heart" title="Обране" aria-label="Додати в обране">♡</button>
+      </div>
+
+      <div class="word" id="wordText">—</div>
+      <div class="hint" id="hintText">—</div>
+
+      <div class="options" id="optionsRow"></div>
+
+      <div class="statsBar" id="statsBar">
+        Всього слів: 0 / Вивчено: 0 / Помилок: 0
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="copyright">© All rights reserved · <span id="copyYear"></span></div>
+  </footer>
+
+  <!-- Модалка словарей -->
+  <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="backdrop" id="backdrop"></div>
+    <div class="dialog">
+      <h2 id="modalTitle">Словники</h2>
+      <div class="field">
+        <div class="dictList" id="dictList"><!-- rows --></div>
+      </div>
+      <div class="modalActions">
+        <button id="okBtn" class="primary">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- i18n и словари -->
+  <script src="i18n.js" defer></script>
+  <script src="dicts.js" defer></script>
+  <script src="deck.js" defer></script>
+
+  <!-- сборщик дек и темы -->
+  <script src="app.decks.js" defer></script>
+  <script src="theme.js" defer></script>
+
+  <!-- ядро и тренажёр -->
+  <script src="app.core.js" defer></script>
+  <script src="app.trainer.js" defer></script>
+
+  <!-- UI (последним) -->
+  <script src="app.ui.view.js" defer></script>
+
+  <!-- 👇 аддон плиток -->
+  <script src="app.addon.sets.js" defer></script>
+  <script src="app.addon.mistakes.js" defer></script>
+  <script src="app.addon.penalties.js" defer></script>
+  <script src="app.addon.startup.js" defer></script>
+</body>
+</html>
