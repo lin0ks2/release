@@ -158,9 +158,7 @@
         return [];
       }
     }
-).filter(id=>App.state.favorites[id]);
-      return favIds.map(id=>byId.get(+id)).filter(Boolean);
-    }
+
     // Пользовательские
     if (key.startsWith && key.startsWith('user-')){
       return App.dictRegistry.user?.[key]?.words || [];
