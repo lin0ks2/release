@@ -138,44 +138,28 @@
     if (!key) return [];
     // Избранное — «виртуальная» колода
     
-    
-if (key === 'fav' || key === 'favorites'){
-  try {
-    App.migrateFavoritesToV2 && App.migrateFavoritesToV2();
-    const st  = App.state || {};
-    const v2  = st.favorites_v2 || {};   // структура: { dictKey: { [id]: true } }
-
-    const out = [];
-    Object.keys(v2).forEach((dictKey) => {
-      const src = App.Decks.resolveDeckByKey(dictKey) || [];
-      const map = v2[dictKey] || {};
-      for (let i = 0; i < src.length; i++){
-        const w = src[i];
-        if (map[w.id]) out.push(w);
-      }
-    });
-
-    return out;
-  } catch (e){
-    console.warn('fav build failed', e);
-    return [];
-  }
-}
-;
-        const v2 = st.favorites_v2 || {};
-
+    if (key === 'fav' || key === 'favorites'){
+      try {
+        App.migrateFavoritesToV2 && App.migrateFavoritesToV2();
+        const st  = App.state || {};
+        const v2  = st.favorites_v2 || {};
         const out = [];
-        Object.keys(v2).forEach(dictKey => {
+        Object.keys(v2).forEach((dictKey) => {
           const src = App.Decks.resolveDeckByKey(dictKey) || [];
           const map = v2[dictKey] || {};
-          for (let i=0;i<src.length;i++){
+          for (let i = 0; i < src.length; i++){
             const w = src[i];
             if (map[w.id]) out.push(w);
           }
         });
         return out;
-      }catch(e){ console.warn('fav build failed', e); return []; }
+      } catch (e){
+        console.warn('fav build failed', e);
+        return [];
+      }
     }
+).filter(id=>App.state.favorites[id]);
+      return favIds.map(id=>byId.get(+id)).filter(Boolean);
     }
     // Пользовательские
     if (key.startsWith && key.startsWith('user-')){
