@@ -135,7 +135,9 @@
   }
 
   function resolveDeckByKey(key){
-    if (!key) return [];
+    
+  if (key === 'mistakes') { try { return (App.Mistakes && App.Mistakes.deck) ? (App.Mistakes.deck() || []) : []; } catch(e){ return []; } }
+if (!key) return [];
     // Избранное — «виртуальная» колода
     
     if (key === 'fav' || key === 'favorites'){
@@ -182,7 +184,9 @@
   // [БЛОК 4] Имя словаря и флаг
   // ───────────────────────────────────────────────────────────────────────────
   function resolveNameByKey(key){
-    return nameByKey(key);
+    
+  if (key === 'mistakes') { try { return (App.i18n && App.i18n().mistakesName) || 'Мои ошибки'; } catch(e){ return 'Мои ошибки'; } }
+return nameByKey(key);
   }
 
   function flagForKey(key, words){
