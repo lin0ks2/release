@@ -1,10 +1,9 @@
-/* app.ui.view.js — stable, no syntax errors; Favorites v2 UI; Mistakes localized w/o counters */
+/* app.ui.view.js — stable: Favorites v2 UI, Mistakes pool, addIDontKnowButton restored */
 (function () {
   const App = window.App;
   const D = App.DOM;
 
-  // ─────────────────────────────────────────────────────────────
-  // Мотивация
+  // ── Мотивация ────────────────────────────────────────────────
   function showMotivation(type) {
     const box = document.getElementById('motivationBox');
     if (!box) return;
@@ -31,8 +30,8 @@
       box.classList.add('motivation-fade');
     } catch (e) {}
   }
-  // ─────────────────────────────────────────────────────────────
 
+  // ── Вспомогательные ─────────────────────────────────────────
   function getActiveDeck() {
     if (App.Trainer && typeof App.Trainer.safeGetDeckSlice === 'function') {
       return App.Trainer.safeGetDeckSlice(App.dictRegistry.activeKey) || [];
@@ -107,27 +106,78 @@
     });
   }
 
-  function addIDontKnowButton() {
-    const t = App.i18n();
+  // ── Кнопка «Не знаю» (ВОССТАНОВЛЕНО) ─────────────────────────
+  function addIDontKnowButton(){
+    if (!D || !D.optionsRow) return;
+    const t = (typeof App.i18n === 'function') ? App.i18n() : { iDontKnow: 'Не знаю' };
     const wrap = document.createElement('div');
     wrap.className = 'idkWrapper';
-    const b = document.createElement('button');
-    b.className = 'ghost';
-    b.textContent = t.iDontKnow;
-    b.addEventListener('click', onIDontKnow);
-    wrap.appendChild(b);
+    const btn = document.createElement('button');
+    btn.className = 'ghost';
+    btn.textContent = t.iDontKnow || 'Не знаю';
+    btn.addEventListener('click', onIDontKnow);
+    wrap.appendChild(btn);
     D.optionsRow.appendChild(wrap);
   }
 
+  // ── Пул дистракторов для «Мои ошибки» ───────────────────────
+  function getMistakesDistractorPool(currentWord){
+    try{
+      const NEED = 3;
+      const uniq = new Map();
+      const push = (w)=>{ if (!w || !w.id || w.id===currentWord.id) return; uniq.set(String(w.id)+'::'+(w.word||w.ru||w.uk||''), w); };
+
+      if (App.Mistakes && typeof App.Mistakes.list === 'function'){
+        const arr = App.Mistakes.list() || [];
+        for (let i=0;i<arr.length;i++) push(arr[i]);
+      }
+
+      let srcKey = null;
+      try{ srcKey = App.Mistakes && App.Mistakes.sourceKeyFor ? App.Mistakes.sourceKeyFor(currentWord.id) : null; }catch(e){}
+      if (srcKey){
+        const srcDeck = App.Decks.resolveDeckByKey(srcKey) || [];
+        for (let i=0;i<srcDeck.length;i++) push(srcDeck[i]);
+      }
+
+      if (uniq.size < NEED){
+        const keys = (App.Decks && App.Decks.builtinKeys) ? App.Decks.builtinKeys() : [];
+        for (let k of keys){
+          const d = App.Decks.resolveDeckByKey(k) || [];
+          for (let i=0;i<d.length;i++) push(d[i]);
+          if (uniq.size >= 20) break;
+        }
+      }
+
+      return Array.from(uniq.values());
+    }catch(e){ return []; }
+  }
+
+  // ── Рендер карточки ──────────────────────────────────────────
   function renderCard(force = false) {
     if (document.activeElement && document.activeElement.blur) try { document.activeElement.blur(); } catch (e) {}
     const deck = getActiveDeck();
     if (!deck.length) {
-      if (D.wordEl) D.wordEl.textContent = '—';
-      if (D.hintEl) D.hintEl.textContent = '—';
-      if (D.optionsRow) D.optionsRow.innerHTML = '';
-      renderStars(); updateStats(); return;
+      if (App.dictRegistry.activeKey === 'mistakes'){
+        const t = App.i18n ? App.i18n() : null;
+        const msg = t && t.allMistakesDone ? t.allMistakesDone :
+          (App.settings && App.settings.lang === 'uk' ? 'Усі помилки закриті!' : 'Все ошибки закрыты!');
+        if (D.wordEl) D.wordEl.textContent = msg;
+        if (D.hintEl) D.hintEl.textContent = '—';
+        if (D.optionsRow) D.optionsRow.innerHTML = '';
+        setTimeout(()=>{
+          App.dictRegistry.activeKey = App.Decks.pickDefaultKey();
+          App.saveDictRegistry && App.saveDictRegistry();
+          renderDictList(); App.renderSetsBar(); renderCard(true); updateStats();
+        }, 900);
+        return;
+      } else {
+        if (D.wordEl) D.wordEl.textContent = '—';
+        if (D.hintEl) D.hintEl.textContent = '—';
+        if (D.optionsRow) D.optionsRow.innerHTML = '';
+        renderStars(); updateStats(); return;
+      }
     }
+
     if (force || App.state.index === App.state.lastIndex) App.state.index = App.Trainer.sampleNextIndexWeighted(deck);
     const w = current();
     if (App.state.lastShownWordId !== w.id) {
@@ -139,14 +189,24 @@
 
     if (!isReverse) {
       if (D.wordEl) D.wordEl.textContent = w.word;
+      let poolWords;
+      if (App.dictRegistry.activeKey === 'mistakes'){
+        poolWords = getMistakesDistractorPool(w).map(x => (App.settings.lang === 'ru' ? x.ru : x.uk));
+      } else {
+        poolWords = deck.filter(x => x.id !== w.id).map(x => (App.settings.lang === 'ru' ? x.ru : x.uk));
+      }
       const correct = (App.settings.lang === 'ru') ? w.ru : w.uk;
-      const pool = deck.filter(x => x.id !== w.id).map(x => (App.settings.lang === 'ru' ? x.ru : x.uk));
-      drawOptions(correct, pool);
+      drawOptions(correct, poolWords);
     } else {
       if (D.wordEl) D.wordEl.textContent = (App.settings.lang === 'ru') ? w.ru : w.uk;
+      let poolWords;
+      if (App.dictRegistry.activeKey === 'mistakes'){
+        poolWords = getMistakesDistractorPool(w).map(x => x.word);
+      } else {
+        poolWords = deck.filter(x => x.id !== w.id).map(x => x.word);
+      }
       const correct = w.word;
-      const pool = deck.filter(x => x.id !== w.id).map(x => x.word);
-      drawOptions(correct, pool);
+      drawOptions(correct, poolWords);
     }
 
     if (D.hintEl) D.hintEl.textContent = t.choose;
@@ -161,6 +221,7 @@
     updateStats();
   }
 
+  // ── Обработчики ответов ──────────────────────────────────────
   function onChoice(btn, correct) {
     const w = current();
     const cur = App.clamp(App.state.stars[w.id] || 0, 0, App.Trainer.starsMax());
@@ -170,21 +231,36 @@
       D.optionsRow.querySelectorAll('button.optionBtn').forEach(b => b.disabled = true);
       App.state.stars[w.id] = App.clamp(cur + 1, 0, App.Trainer.starsMax());
       App.state.successes[w.id] = (App.state.successes[w.id] || 0) + 1;
-      App.saveState(); renderStars(); updateStats(); setTimeout(nextWord, 500);
+      App.saveState(); renderStars(); updateStats();
+      try{
+        const repeats = App.Trainer.starsMax();
+        let learned = 0; const all = (App.Decks.resolveDeckByKey(App.dictRegistry.activeKey) || []);
+        for (let i=0;i<all.length;i++) if ((App.state.stars[all[i].id]||0) >= repeats) learned++;
+        if (learned > 0 && learned % 10 === 0 && App.Milestones && App.Milestones.tryShow){ App.Milestones.tryShow('learned', {count: learned}); }
+      }catch(e){}
+      setTimeout(nextWord, 500);
     } else {
       showMotivation('encouragement');
       btn.classList.add('wrong'); btn.disabled = true;
       App.state.stars[w.id] = App.clamp(cur - 1, 0, App.Trainer.starsMax());
       App.state.totals.errors += 1;
+      addToMistakesOnFailure(w);
+      // session errors for milestones
+      App.state.totals.sessionErrors = (App.state.totals.sessionErrors || 0) + 1;
+      if (App.state.totals.sessionErrors % 5 === 0 && App.Milestones && App.Milestones.tryShow){ App.Milestones.tryShow('errors', {count: App.state.totals.sessionErrors}); }
       App.saveState(); renderStars(); updateStats();
     }
   }
 
-  function addToMistakesOnFailure(word) {
-    try { if (word && App.Mistakes) App.Mistakes.add(word.id); } catch (e) {}
+  function addToMistakesOnFailure(word){
+    if (!word) return;
+    if (App && App.Mistakes && typeof App.Mistakes.add === 'function') {
+      const dictKey = (App.dictRegistry && App.dictRegistry.activeKey) || null;
+      App.Mistakes.add(word.id, dictKey);
+    }
   }
 
-  function onIDontKnow() {
+  function onIDontKnow () {
     const w = current();
     showMotivation('encouragement');
     const c = D.optionsRow.querySelector('button.optionBtn[data-correct="1"]');
@@ -193,12 +269,14 @@
     const cur = App.clamp(App.state.stars[w.id] || 0, 0, App.Trainer.starsMax());
     App.state.stars[w.id] = App.clamp(cur - 1, 0, App.Trainer.starsMax());
     App.state.totals.errors += 1;
+    App.state.totals.sessionErrors = (App.state.totals.sessionErrors || 0) + 1;
+    if (App.state.totals.sessionErrors % 5 === 0 && App.Milestones && App.Milestones.tryShow){ App.Milestones.tryShow('errors', {count: App.state.totals.sessionErrors}); }
     addToMistakesOnFailure(w);
     App.saveState(); renderStars(); updateStats();
     setTimeout(function () { App.Sets.checkCompletionAndAdvance(); nextWord(); }, 700);
   }
 
-  // === Sets UI & logic ===
+  // ── Наборы (UI) ─────────────────────────────────────────────
   App.renderSetsBar = function () {
     const host = document.getElementById('setsBar');
     if (!host) return;
@@ -228,27 +306,7 @@
     App.saveState && App.saveState();
   };
 
-  function sampleIndexInActiveSet() {
-    const deck = App.Decks.resolveDeckByKey(App.dictRegistry.activeKey) || [];
-    const b = App.Sets.activeBounds();
-    const sub = deck.slice(b.start, b.end);
-    try {
-      if (App.Penalties && sub.length) {
-        let sum = 0;
-        const weights = sub.map(w => { const wt = Math.max(1, App.Penalties.weightFor(w.id) || 1); sum += wt; return wt; });
-        const r = Math.random() * sum;
-        let acc = 0;
-        for (let i = 0; i < sub.length; i++) {
-          acc += weights[i];
-          if (r <= acc) return b.start + i;
-        }
-      }
-    } catch (e) {}
-    const nextLocal = App.Trainer.sampleNextIndexWeighted(sub);
-    return b.start + nextLocal;
-  }
-
-  /* MOTIVATION ENGINE (non-repeating) */
+  // ── Мотивация без повторов (как было) ───────────────────────
   App.Motivation = App.Motivation || {};
   (function (M) {
     const LS = 'motivation.seq.v1';
@@ -276,10 +334,14 @@
 
   function nextWord() {
     App.state.lastIndex = App.state.index;
-    App.state.index = sampleIndexInActiveSet();
+    const b = App.Sets ? App.Sets.activeBounds() : {start:0,end:getActiveDeck().length};
+    const sub = (App.Decks.resolveDeckByKey(App.dictRegistry.activeKey)||[]).slice(b.start,b.end);
+    const nextLocal = App.Trainer.sampleNextIndexWeighted(sub);
+    App.state.index = b.start + nextLocal;
     renderCard(true);
   }
 
+  // ── Favorites v2 UI ─────────────────────────────────────────
   function toggleFav() {
     const w = current();
     const dictKey = App.dictRegistry.activeKey;
@@ -302,7 +364,7 @@
     } catch (e) { return false; }
   }
 
-  // === makeDictRow: Mistakes — без числа, с локализацией; Favorites — с очисткой v2
+  // ── Рендер списка словарей ──────────────────────────────────
   function makeDictRow(key) {
     const words = App.Decks.resolveDeckByKey(key) || [];
 
@@ -331,7 +393,6 @@
     const actions = document.createElement('div');
     actions.className = 'dictActions';
 
-    // Превью
     const prevBtn = document.createElement('button');
     prevBtn.className = 'iconOnly';
     prevBtn.title = App.i18n().ttPreview;
@@ -342,7 +403,6 @@
     });
     actions.appendChild(prevBtn);
 
-    // Очистка "Обраного"
     if (key === 'fav' || key === 'favorites') {
       const delBtn = document.createElement('button');
       delBtn.className = 'iconOnly';
@@ -382,21 +442,17 @@
   function renderDictList() {
     const host = D.dictListHost; if (!host) return; host.innerHTML = '';
 
-    // Всегда первым — "Мои ошибки"
     (function appendMistakesRowFirst() {
       try {
         const row = makeDictRow('mistakes'); if (!row) return;
         host.appendChild(row);
         let cnt = 0;
-        if (App.Mistakes && typeof App.Mistakes.count === 'function') {
-          cnt = App.Mistakes.count();
-        }
+        if (App.Mistakes && typeof App.Mistakes.count === 'function') cnt = App.Mistakes.count();
         if (cnt < 4) {
           row.classList.add('disabled');
           row.setAttribute('aria-disabled', 'true');
           row.addEventListener('click', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
+            e.preventDefault(); e.stopPropagation();
             try {
               const t = (typeof App.i18n === 'function') ? App.i18n() : null;
               const msg = t && t.needMoreMistakes
@@ -407,10 +463,10 @@
                 box.textContent = msg;
                 box.classList.remove('motivation-fade'); void box.offsetWidth; box.classList.add('motivation-fade');
               }
-            } catch (_) { }
+            } catch (_) {}
           }, { capture: true });
         }
-      } catch (e) { }
+      } catch (e) {}
     })();
 
     if (canShowFav()) host.appendChild(makeDictRow('fav'));
@@ -418,6 +474,7 @@
     for (const k of Object.keys(App.dictRegistry.user || {})) host.appendChild(makeDictRow(k));
   }
 
+  // ── Прочее ──────────────────────────────────────────────────
   function applyLang() {
     const t = App.i18n();
     if (D.titleEl && D.titleEl.firstChild) D.titleEl.firstChild.textContent = t.appTitle + ' ';
@@ -438,7 +495,7 @@
           box.textContent = ''; box.classList.remove('motivation-fade');
         }
       }
-    } catch (e) { }
+    } catch (e) {}
     if (D.modal) D.modal.classList.add('hidden');
   }
 

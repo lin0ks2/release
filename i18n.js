@@ -13,7 +13,8 @@ window.I18N = {
     favTitle:'Избранное', ttPreview:'Предпросмотр',
     badgeSetWords:'Слов в наборе',
     badgeLearned:'Выучено',
-    mistakesName: "Мои ошибки",
+    mistakesName: "Мои ошибки",   allMistakesDone: "Все ошибки закрыты!",
+    needMoreMistakes: "Добавьте ещё {n} слов с ошибками для активации",
 
     // 🎉 Мотивация
     praise: [
@@ -43,7 +44,8 @@ window.I18N = {
     favTitle:'Обране', ttPreview:'Попередній перегляд',
     badgeSetWords:'Слів у наборі',
     badgeLearned:'Вивчено',
-    mistakesName: "Мої помилки",
+    mistakesName: "Мої помилки", allMistakesDone: "Усі помилки закриті!",
+    needMoreMistakes: "Додайте ще {n} слів з помилками для активації",
 
     // 🎉 Мотивация
     praise: [
