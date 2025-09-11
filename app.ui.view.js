@@ -145,11 +145,13 @@
     if(D.hintEl) D.hintEl.textContent=t.choose;
 
     
+
 if(D.favBtn){
   const dictKey = App.dictRegistry.activeKey;
   D.favBtn.textContent = (App.isFavorite && App.isFavorite(dictKey, w.id)) ? '♥' : '♡';
   D.favBtn.disabled = (App.dictRegistry.activeKey==='fav');
 }
+
 
     addIDontKnowButton(); updateStats();
   }
@@ -276,25 +278,35 @@ if(D.favBtn){
   }
 
   
+
 function toggleFav(){
   const w = current();
   const dictKey = App.dictRegistry.activeKey;
   App.toggleFavorite && App.toggleFavorite(dictKey, w.id);
   if(D.favBtn){
-    D.favBtn.textContent = App.isFavorite(dictKey, w.id) ? '♥' : '♡';
+    D.favBtn.textContent = (App.isFavorite && App.isFavorite(dictKey, w.id)) ? '♥' : '♡';
     D.favBtn.style.transform='scale(1.2)';
     setTimeout(()=>{D.favBtn.style.transform='scale(1)';},140);
   }
+  renderDictList(); App.renderSetsBar();
+}
   renderDictList(); App.renderSetsBar();
 }
     renderDictList(); App.renderSetsBar();
   }
 
   
+
 function canShowFav(){
   try{
     App.migrateFavoritesToV2 && App.migrateFavoritesToV2();
     const v2 = (App.state && App.state.favorites_v2) || {};
+    let cnt = 0;
+    Object.keys(v2).forEach(k=>{ cnt += Object.keys(v2[k]||{}).filter(x=>v2[k][x]).length; });
+    return cnt >= 4;
+  }catch(e){ return false; }
+}
+;
     let cnt = 0;
     Object.keys(v2).forEach(k=>{ cnt += Object.keys(v2[k]||{}).filter(x=>v2[k][x]).length; });
     return cnt >= 4;
@@ -339,6 +351,7 @@ function canShowFav(){
     actions.appendChild(prevBtn);
 
     
+
 if (key === 'fav' || key === 'favorites') {
   const delBtn = document.createElement('button');
   delBtn.className = 'iconOnly';
@@ -355,6 +368,9 @@ if (key === 'fav' || key === 'favorites') {
     App.saveDictRegistry();
     renderDictList(); App.renderSetsBar(); renderCard(true); updateStats();
   });
+  actions.appendChild(delBtn);
+}
+);
   actions.appendChild(delBtn);
 }
 ;
@@ -475,7 +491,9 @@ if (key === 'fav' || key === 'favorites') {
   const _origBootstrap = App.bootstrap;
   App.bootstrap = function(){
     
+    
     try{ App.migrateFavoritesToV2 && App.migrateFavoritesToV2(); }catch(e){}
+try{ App.migrateFavoritesToV2 && App.migrateFavoritesToV2(); }catch(e){}
 _origBootstrap();
     if (!App.dictRegistry.activeKey){
       App.dictRegistry.activeKey = App.Decks.pickDefaultKey(); App.saveDictRegistry();
