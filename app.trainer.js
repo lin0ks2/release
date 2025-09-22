@@ -42,7 +42,7 @@
 
   // ───────── поддержка наборов ─────────
   function getSetSize(){
-    let raw = 4; // <— по умолчанию 50
+    let raw = 50; // <— по умолчанию 50
     try { raw = Number(App && App.state && App.state.setSize); } catch(e){}
     return (Number.isFinite(raw) && raw >= 2) ? raw : 4;
   }
