@@ -14,7 +14,7 @@
   const S = App.Sets || (App.Sets = {});
 
   const LS_KEY = 'sets.progress.v1';
-  const DEFAULT_SET_SIZE = 4;
+  const DEFAULT_SET_SIZE = 50;
 
   // state
   S.state = S.state || { activeByDeck: {}, completedByDeck: {} };
