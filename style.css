@@ -1,0 +1,426 @@
+/*!
+ * style.css — Lexitron styles
+ * Version: 1.5.0
+ * Date: 2025-09-22
+ *
+ * Purpose:
+ *  - Core layout and theme variables
+ *  - Header, sets bar, card, options, modals, footer
+ *  - Responsive tweaks
+ *
+ * NOTE: Section dividers were inserted automatically at rule boundaries only.
+ *       No CSS declarations were modified.
+ */
+/* ─────────────────────────────────────────────────────────────────────────── */
+/* Тема (переменные) */
+
+/* ============================== THEME VARIABLES / ROOT =============================== */
+:root{
+  --bg:#f6f7fb; --card:#fff; --text:#1f2430; --muted:#6b7280;
+  --green:#16a34a; --red:#dc2626; --border:#e5e7eb; --shadow:0 10px 30px rgba(16,24,40,.08);
+  --mint:#34d399; --mint-strong:#10b981; --mint-weak:#d1fae5;
+  --overlay:rgba(15,23,42,.6);
+  /* Инструментальные токены */
+  --tool-bg:#f5f7fb; --tool-border:#e2e8f0; --tool-fg:#0f172a;
+  --idk-fg:#0f172a; --idk-border:#cbd5e1; --idk-bg:transparent;
+  --focus-ring:#22c55e40;
+}
+/* Тёмная тема — у нас в проекте используется [data-theme="dark"] */
+[data-theme="dark"]{
+  --bg:#0b1020; --card:#0f172a; --text:#e5e7eb; --muted:#9ca3af;
+  --green:#22c55e; --red:#ef4444; --border:#1f2937; --shadow:0 10px 30px rgba(0,0,0,.4);
+  --mint:#34d399; --mint-strong:#10b981; --mint-weak:#0b3b2f;
+  --overlay:rgba(2,6,23,.7);
+  --tool-bg:#0f172a; --tool-border:#1f2937; --tool-fg:#e5e7eb;
+  --idk-fg:#e5e7eb; --idk-border:#334155; --idk-bg:transparent;
+  --focus-ring:#22c55e55;
+}
+
+/* База */
+*{box-sizing:border-box}
+html,body{height:100%}
+
+/* ============================== BODY / GLOBAL =============================== */
+body{
+  margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  background:var(--bg); color:var(--text);
+  display:flex; flex-direction:column;
+}
+
+/* Header */
+
+/* ============================== HEADER =============================== */
+header{
+  padding:10px 14px;
+  display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:nowrap;
+  background:var(--card); border-bottom:1px solid var(--border);
+}
+header .brand{ display:flex; align-items:center; gap:8px; }
+.brand h1{font-size:26px;margin:0;font-weight:800}
+.brand .tagline{font-size:13px;color:var(--muted)}
+.ver{font-size:12px;color:var(--muted);margin-left:6px}
+
+.iconBtn{
+  width:44px;height:44px;padding:0;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1;
+  border:1px solid var(--tool-border);background:var(--tool-bg);color:var(--tool-fg);
+  cursor:pointer;transition:transform .12s ease, background .2s ease, border-color .2s ease, color .2s ease;
+}
+.iconBtn:hover{ filter:brightness(1.06); }
+.iconBtn:active{ transform:scale(0.95); }
+.iconBtn:focus-visible{ outline:none; box-shadow:0 0 0 2px var(--focus-ring); }
+
+/* Лого */
+header .logo-mark{
+  width:46px;height:46px;border-radius:6px;background:var(--card);border:1px solid var(--border);
+  padding:2px;object-fit:contain;pointer-events:none;
+}
+header .title-wrap{ display:flex; flex-direction:column; line-height:1.1; }
+header .title-wrap h1{ margin:0; }
+header .title-wrap .tagline{ margin-top:2px; }
+header .controls{ position:relative; z-index:1; display:flex; gap:10px; align-items:center; }
+
+/* Main Card */
+main{flex:1;display:grid;place-items:center;padding:14px}
+
+/* ============================== CARD / TRAINER CORE =============================== */
+.card{
+  width: 640px; max-width: 94vw;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:24px;
+  box-shadow:var(--shadow);
+  text-align:center;
+}
+
+.topRow{
+  display:flex; align-items:center; justify-content:space-between;
+  min-height:40px; margin-bottom:4px;
+}
+.stars{display:flex; gap:6px; align-items:center}
+.starIcon{font-size:22px;color:#cbd5e1}
+.starIcon.filled{color:#fbbf24}
+
+.heart{
+  font-size:22px; background:none; border:none; cursor:pointer;
+  transition:transform .2s ease; color:inherit; line-height:1;
+  width:22px; height:22px; display:flex; align-items:center; justify-content:center;
+}
+.heart:active{transform:scale(0.9)}
+
+/* ============================== WORD BLOCK =============================== */
+
+.word{font-size:36px; font-weight:800; margin:6px 0 2px; line-height:1.15}
+.hint{color:var(--muted); margin-bottom:12px; font-size:14px}
+
+/* Sets bar — компактный, чувствительный к теме */
+
+/* ============================== SETS BAR =============================== */
+#setsBar{
+  display:flex; flex-wrap:wrap; justify-content:center; align-items:center;
+  gap:6px 8px; padding:6px 0 2px; margin:20px 0 6px;
+}
+#setsBar .setTile{
+  min-width:36px; height:36px; padding:0 8px;
+  border-radius:8px; border:1px solid var(--border);
+  background:var(--card); color:var(--text);
+  font-weight:700; font-size:13px; user-select:none; cursor:pointer;
+  transition: transform .12s ease, background .12s ease, border-color .12s ease, color .12s ease;
+}
+#setsBar .setTile:hover{ transform: translateY(-1px); }
+#setsBar .setTile:active{ transform:scale(0.97); }
+#setsBar .setTile.active{ border-width:2px; border-color: var(--mint-strong); }
+#setsBar .setTile.done{
+  background: rgba(34,197,94,.18);
+  border-color: rgba(34,197,94,.7);
+  color: inherit;
+}
+@media (max-width:360px){
+  #setsBar .setTile{ min-width:32px; height:32px; border-radius:7px; padding:0 6px; font-size:12px; }
+}
+
+/* Мотивация — между наборами и звёздами */
+#motivationBox{
+  text-align:center; font-size:15px; font-weight:700;
+  margin:6px 0 10px; color: var(--text); opacity:.9; pointer-events:none;
+}
+
+/* Варианты и кнопки */
+
+/* ============================== OPTIONS / ANSWERS =============================== */
+.options{
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:12px; justify-items:stretch; margin:14px 0 12px;
+}
+@media (max-width:420px){ .options{ grid-template-columns:1fr; } }
+
+button{
+  padding:0 14px; border-radius:14px; font-size:17px; cursor:pointer;
+  transition:background .2s, transform .06s ease, filter .2s;
+}
+
+/* ============================== OPTION BUTTON =============================== */
+.optionBtn{
+  height:52px; border:none; color:#073b3a; background:var(--mint); font-weight:600; outline:none;
+}
+.optionBtn:focus{ outline:none; box-shadow:none; }
+.optionBtn:active{ transform:scale(0.98); }
+.optionBtn.correct{ background:var(--green); color:#fff; }
+.optionBtn.wrong{ background:var(--red); color:#fff; }
+
+/* "Не знаю" — по центру и без мигания фокуса */
+.idkWrapper{ grid-column:1 / -1; display:flex; justify-content:center; margin-top:6px; }
+button.ghost{
+  background:var(--idk-bg); border:1px solid var(--border); color:var(--idk-fg);
+  margin-top:6px; height:42px; padding:0 16px;
+  border-radius:12px; font-size:15px; font-weight:600;
+  display:flex; align-items:center; justify-content:center; box-shadow:none; will-change: transform, filter;
+}
+button.ghost:hover{ filter:brightness(1.06); }
+button.ghost:focus, button.ghost:focus-visible{ outline:none; box-shadow:0 0 0 3px var(--focus-ring); }
+[data-theme="dark"] button.ghost{ background:#111827; color:var(--text); border:1px solid #374151; box-shadow:none; }
+
+/* Статистика */
+
+/* ============================== BOTTOM STATS =============================== */
+.statsBar{
+  margin-top:8px; font-size:12px; color:var(--muted);
+  border:1px solid var(--border); border-radius:10px; padding:6px 10px;
+  display:inline-block; background:var(--card);
+}
+
+/* Модалка словарей */
+.modal.hidden{display:none}
+
+/* ============================== MODAL · GENERIC =============================== */
+.modal{position:fixed; inset:0; display:grid; place-items:center; z-index:50}
+
+/* ============================== MODAL · BACKDROP =============================== */
+.backdrop{position:absolute; inset:0; background:var(--overlay)}
+
+/* ============================== MODAL · DIALOG FRAME =============================== */
+.dialog{
+  position:relative; z-index:10; background:var(--card); border:1px solid var(--border); border-radius:14px;
+  padding:14px; box-shadow:var(--shadow);
+  width:min(860px,94vw); max-height:90vh; overflow:auto;
+}
+.dialog h2{ text-align:center; margin:0 0 8px; font-size:26px; }
+
+/* Сетка списка словарей с фиксированной зоной действий */
+
+/* ============================== DICT LIST =============================== */
+.dictList{ display:flex; flex-direction:column; gap:6px; margin-top:6px; max-height:200px; overflow-y:auto; }
+.dictRow{
+  display:grid; grid-template-columns:22px 1fr 110px;
+  align-items:center; gap:8px; padding:8px 10px;
+  border:1px solid var(--border); border-radius:12px; background:var(--card);
+}
+.dictRow.active{ border-color:var(--mint); background:var(--mint-weak); box-shadow:0 0 0 2px rgba(52,211,153,.12) inset; }
+.dictFlag{ font-size:16px; width:22px; text-align:center; }
+.dictName{
+  font-weight:600; font-size:15px;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:left; cursor:pointer;
+}
+.dictActions{ display:flex; gap:6px; justify-content:flex-end; }
+.iconOnly{
+  width:30px; height:30px; border:1px solid var(--border); border-radius:10px; background:var(--card); cursor:pointer;
+  display:flex; align-items:center; justify-content:center; font-size:15px; transition: filter .2s ease, transform .08s ease;
+}
+.iconOnly:hover{ filter:brightness(1.06); }
+.iconOnly:active{ transform:scale(0.96); }
+
+/* Кнопка OK в модалке */
+.modalActions{ display:flex; justify-content:center; margin-top:10px; }
+.modalActions .primary{
+  padding:9px 20px; font-size:15px; border-radius:10px;
+  background:var(--mint); border:none; color:#073b3a;
+}
+.modalActions .primary:hover{ background:var(--mint-strong); color:#fff; }
+
+/* Footer */
+
+/* ============================== FOOTER =============================== */
+footer{
+  padding:10px 14px; color:var(--muted);
+  border-top:1px solid var(--border);
+  font-size:13px; text-align:center;
+}
+.copyright{ color:var(--muted); }
+
+/* Small screens */
+@media (max-width:600px){
+  .brand h1{font-size:22px}
+  .card{ padding:20px }
+  .word{font-size:30px}
+  .optionBtn{font-size:15px; height:50px}
+}
+/* конец! */
+
+
+/* Disabled state for 'Мои ошибки' row (<4 words) */
+.dictRow.disabled{
+  opacity: .55;
+  cursor: not-allowed;
+}
+.dictRow.disabled .dictName{ color: var(--muted); }
+.dictRow.disabled .iconOnly{ pointer-events:none; opacity:.5; }
+
+
+/* Fade-in for motivation text */
+#motivationBox{
+  transition: opacity .14s ease;
+}
+.motivation-fade{
+  animation: motFade .14s ease;
+}
+@keyframes motFade{
+  from{ opacity: 0; }
+  to{ opacity: 1; }
+}
+
+
+/* calm motivation line overrides */
+#motivationBox{
+  text-align:center;
+  font-size:13px;
+  font-weight:500;
+  opacity:.65;
+  margin:4px 0 8px;
+  pointer-events:none;
+}
+.motivation-fade{ animation:none !important; }
+
+
+
+/* Language flags row (updated to match iconBtn style) */
+.langFlags{
+  display:flex; gap:8px; justify-content:center; align-items:center;
+  margin: 6px 0 8px;
+  flex-wrap: wrap;
+}
+.langFlags .flagBtn,
+#langFlags .flagBtn{
+  width:40px; height:40px; border-radius:10px;
+  border:1px solid var(--tool-border); background:var(--tool-bg); color:var(--tool-fg);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; user-select:none; font-size:18px; line-height:1;
+  transition:transform .12s ease, background .2s ease, border-color .2s ease, color .2s ease;
+}
+:root[data-theme="dark"] .langFlags .flagBtn,
+:root[data-theme="dark"] #langFlags .flagBtn{ background:var(--tool-bg); }
+.langFlags .flagBtn:hover,
+#langFlags .flagBtn:hover{ filter: brightness(1.06); }
+.langFlags .flagBtn:active,
+#langFlags .flagBtn:active{ transform: scale(0.95); }
+.langFlags .flagBtn:focus-visible,
+#langFlags .flagBtn:focus-visible{ outline:none; box-shadow:0 0 0 2px var(--focus-ring); }
+.langFlags .flagBtn.active,
+#langFlags .flagBtn.active{ border-color: var(--mint); box-shadow:0 0 0 2px rgba(52,211,153,.12) inset; }
+
+
+
+.langFlags{
+  display:flex; gap:8px; justify-content:center; align-items:center;
+  margin: 6px 0 8px;
+  flex-wrap: wrap;
+}
+.langFlags .flagBtn{
+  width:32px; height:32px; border-radius:10px;
+  border:1px solid var(--border); background:var(--card); color:inherit;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; user-select:none; font-size:18px;
+}
+:root[data-theme="dark"] .langFlags .flagBtn{ background:var(--card); }
+.langFlags .flagBtn.active{ border-color: var(--mint); box-shadow:0 0 0 2px rgba(52,211,153,.12) inset; }
+.langFlags .flagBtn:hover{ filter: brightness(1.06); }
+
+
+/* Active dictionary title above sets */
+.dictActiveTitle{
+  text-align:center;
+  font-weight:700;
+  font-size:16px;
+  margin:6px 0 4px;
+  color:var(--text);
+}
+/* Верхняя статистика без белой рамки */
+
+/* ============================== SET STATS BAR =============================== */
+#setStats {
+  text-align: center;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+
+/* Extra actions (info + donate) */
+.extraActions{
+  margin: 16px auto 10px;
+  display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap;
+}
+.extraActions .iconBtn{ width:44px; height:44px; border-radius:12px; }
+
+/* Simple modal using existing theme tokens */
+#infoModal.modal{ display:flex; align-items:center; justify-content:center; }
+#infoModal.hidden{ display:none; }
+#infoModal .modalFrame{
+  width:min(680px, 92vw); background:var(--card); color:var(--text);
+  border-radius:16px; box-shadow: 0 10px 30px rgba(0,0,0,.15); border:1px solid var(--border);
+}
+#infoModal .modalHeader{ display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border-bottom:1px solid var(--border) }
+#infoModal .modalTitle{ font-weight:700; font-size:16px; }
+#infoModal .modalBody{ padding:14px; font-size:14px; line-height:1.5; color: var(--text); }
+#infoModal .iconBtn.small{ width:36px; height:36px; border-radius:10px; }
+.infoContent p{ margin: 0 0 8px; }
+.infoContent ul{ margin: 6px 0 0 18px; }
+
+
+
+/* Flag before dictionary title */
+.dictActiveTitle .dictFlag{
+  display:inline-block;
+  margin-right:6px;
+  line-height:1;
+  vertical-align:-1px;
+  font-size:18px;
+}
+
+/* Активный флаг — базово (светлая тема) */
+.langFlags .flagBtn.active {
+  background: rgba(16, 185, 129, .16);   /* мягкая зелёная заливка */
+  border-color: #10b981;                 /* тот же акцент */
+  box-shadow: inset 0 0 0 2px rgba(16,185,129,.28);
+  color: var(--tool-fg);
+  font-weight: 700;
+  transition: background .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+
+/* Активный флаг — тёмная тема (немного плотнее, чтобы не «проваливался») */
+[data-theme="dark"] .langFlags .flagBtn.active,
+.theme-dark .langFlags .flagBtn.active,
+.dark .langFlags .flagBtn.active {
+  background: rgba(16, 185, 129, .28);
+  border-color: #10b981;
+  box-shadow: inset 0 0 0 2px rgba(16,185,129,.4);
+}
+
+/* Небольшой апгрейд для изображения флага внутри активного чипа */
+.langFlags .flagBtn.active img {
+  filter: saturate(1.05) contrast(1.05);
+}
+
+/* VISUAL FIX v2: remove underline from donate and footer links */
+a#donate, .donate, .donate a, .donate-btn, .donate-btn a, .icon-donate,
+.footer a, .bottom, .bottom a, .footer .btn, .footer .btn a, .bottom .btn, .bottom .btn a {
+  text-decoration: none !important;
+  -webkit-text-decoration: none !important;
+}
+
+/* CLEAN FIX: remove underline from donate icon by id */
+#btnDonate, #btnDonate:link, #btnDonate:visited, #btnDonate:hover, #btnDonate:active, #btnDonate:focus {
+  text-decoration: none !important;
+  -webkit-text-decoration: none !important;
+}
+/* --------------------------  К О Н Е Ц  style.css  -------------------------- */
