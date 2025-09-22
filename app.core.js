@@ -27,9 +27,9 @@
 
   // ── миграция под наборы: setSize=50 по умолчанию, map под активные наборы ──
   (function migrateSets(){
-    let ss = 4;
+    let ss = 50;
     try { ss = Number(App.state.setSize); } catch(e){}
-    if (!Number.isFinite(ss) || ss < 2) ss = 4;
+    if (!Number.isFinite(ss) || ss < 2) ss = 50;
     App.state.setSize = ss;
 
     if (!App.state.setByDeck || typeof App.state.setByDeck !== 'object'){
