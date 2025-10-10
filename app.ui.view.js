@@ -8,34 +8,8 @@
 function badgeFor(item){
   try {
     if (!item || typeof item !== 'object') return '';
-    // Determine base code from gram (preferred) or from badgeDe fallback
-    var code = '';
-    if (item.gram) {
-      if (item.gram.verbForm === 'inf')   code = 'inf';
-      else if (item.gram.verbForm === 'praet') code = 'praet';
-      else if (item.gram.verbForm === 'pp')    code = 'pp';
-      else if (item.gram.number === 'sg')      code = 'sg';
-      else if (item.gram.number === 'pl')      code = 'pl';
-      else if (item.gram.number === 'uncount') code = 'uncount';
-    }
-    if (!code && item.badgeDe) {
-      var bd = String(item.badgeDe).toLowerCase();
-      if (bd.indexOf('inf')>=0) code = 'inf';
-      else if (bd.indexOf('prät')>=0 || bd.indexOf('praet')>=0 || bd.indexOf('прет')>=0) code = 'praet';
-      else if (bd.indexOf('part')>=0) code = 'pp';
-      else if (bd === 'sg' || bd.indexOf('ед')>=0) code = 'sg';
-      else if (bd === 'pl' || bd.indexOf('мн')>=0) code = 'pl';
-      else code = 'uncount';
-    }
-    var lang = (App && App.settings && App.settings.lang) || 'ru';
-    var MAP = {
-      ru: { inf:'Инф.', praet:'Прет.', pp:'Прич. II', sg:'Ед.', pl:'Мн.', uncount:'—' },
-      uk: { inf:'Інф.', praet:'Прет.', pp:'Дієп. II', sg:'Одн.', pl:'Мн.', uncount:'—' }
-    };
-    var m = MAP[lang] || MAP['ru'];
-    return m[code] || '';
-  } catch(_) { return ''; }
-};
+    if (item.badgeDe) return item.badgeDe;
+    const g = item.gram || {};
     if (g.verbForm === 'inf')   return 'Inf.';
     if (g.verbForm === 'praet') return 'Prät.';
     if (g.verbForm === 'pp')    return 'Part. II';
