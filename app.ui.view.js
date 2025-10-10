@@ -4,26 +4,6 @@
 ************************************************************************
 */
 
-// === Gram badge helpers (v2) ===
-function badgeFor(item){
-  if (!item || typeof item !== 'object') return '';
-  if (item.badgeDe) return item.badgeDe;
-  const g = item.gram || {};
-  if (g.verbForm === 'inf') return 'Inf.';
-  if (g.verbForm === 'praet') return 'Prät.';
-  if (g.verbForm === 'pp') return 'Part. II';
-  if (g.number === 'sg') return 'Sg';
-  if (g.number === 'pl') return 'Pl';
-  if (g.number === 'uncount') return '—';
-  return '';
-}
-function labelFor(item){
-  if (!item || typeof item !== 'object') return '';
-  const t = (App && App.settings && App.settings.lang === 'ru');
-  return t ? (item.ru || item.uk || item.translation || item.meaning || '') 
-           : (item.uk || item.ru || item.translation || item.meaning || '');
-}
-
 // --- Mode helpers (Normal vs Hard) ---
 (function(){
   const App = window.App || (window.App = {});
@@ -165,51 +145,112 @@ function labelFor(item){
   }
 
   // ─ variants (with dedup) ─
-  
-function drawOptions(correct, pool) {
-    // Normalize to objects { main, meta }
-    function toObj(v){
-      if (typeof v === 'string') return { main: String(v).trim(), meta: '' };
-      if (v && typeof v === 'object'){
-        // support raw word objects
-        if ('word' in v || 'uk' in v || 'ru' in v){
-          return { main: labelFor(v), meta: badgeFor(v) };
-        }
-        return { main: String(v.main||'').trim(), meta: String(v.meta||'').trim() };
-      }
-      return { main: '', meta: '' };
-    }
+  function drawOptions(correct, pool) {
     const uniq = [];
     const seen = new Set();
     for (let i=0;i<pool.length;i++){
-      const o = toObj(pool[i]);
-      const s = o.main;
-      if (!s) continue;
-      if (!seen.has(s)){ seen.add(s); uniq.push(o); }
+      const v = pool[i];
+      const s = String(v||'').trim();
+      if (!s || s === correct) continue;
+      if (!seen.has(s)){ seen.add(s); uniq.push(s); }
       if (uniq.length >= 12) break;
     }
-    const correctObj = toObj(correct);
-    const distractors = App.shuffle(uniq.filter(x => x.main && x.main !== correctObj.main)).slice(0, 3);
-    const variants = App.shuffle([correctObj, ...distractors]);
-    variants.forEach(o => {
+    const distractors = App.shuffle(uniq).slice(0, 3);
+    const variants = App.shuffle([correct, ...distractors]);
+    variants.forEach(v => {
       const b = document.createElement('button');
       b.className = 'optionBtn';
-      // Build two-line content
-      const main = document.createElement('span');
-      main.className = 'main';
-      main.textContent = o.main;
-      b.appendChild(main);
-      if (o.meta){
-        const meta = document.createElement('span');
-        meta.className = 'meta';
-        meta.textContent = o.meta;
-        b.appendChild(meta);
-      }
-      b.addEventListener('click', function onClick(){ onOptionClick(o.main); }, { once:true });
+      b.textContent = v;
+      if (v === correct) b.dataset.correct = '1';
+      b.addEventListener('click', () => onChoice(b, v === correct));
       D.optionsRow.appendChild(b);
     });
   }
- catch (_) { }
+
+  function addIDontKnowButton() {
+    if (!D || !D.optionsRow) return;
+    const t = (typeof App.i18n === 'function') ? App.i18n() : { iDontKnow: 'Не знаю' };
+    const wrap = document.createElement('div');
+    wrap.className = 'idkWrapper';
+    const btn = document.createElement('button');
+    btn.className = 'ghost';
+    btn.textContent = t.iDontKnow || 'Не знаю';
+    btn.addEventListener('click', onIDontKnow);
+    wrap.appendChild(btn);
+    D.optionsRow.appendChild(wrap);
+  }
+
+  // ─ mistakes pool (same source/dictLang only) ─
+  function getMistakesDistractorPool(currentWord) {
+    const out = [];
+    const seen = new Set();
+    const push = (w) => {
+      if (!w || !w.id || String(w.id) === String(currentWord.id)) return;
+      const label = ((App.settings.lang === 'ru') ? (w.ru || w.uk) : (w.uk || w.ru)) || w.translation || w.meaning;
+      if (!label) return;
+      const key = String(w.id) + '::' + String(label);
+      if (seen.has(key)) return;
+      seen.add(key);
+      out.push(w);
+    };
+
+    let srcKey = null;
+    try { srcKey = (App.Mistakes && App.Mistakes.sourceKeyFor) ? App.Mistakes.sourceKeyFor(currentWord.id) : (currentWord._mistakeSourceKey || null); } catch (_) {}
+    const dictLang = langOfKey(srcKey) || null;
+
+    if (srcKey) {
+      const srcDeck = App.Decks.resolveDeckByKey(srcKey) || [];
+      for (let i = 0; i < srcDeck.length; i++) push(srcDeck[i]);
+    }
+
+    if (out.length < 12 && dictLang) {
+      const keys = (App.Decks && App.Decks.builtinKeys) ? App.Decks.builtinKeys() : Object.keys(window.decks || {});
+      for (let k of keys) {
+        if (langOfKey(k) !== dictLang) continue;
+        if (k === srcKey) continue;
+        const d = App.Decks.resolveDeckByKey(k) || [];
+        for (let i = 0; i < d.length; i++) push(d[i]);
+        if (out.length >= 24) break;
+      }
+    }
+
+    if (out.length < 24 && App.Mistakes && typeof App.Mistakes.deck === 'function') {
+      const arr = App.Mistakes.deck() || [];
+      for (let i = 0; i < arr.length; i++) push(arr[i]);
+    }
+
+    return out;
+  }
+
+  function allLearned(sub, key){
+    const max = App.Trainer.starsMax();
+    if (key === 'mistakes' && App.Mistakes && App.Mistakes.getStars){
+      for (let i=0;i<sub.length;i++){
+        const w = sub[i];
+        const sk = w._mistakeSourceKey || (App.Mistakes.sourceKeyFor && App.Mistakes.sourceKeyFor(w.id));
+        if ((App.Mistakes.getStars(sk, w.id) || 0) < max) return false;
+      }
+      return true;
+    }
+    const stars = (App.state && App.state.stars) || {};
+    for (let i=0;i<sub.length;i++){ const w=sub[i]; if ((stars[App.starKey(w.id)]||0) < max) return false; }
+    return true;
+  }
+
+  function pickIndexWithFallback(sub, key) {
+    if (!Array.isArray(sub) || sub.length === 0) return  - App.getStarStep();
+    if (isEndlessDict(key) && allLearned(sub, key)) {
+      return Math.floor(Math.random() * sub.length);
+    }
+    return (App && App.Trainer && typeof App.Trainer.sampleNextIndexWeighted==="function") ? App.Trainer.sampleNextIndexWeighted(sub) : Math.floor(Math.random()*sub.length);
+  }
+
+  // ─ render & stats ─
+function renderStars() {
+  const w = current();
+  try {
+  document.dispatchEvent(new CustomEvent('lexitron:word-shown', { detail: { word: w } }));
+} catch (_) { }
 try {
   if (App.Trainer && typeof App.Trainer.rememberShown === 'function') { App.Trainer.rememberShown(w.id); }
 } catch (_) { }
@@ -359,14 +400,14 @@ if (!w) return;
       let poolWords;
       if (key === 'mistakes') {
         poolWords = getMistakesDistractorPool(w)
-          .map(x => x)
+          .map(x => (App.settings.lang === 'ru') ? (x.ru || x.uk || x.translation || x.meaning) : (x.uk || x.ru || x.translation || x.meaning))
           .filter(Boolean);
       } else {
         poolWords = sub.filter(x => x.id !== w.id)
-          .map(x => x)
+          .map(x => (App.settings.lang === 'ru') ? (x.ru || x.uk || x.translation || x.meaning) : (x.uk || x.ru || x.translation || x.meaning))
           .filter(Boolean);
       }
-      const correct = w;
+      const correct = (App.settings.lang === 'ru') ? (w.ru || w.uk || w.translation || w.meaning || '') : (w.uk || w.ru || w.translation || w.meaning || '');
       drawOptions(correct, poolWords);
     } else {
       if (D.wordEl) D.wordEl.textContent = (App.settings.lang === 'ru') ? (w.ru || w.uk || w.translation || w.meaning || '') : (w.uk || w.ru || w.translation || w.meaning || '');
