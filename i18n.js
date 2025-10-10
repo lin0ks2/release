@@ -15,7 +15,7 @@
     // -----------------------------------------------------------------------
     ru: {
       // App & brand
-      appTitle: "Lexitron",
+      appTitle: "Lexicard",
       tagline: "Он научит!",
       
       
@@ -112,7 +112,7 @@ settingsTitle: "Настройки",
     // -----------------------------------------------------------------------
     uk: {
       // App & brand
-      appTitle: "Lexitron",
+      appTitle: "Lexicard",
       tagline: "Він навчить!",
       
       
