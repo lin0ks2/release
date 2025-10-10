@@ -1339,12 +1339,7 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
 .dictSpoiler > summary::-webkit-details-marker { display: none; }
 .dictSpoiler > summary::marker { content: ""; }
 
-/* two-line options (meta) */
-.optionBtn{display:inline-flex;flex-direction:column;align-items:flex-start;gap:.2em}
-.optionBtn .main{font-weight:600;line-height:1.1}
-.optionBtn .meta{font-size:.75em;opacity:.75;line-height:1}
-
-/* v2-localized: centered two-line option buttons */
+/* two-line localized option buttons */
 .optionBtn{
   display:flex;
   flex-direction:column;
