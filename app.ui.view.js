@@ -4,6 +4,22 @@
 ************************************************************************
 */
 
+// === Gram badge helpers (v2-safe) ===
+function badgeFor(item){
+  try {
+    if (!item || typeof item !== 'object') return '';
+    if (item.badgeDe) return item.badgeDe;
+    const g = item.gram || {};
+    if (g.verbForm === 'inf')   return 'Inf.';
+    if (g.verbForm === 'praet') return 'Prät.';
+    if (g.verbForm === 'pp')    return 'Part. II';
+    if (g.number === 'sg')      return 'Sg';
+    if (g.number === 'pl')      return 'Pl';
+    if (g.number === 'uncount') return '—';
+  } catch(_) {}
+  return '';
+}
+
 // --- Mode helpers (Normal vs Hard) ---
 (function(){
   const App = window.App || (window.App = {});
@@ -145,7 +161,7 @@
   }
 
   // ─ variants (with dedup) ─
-  function drawOptions(correct, pool) {
+  function drawOptions(correct, pool, metaText){
     const uniq = [];
     const seen = new Set();
     for (let i=0;i<pool.length;i++){
@@ -160,7 +176,16 @@
     variants.forEach(v => {
       const b = document.createElement('button');
       b.className = 'optionBtn';
-      b.textContent = v;
+      const main = document.createElement('span');
+      main.className = 'main';
+      main.textContent = String(v||'');
+      b.appendChild(main);
+      if (metaText){
+        const meta = document.createElement('span');
+        meta.className = 'meta';
+        meta.textContent = String(metaText||'');
+        b.appendChild(meta);
+      }
       if (v === correct) b.dataset.correct = '1';
       b.addEventListener('click', () => onChoice(b, v === correct));
       D.optionsRow.appendChild(b);
@@ -408,7 +433,7 @@ if (!w) return;
           .filter(Boolean);
       }
       const correct = (App.settings.lang === 'ru') ? (w.ru || w.uk || w.translation || w.meaning || '') : (w.uk || w.ru || w.translation || w.meaning || '');
-      drawOptions(correct, poolWords);
+      drawOptions(correct, poolWords, (typeof badgeFor==='function') ? badgeFor(w) : '');
     } else {
       if (D.wordEl) D.wordEl.textContent = (App.settings.lang === 'ru') ? (w.ru || w.uk || w.translation || w.meaning || '') : (w.uk || w.ru || w.translation || w.meaning || '');
       let poolWords;
@@ -418,7 +443,7 @@ if (!w) return;
         poolWords = sub.filter(x => x.id !== w.id).map(x => x.word).filter(Boolean);
       }
       const correct = w.word;
-      drawOptions(correct, poolWords);
+      drawOptions(correct, poolWords, (typeof badgeFor==='function') ? badgeFor(w) : '');
     }
 
     if (D.hintEl) D.hintEl.textContent = t.choose;
