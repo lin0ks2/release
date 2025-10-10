@@ -3,36 +3,6 @@
  Version: 1.5 • Updated: 2025-10-10 • File: release-main/app.ui.view.js 
 ************************************************************************
 */
-function badgeFor(item){
-  try {
-    if (!item || typeof item !== 'object') return '';
-    var code = '';
-    if (item.gram) {
-      if (item.gram.verbForm === 'inf') code = 'inf';
-      else if (item.gram.verbForm === 'praet') code = 'praet';
-      else if (item.gram.verbForm === 'pp') code = 'pp';
-      else if (item.gram.number === 'sg') code = 'sg';
-      else if (item.gram.number === 'pl') code = 'pl';
-      else if (item.gram.number === 'uncount') code = 'uncount';
-    } else if (item.badgeDe) {
-      var bd = String(item.badgeDe).toLowerCase();
-      if (bd.indexOf('inf')>=0) code='inf';
-      else if (bd.indexOf('prät')>=0 || bd.indexOf('praet')>=0) code='praet';
-      else if (bd.indexOf('part')>=0) code='pp';
-      else if (bd==='sg') code='sg';
-      else if (bd==='pl') code='pl';
-      else code='uncount';
-    }
-    if (code === 'uncount') return '';
-    var lang = (App && App.settings && App.settings.lang) || 'ru';
-    var MAP = {
-      ru: { inf:'Инф.', praet:'Прет.', pp:'Прич. II', sg:'Ед.',  pl:'Мн.' },
-      uk: { inf:'Інф.', praet:'Прет.', pp:'Дієп. II', sg:'Одн.', pl:'Мн.' }
-    };
-    var m = MAP[lang] || MAP['ru'];
-    return m[code] || '';
-  } catch(_) { return ''; }
-}
 
 // --- Mode helpers (Normal vs Hard) ---
 (function(){
@@ -175,7 +145,7 @@ function badgeFor(item){
   }
 
   // ─ variants (with dedup) ─
-  function drawOptions(correct, pool, metaText){
+  function drawOptions(correct, pool) {
     const uniq = [];
     const seen = new Set();
     for (let i=0;i<pool.length;i++){
@@ -190,16 +160,7 @@ function badgeFor(item){
     variants.forEach(v => {
       const b = document.createElement('button');
       b.className = 'optionBtn';
-      const main = document.createElement('span');
-      main.className = 'main';
-      main.textContent = String(v||'');
-      b.appendChild(main);
-      if (metaText){
-        const meta = document.createElement('span');
-        meta.className = 'meta';
-        meta.textContent = String(metaText||'');
-        b.appendChild(meta);
-      }
+      b.textContent = v;
       if (v === correct) b.dataset.correct = '1';
       b.addEventListener('click', () => onChoice(b, v === correct));
       D.optionsRow.appendChild(b);
@@ -447,7 +408,7 @@ if (!w) return;
           .filter(Boolean);
       }
       const correct = (App.settings.lang === 'ru') ? (w.ru || w.uk || w.translation || w.meaning || '') : (w.uk || w.ru || w.translation || w.meaning || '');
-      drawOptions(correct, poolWords, (typeof badgeFor==='function') ? badgeFor(w) : '');
+      drawOptions(correct, poolWords);
     } else {
       if (D.wordEl) D.wordEl.textContent = (App.settings.lang === 'ru') ? (w.ru || w.uk || w.translation || w.meaning || '') : (w.uk || w.ru || w.translation || w.meaning || '');
       let poolWords;
@@ -457,7 +418,7 @@ if (!w) return;
         poolWords = sub.filter(x => x.id !== w.id).map(x => x.word).filter(Boolean);
       }
       const correct = w.word;
-      drawOptions(correct, poolWords, (typeof badgeFor==='function') ? badgeFor(w) : '');
+      drawOptions(correct, poolWords);
     }
 
     if (D.hintEl) D.hintEl.textContent = t.choose;
