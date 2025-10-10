@@ -1,0 +1,368 @@
+<!--
+********************************************************************
+ Version: 1.5 • Updated: 2025-10-10 • File: release-main/index.html 
+********************************************************************
+-->
+<!DOCTYPE html>
+<!--
+  =====================================================================
+  index.html — Lexitron
+  Version: 1.6.1
+  Date: 2025-09-21
+
+  Purpose:
+    - Entry point for the Lexitron web app
+    - Stable DOM ids expected by JS modules
+    - Sections documented with clear comment dividers
+  =====================================================================
+-->
+
+<html lang="uk">
+<head>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LEXITRON</title>
+
+<link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon-180x180.png?v=1.5">
+  <link rel="apple-touch-icon" sizes="152x152" href="./apple-touch-icon-152x152.png?v=1.5">
+  <link rel="apple-touch-icon" sizes="120x120" href="./apple-touch-icon-120x120.png?v=1.5">
+  <link rel="apple-touch-icon" sizes="76x76" href="./apple-touch-icon-76x76.png?v=1.5">
+
+                  <link rel="icon" type="image/png" sizes="192x192" href="./android-chrome-192x192.png?v=1.5">
+<link rel="icon" type="image/png" sizes="512x512" href="./favicon-512x512.png?v=1.5">
+<link rel="icon" type="image/png" sizes="256x256" href="./favicon-256x256.png?v=1.5">
+<link rel="icon" type="image/png" sizes="192x192" href="./favicon-192x192.png?v=1.5">
+<link rel="icon" type="image/png" sizes="128x128" href="./favicon-128x128.png?v=1.5">
+<link rel="icon" type="image/png" sizes="48x48" href="./favicon-48x48.png?v=1.5">
+<link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png?v=1.5">
+<link rel="icon" type="image/png" sizes="512x512" href="./logo_512.png?v=1.5">
+<link rel="icon" type="image/png" sizes="128x128" href="./logo_128.png?v=1.5">
+<link rel="icon" type="image/png" sizes="32x32" href="./logo_32.png?v=1.5">
+<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png?v=1.5">
+<link rel="icon" href="./favicon.ico?v=1.5" type="image/x-icon"> 
+<link rel="icon" sizes="512x512" href="./android-chrome-512x512.png?v=1.5">
+<link rel="manifest" href="./site.webmanifest?v=1.6.1">
+
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="LEXITRON">
+
+<link rel="stylesheet" href="./style.css?v=1.5">
+
+  
+  
+  <!-- ============================ SOCIAL PREVIEW ============================ -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="LEXITRON · учите слова легко">
+  <meta property="og:description" content="Карточки, быстрые сессии, Избранное и статистика прогресса. Учите новые слова каждый день без рекламы и подписки.">
+  <meta property="og:image" content="./og-image.png?v=1.6.1">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="LEXITRON · учите слова легко">
+  <meta name="twitter:description" content="Карточки, быстрые сессии, Избранное и статистика прогресса. Учите новые слова каждый день без рекламы и подписки.">
+  <meta name="twitter:image" content="./og-image.png?v=1.6.1">
+
+<style id="modal-inline-fix-1.6.3-1758932002">
+/* Critical inline for iOS cache issues — v1.6.3-1758932002 */
+.modal .modalHeader{display:flex!important;align-items:center!important;justify-content:space-between!important;padding:14px 14px!important;border-bottom:1px solid rgba(255,255,255,.08)!important}
+.modal .modalHeader .modalTitle{margin:0!important;font-size:20px!important;font-weight:700!important;line-height:1.2!important}
+.modal .iconBtn.small{width:32px!important;height:32px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;font-size:18px!important;border-radius:8px!important;background:transparent!important;border:1px solid rgba(255,255,255,.08)!important;opacity:.9!important}
+#modal .modalBody{padding-bottom:0px!important}
+#modal .dictList{padding-bottom:14px!important}
+#modal .dictList > *:last-child{margin-bottom:8px!important}
+</style>
+  
+</head>
+<body>
+
+<header>
+    <div class="brand">
+      <img class="logo-mark"
+           src="./logo_32.png?v=1.5"
+           srcset="./logo_64.png?v=1.6.1 2x, ./logo_128.png?v=1.6.1 4x, ./logo_256.png?v=1.6.1 8x"
+           alt="LEXITRON" width="28" height="28"
+           decoding="async" loading="eager"/>
+      <div class="title-wrap">
+        <h1 id="title">Lexitron <span class="ver" id="appVer"></span></h1>
+        <div class="tagline" id="tagline">Он научит!</div>
+      </div>
+    </div>
+    <div class="controls">
+      <button id="themeToggleBtn" class="iconBtn" title="Тема" aria-label="Тема">🌞</button>
+      <button id="langToggleBtn"  class="iconBtn" title="Язык интерфейса" aria-label="Язык интерфейса">🇺🇦</button>
+      <button id="dictsBtn"       class="iconBtn gear" title="Словари" aria-label="Словари">📚</button>
+    </div>
+  </header>
+
+<details class="dictSpoiler" id="dictSpoiler" open>
+  <summary><span class="flag" id="dictFlag">📚</span><span class="name" id="dictTitleInSpoiler">—</span></summary>
+  <div id="setControls">
+    <div id="setsBar" class="setsBar" aria-label="Sets"></div>
+    <div id="setStats" class="setStats statsBar" aria-live="polite"></div>
+  </div>
+</details>
+
+<main>
+    <section class="card">
+      <div class="topRow">
+        <div class="stars" id="stars"></div>
+        <button id="favBtn" class="heart" title="Избранное" aria-label="Добавить в избранное">♡</button>
+      </div>
+
+      <div class="word" id="wordText">—</div>
+      <div class="hint" id="hintText">—</div>
+
+      <div class="options" id="optionsRow"></div>
+
+      <div class="statsBar" id="statsBar">
+        Всего слов: 0 / Изученно: 0 / Ошибок: 0
+      </div>
+    </section>
+  
+    <div class="extraActions" aria-label="Extra actions">
+      <button id="btnInfo" class="iconBtn" title="Инструкция" aria-label="Инструкция">ℹ️</button>
+      <button id="btnDonate" class="iconBtn" title="Поддержка" aria-label="Поддержка">💰</button>
+
+      <button id="btnSettings" class="iconBtn" title="Настройки" aria-label="Настройки">⚙️</button>
+    </div>
+
+    <!-- Info modal with footer OK in same style as Dicts modal -->
+    <!-- Settings modal (same structure as Info) -->
+    <div id="settingsModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+      <div class="modalFrame">
+        <div class="modalHeader">
+          <div class="modalTitle" id="settingsTitle" data-i18n="settingsTitle">Настройки</div>
+          <button class="iconBtn small" id="settingsClose" aria-label="Close">✖️</button>
+        </div>
+        <div class="modalBody">
+          <div id="settingsContent" class="infoContent">
+<!-- Mode toggle -->
+  <div id="modeToggleWrap" class="field" style="margin-top:10px;display:flex;align-items:center;gap:10px;justify-content:center">
+    <label for="modeToggle" style="display:flex;align-items:center;gap:10px;cursor:pointer">
+      <span data-i18n="modeNormal">Обычный режим</span>
+      <input id="modeToggle" type="checkbox" role="switch" aria-checked="false" />
+      <span data-i18n="modeHard">Сложный режим</span>
+    </label>
+  </div>
+
+</div>
+        </div>
+        <div class="modalActions">
+          <button id="settingsOk" class="btn primary" data-i18n="ok">OK</button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Donate modal (same structure as Settings) -->
+    <div id="donateModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="donateTitle">
+      <div class="modalFrame">
+        <div class="modalHeader">
+          <div class="modalTitle" id="donateTitle" data-i18n="donateTitle">Поддержать проект</div>
+          <button class="iconBtn small" id="donateClose" aria-label="Close">✖️</button>
+        </div>
+        <div class="modalBody">
+          <div id="donateContent" class="infoContent" style="text-align:center">
+  <div id="donate-button-container" style="margin-top:20px">
+    <div id="donate-button"></div>
+    <script src="https://www.paypalobjects.com/donate/sdk/donate-sdk.js" charset="UTF-8"></script>
+    <script>
+      PayPal.Donation.Button({
+        env:'production',
+        hosted_button_id:'KFBR8BW5ZZTQ4',
+        image: {
+          src:'https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif',
+          alt:'Donate with PayPal button',
+          title:'PayPal - The safer, easier way to pay online!'
+        }
+      }).render('#donate-button');
+    </script>
+  </div>
+</div>
+        </div>
+        <div class="modalActions">
+          <button id="donateOk" class="btn primary" data-i18n="ok">OK</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="infoModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
+      <div class="modalFrame">
+        <div class="modalHeader">
+          <div class="modalTitle" id="infoTitle">Info</div>
+          <button class="iconBtn small" id="infoClose" aria-label="Close">✖️</button>
+        </div>
+        <div class="modalBody">
+          <div id="infoContent" class="infoContent"></div>
+        </div>
+        <div class="modalActions" style="text-align:center">
+          <button id="infoOk" class="primary">OK</button>
+        </div>
+      </div>
+    </div>
+  
+  <div id="motivation" class="motivation"></div>
+</main>
+
+
+
+  <!-- Dicts modal -->
+  <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="backdrop" id="backdrop"></div>
+  <div class="dialog">
+    <!-- Шапка -->
+    <div class="modalHeader">
+      <h2 class="modalTitle" id="modalTitle">Словари</h2>
+      <button id="modalClose" class="iconBtn small" aria-label="Close">✖️</button>
+    </div>
+
+    <!-- Тело -->
+    <div class="modalBody">
+      <div id="langFlags" class="flagsRow" style="display:flex;gap:10px;align-items:center;justify-content:center;margin:10px 10px 10px;"></div>
+      <div class="field">
+        <div class="dictList" id="dictList"></div>
+      </div>
+    </div>
+
+    <!-- Футер -->
+    <div class="modalActions" style="text-align:center">
+      <button id="okBtn" class="primary">OK</button>
+    </div>
+  </div>
+</div>
+
+<script src="i18n.js?v=1.5"></script>
+  <script src="dicts.js?v=1.5"></script>
+
+  
+  <script src="deck.de.v2.js?v=1.5"></script>
+  <script src="deck.sr.js?v=1.5"></script>
+  <script src="deck.en.js?v=1.5"></script>
+  <script src="deck.fr.js?v=1.5"></script>
+
+<script src="app.core.js?v=1.5"></script>
+<script src="app.decks.js?v=1.5"></script>
+<script src="theme.js?v=1.5"></script>
+<script src="app.trainer.js?v=1.5"></script>
+<script src="app.mistakes.js?v=1.5"></script>
+<script src="app.favorites.js?v=1.5"></script>
+<script src="app.ui.view.js?v=1.5"></script>
+<script src="ui.options.safe.js?v=1.5"></script>
+<script src="ui.setup.modal.js?v=1.5"></script>
+
+<script src="ui.bus.js?v=1.5"></script>
+<script src="ui.state.js?v=1.5"></script>
+<script src="ui.sets.js?v=1.5"></script>
+<script src="ui.progress.scope.js?v=1.5"></script>
+<script src="ui.stats.core.js?v=1.5"></script>
+<script src="ui.lifecycle.js?v=1.5"></script>
+<script src="ui.sets.done.js?v=1.5"></script>
+<script src="ui.fix.js?v=1.5"></script>
+
+
+  <!-- --------------------------  К О Н Е Ц  --------------------------- -->
+<script>
+(function(){
+  function hydrateI18N(){
+    try{
+      var App = window.App || {};
+      var bag = (App.i18n && App.i18n()) || (window.I18N && (window.I18N[(App.settings&&App.settings.lang)||'uk'] || window.I18N.uk)) || {};
+      document.querySelectorAll('[data-i18n]').forEach(function(el){
+        var key = el.getAttribute('data-i18n');
+        if (bag && bag[key]) el.textContent = bag[key];
+      });
+      document.querySelectorAll('[data-i18n-title]').forEach(function(el){
+        var key = el.getAttribute('data-i18n-title');
+        if (bag && bag[key]) el.setAttribute('title', bag[key]);
+      });
+      document.querySelectorAll('[data-i18n-aria]').forEach(function(el){
+        var key = el.getAttribute('data-i18n-aria');
+        if (bag && bag[key]) el.setAttribute('aria-label', bag[key]);
+      });
+    }catch(e){/*noop*/}
+  }
+  window.hydrateI18N = hydrateI18N;
+  document.addEventListener('DOMContentLoaded', hydrateI18N);
+  document.addEventListener('i18n:lang-changed', hydrateI18N);
+})();
+</script>
+
+  <!-- Unified Confirm Modal -->
+  <div id="confirmModal" class="modal confirmModal hidden" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmText">
+    <div class="modalFrame">
+      <div class="modalHeader">
+        <div class="modalTitle" id="confirmTitle">Подтверждение</div>
+        <button class="iconBtn small" id="confirmClose" aria-label="Close">✖️</button>
+      </div>
+      <div class="modalBody">
+        <div id="confirmText" class="infoContent">Вы уверены?</div>
+      </div>
+      <div class="modalActions">
+        <button id="confirmOk" class="btn primary">OK</button>
+        <button id="confirmCancel" class="btn">Отмена</button>
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('./sw.js').catch(function(e){ console.warn('SW registration failed', e); });
+    });
+  }
+  </script>
+
+  <script src="app.spoiler.bootstrap.js?v=1.5"></script>
+
+
+<footer class="site-footer">
+  <div class="footer-links">
+    <a data-legal="privacy" href="./privacy.en.html">Privacy</a> ·
+    <a data-legal="terms" href="./terms.en.html">Terms</a> ·
+    <a data-legal="impressum" href="./impressum.en.html">Impressum</a>
+  </div>
+  <div class="footer-copy">© 2025 Lexitron</div>
+</footer>
+<script>
+(function(){
+  function detectLang(){
+    try{
+      var u = localStorage.getItem('lang') || localStorage.getItem('language') || localStorage.getItem('appLang');
+      if(!u){
+        if (navigator.languages && navigator.languages.length) u = navigator.languages[0];
+        else u = navigator.language || (document.documentElement.getAttribute('lang')||'');
+      }
+      u = (u||'en').toLowerCase();
+      if(u.startsWith('ru')) return 'ru';
+      if(u.startsWith('uk') || u.startsWith('ua')) return 'uk';
+      return 'en';
+    }catch(e){ return 'en'; }
+  }
+
+  var lang = detectLang();
+  var hrefMap = {
+    privacy: './privacy.'+lang+'.html',
+    terms: './terms.'+lang+'.html',
+    impressum: './impressum.'+lang+'.html'
+  };
+  var labelMap = {
+    en: { privacy:'Privacy Policy', terms:'Terms of Use', impressum:'Legal Notice' },
+    ru: { privacy:'Политика конфиденциальности', terms:'Условия использования', impressum:'Юридическая информация' },
+    uk: { privacy:'Політика конфіденційності', terms:'Умови використання', impressum:'Юридична інформація' }
+  };
+  document.querySelectorAll('.footer-links a[data-legal]').forEach(function(a){
+    var key = a.getAttribute('data-legal');
+    if(hrefMap[key]) a.setAttribute('href', hrefMap[key]);
+    if(labelMap[lang] && labelMap[lang][key]) a.textContent = labelMap[lang][key];
+  });
+})();
+</script>
+</body>
+</html>
