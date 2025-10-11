@@ -49,12 +49,12 @@
 
 /* ---- MERGED FROM: app.addon.startup.js, startup.manager.js ---- */
 /*!
- * app.addon.startup.js — Lexitron
+ * app.addon.startup.js — Lexiplexy
  * Version: 1.5.0
  * Date: 2025-09-21
  *
  * Purpose:
- *  - Part of the Lexitron web app
+ *  - Part of the Lexiplexy web app
  */
 
 (function(){
@@ -78,21 +78,21 @@
 
 
 /*!
- * startup.manager.js — Lexitron
+ * startup.manager.js — Lexiplexy
  * Version: 1.6.1
  * Date: 2025-09-21
  *
  * Purpose:
- *  - Part of the Lexitron web app
+ *  - Part of the Lexiplexy web app
  */
 
 (function(){
   const LS = {
-    uiLang: 'lexitron.uiLang',
-    studyLang: 'lexitron.studyLang',
-    deckKey: 'lexitron.deckKey',
-    setupDone: 'lexitron.setupDone',
-    legacyActiveKey: 'lexitron.activeKey'
+    uiLang: 'lexiplexy.uiLang',
+    studyLang: 'lexiplexy.studyLang',
+    deckKey: 'lexiplexy.deckKey',
+    setupDone: 'lexiplexy.setupDone',
+    legacyActiveKey: 'lexiplexy.activeKey'
   };
 
   const M = (window.StartupManager = {
@@ -236,7 +236,7 @@
 
       if (M.shouldShowSetup(initial) && window.SetupModal && typeof SetupModal.build==='function'){
         M.log('show setup modal');
-        document.addEventListener('lexitron:setup:done', function(){
+        document.addEventListener('lexiplexy:setup:done', function(){
           const after = M.readSettings();
           const fixed = M.validateAndFix(after);
           M.persist(fixed);

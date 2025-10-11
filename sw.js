@@ -4,7 +4,7 @@
 ***************************************************************
 */
 const CACHE_VERSION = 'v1.0.2';
-const CACHE_NAME='lexitron-'+CACHE_VERSION;
+const CACHE_NAME='lexiplexy-'+CACHE_VERSION;
 const CORE=[
   './','./index.html','./style.css','./site.webmanifest',
   './app.core.js','./app.decks.js','./app.trainer.js','./app.ui.view.js',

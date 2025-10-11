@@ -144,7 +144,7 @@
 
   window.MistakesGate={ onFail:onFail };
 
-  document.addEventListener('lexitron:answer-wrong', function(e){
+  document.addEventListener('lexiplexy:answer-wrong', function(e){
     onFail(e && e.detail && e.detail.word);
   });
 })();

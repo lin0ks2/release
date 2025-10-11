@@ -1,3 +1,16 @@
+// Lexiplexy migration: move old 'lexitron'/'lexicard' keys to 'lexiplexy'
+try {
+  const keys = Object.keys(localStorage);
+  const toMove = keys.filter(k => /lexitron|lexicard/i.test(k));
+  toMove.forEach(oldKey => {
+    const val = localStorage.getItem(oldKey);
+    if (val !== null) {
+      const newKey = oldKey.replace(/lexitron/ig, 'lexiplexy').replace(/lexicard/ig, 'lexiplexy');
+      if (!localStorage.getItem(newKey)) localStorage.setItem(newKey, val);
+    }
+  });
+} catch(e) { /* noop */ }
+
 /*
 *********************************************************************
  Version: 1.5 • Updated: 2025-10-10 • File: release-main/app.core.js 
@@ -54,7 +67,7 @@ App.starKey = function(wid, dk){
   App.saveSettings = function(s){
   try{ localStorage.setItem(LS_SETTINGS, JSON.stringify(s)); }catch(e){}
   try{
-    if (s && s.lang) localStorage.setItem('lexitron.uiLang', String(s.lang).toLowerCase());
+    if (s && s.lang) localStorage.setItem('lexiplexy.uiLang', String(s.lang).toLowerCase());
   }catch(_){}}
 ;
 
