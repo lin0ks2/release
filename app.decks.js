@@ -159,7 +159,7 @@
 
 /* ---- MERGED FROM: app.addon.sets.js ---- */
 /*!
- * app.addon.sets.js — Lexiplexy (carousel-safe)
+ * app.addon.sets.js — Lexitron (carousel-safe)
  * Version: 1.5.2
  * Date: 2025-09-22
  *

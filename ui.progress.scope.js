@@ -15,7 +15,7 @@
     try{
       var k = (App.dictRegistry && App.dictRegistry.activeKey) || null;
       if (!k){
-        k = localStorage.getItem('lexiplexy.deckKey') || localStorage.getItem('lexiplexy.activeKey') || null;
+        k = localStorage.getItem('lexitron.deckKey') || localStorage.getItem('lexitron.activeKey') || null;
       }
       return k || 'default';
     }catch(_){ return 'default'; }

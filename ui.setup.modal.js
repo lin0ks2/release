@@ -5,11 +5,11 @@
 */
 (function(){
   const LS = {
-    uiLang: 'lexiplexy.uiLang',
-    studyLang: 'lexiplexy.studyLang',
-    deckKey: 'lexiplexy.deckKey',
-    setupDone: 'lexiplexy.setupDone',
-    legacyActiveKey: 'lexiplexy.activeKey'
+    uiLang: 'lexitron.uiLang',
+    studyLang: 'lexitron.studyLang',
+    deckKey: 'lexitron.deckKey',
+    setupDone: 'lexitron.setupDone',
+    legacyActiveKey: 'lexitron.activeKey'
   };
   const FLAG_EMOJI = { ru:'🇷🇺', uk:'🇺🇦', en:'🇬🇧', de:'🇩🇪', es:'🇪🇸', fr:'🇫🇷', it:'🇮🇹', pl:'🇵🇱', sr:'🇷🇸', tr:'🇹🇷' };
 
@@ -232,10 +232,10 @@
         if (window.App){
           window.App.settings = window.App.settings || {};
           window.App.settings.mode = chosenMode;
-          try{ window.localStorage.setItem('lexiplexy.mode', chosenMode); }catch(_){}
+          try{ window.localStorage.setItem('lexitron.mode', chosenMode); }catch(_){}
           try{ App.saveSettings && App.saveSettings(window.App.settings); }catch(_){}
         } else {
-          try{ window.localStorage.setItem('lexiplexy.mode', chosenMode); }catch(_){}
+          try{ window.localStorage.setItem('lexitron.mode', chosenMode); }catch(_){}
         }
       }catch(_){}
 const ui = activeUi() || effectiveLang();
@@ -261,7 +261,7 @@ const ui = activeUi() || effectiveLang();
 
       // notify
       try{ document.dispatchEvent(new CustomEvent('i18n:lang-changed', { detail:{ lang: ui } })); }catch(_){}
-      document.dispatchEvent(new CustomEvent('lexiplexy:setup:done', { detail:{ uiLang:ui, studyLang:st, deckKey:dk } }));
+      document.dispatchEvent(new CustomEvent('lexitron:setup:done', { detail:{ uiLang:ui, studyLang:st, deckKey:dk } }));
     });
   }
 
@@ -271,7 +271,7 @@ const ui = activeUi() || effectiveLang();
       if (force) return true;
     }catch(_){}
     try{
-    var dk = localStorage.getItem('lexiplexy.deckKey') || localStorage.getItem('lexiplexy.activeKey');
+    var dk = localStorage.getItem('lexitron.deckKey') || localStorage.getItem('lexitron.activeKey');
     if (!dk) return true;
     var okLen = 0;
     try {

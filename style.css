@@ -5,7 +5,7 @@
 */
 :root{ --radius-base:16px; --border-width:1px; }
 /*!
- * style.css — Lexiplexy styles
+ * style.css — Lexitron styles
  * Version: 1.5.0
  * Date: 2025-09-22
  *
@@ -1338,6 +1338,3 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
 
 .dictSpoiler > summary::-webkit-details-marker { display: none; }
 .dictSpoiler > summary::marker { content: ""; }
-
-.tagline .tl1{margin-bottom:2px}
-.tagline .tl2{opacity:.9}

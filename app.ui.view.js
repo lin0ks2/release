@@ -8,7 +8,7 @@
 (function(){
   const App = window.App || (window.App = {});
   App.settings = App.settings || {};
-  if (!App.settings.mode) App.settings.mode = (localStorage.getItem('lexiplexy.mode') || 'normal'); // default: normal
+  if (!App.settings.mode) App.settings.mode = (localStorage.getItem('lexitron.mode') || 'normal'); // default: normal
   App.getMode = function(){ return (App.settings && App.settings.mode) || 'normal'; };
   App.getStarStep = function(){
     return (App.getMode() === 'normal') ? 1 : 0.5;
@@ -17,11 +17,11 @@
     return (App.getMode() === 'normal') ? 3.0 : 2.5;
   };
   // bridge to save
-  App.saveSettings = App.saveSettings || function(s){ try{ localStorage.setItem('lexiplexy.settings', JSON.stringify(s||App.settings||{})); localStorage.setItem('lexiplexy.mode', App.getMode()); }catch(_){ } };
+  App.saveSettings = App.saveSettings || function(s){ try{ localStorage.setItem('lexitron.settings', JSON.stringify(s||App.settings||{})); localStorage.setItem('lexitron.mode', App.getMode()); }catch(_){ } };
 })();
 
 /*!
- * app.ui.view.js — Lexiplexy
+ * app.ui.view.js — Lexitron
  * Version: 1.6.2 (full-deck source, single-slice per set)
  * Date: 2025-09-22
  *
@@ -92,7 +92,7 @@
           if (sc >= sMax) learned++;
         }
       } else {
-    try{document.dispatchEvent(new CustomEvent("lexiplexy:answer-wrong",{detail:{word:w}}));}catch(_){}
+    try{document.dispatchEvent(new CustomEvent("lexitron:answer-wrong",{detail:{word:w}}));}catch(_){}
 
         const stars = (App.state && App.state.stars) || {};
         for (let i=b.start;i<b.end;i++){
@@ -249,7 +249,7 @@
 function renderStars() {
   const w = current();
   try {
-  document.dispatchEvent(new CustomEvent('lexiplexy:word-shown', { detail: { word: w } }));
+  document.dispatchEvent(new CustomEvent('lexitron:word-shown', { detail: { word: w } }));
 } catch (_) { }
 try {
   if (App.Trainer && typeof App.Trainer.rememberShown === 'function') { App.Trainer.rememberShown(w.id); }
@@ -348,7 +348,7 @@ if (!w) return;
   function renderCard(force = false) {
     applyCardModeClass();
 
-  try{document.dispatchEvent(new CustomEvent("lexiplexy:word-shown",{detail:{word:w}}));}catch(_){}
+  try{document.dispatchEvent(new CustomEvent("lexitron:word-shown",{detail:{word:w}}));}catch(_){}
   try{if(App.Trainer&&typeof App.Trainer.rememberShown==="function"){App.Trainer.rememberShown(w.id);}}catch(_){}
 
     if (document.activeElement && document.activeElement.blur) { try { document.activeElement.blur(); } catch (e) {} }
@@ -462,7 +462,7 @@ if (!w) return;
     const max = App.Trainer.starsMax();
 
     if (correct) {
-    try{document.dispatchEvent(new CustomEvent("lexiplexy:answer-correct",{detail:{word:w}}));}catch(_){}
+    try{document.dispatchEvent(new CustomEvent("lexitron:answer-correct",{detail:{word:w}}));}catch(_){}
 
       btn.classList.add('correct');
       D.optionsRow.querySelectorAll('button.optionBtn').forEach(b => b.disabled = true);
@@ -490,7 +490,7 @@ if (!w) return;
     }
 
     btn.classList.add('wrong');
-    try{ document.dispatchEvent(new CustomEvent('lexiplexy:answer-wrong', { detail:{ word: w } })); }catch(_){}
+    try{ document.dispatchEvent(new CustomEvent('lexitron:answer-wrong', { detail:{ word: w } })); }catch(_){}
     if (typeof showMotivation==="function" && Math.random()<0.22) showMotivation("encouragement");
     btn.disabled = true;
 
@@ -530,7 +530,7 @@ if (!w) return;
     }
   }catch(_){}
   // fire event for UI listeners, but do NOT change progress
-  try { document.dispatchEvent(new CustomEvent('lexiplexy:idk', { detail:{ word:w } })); } catch(_){}
+  try { document.dispatchEvent(new CustomEvent('lexitron:idk', { detail:{ word:w } })); } catch(_){}
   // do not touch stars, totals, or mistakes
   renderStars();
   updateStats();
@@ -723,7 +723,7 @@ if (!w) return;
           }
         } catch(_) {}
         if (defKey) App.dictRegistry.activeKey = defKey;
-        try{ localStorage.setItem('lexiplexy.deckKey', String(defKey)); localStorage.setItem('lexiplexy.activeKey', String(defKey)); }catch(_){}
+        try{ localStorage.setItem('lexitron.deckKey', String(defKey)); localStorage.setItem('lexitron.activeKey', String(defKey)); }catch(_){}
 
 
         App.saveDictRegistry && App.saveDictRegistry();
@@ -740,12 +740,12 @@ if (!w) return;
 
     row.addEventListener('click', () => {
       
-      try{ localStorage.setItem('lexiplexy.deckKey', String(key)); localStorage.setItem('lexiplexy.activeKey', String(key)); }catch(_){}
+      try{ localStorage.setItem('lexitron.deckKey', String(key)); localStorage.setItem('lexitron.activeKey', String(key)); }catch(_){}
       try{ if (typeof updateSpoilerHeader==='function') updateSpoilerHeader(); }catch(_){ }
       try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
 if (row.classList.contains('disabled')) return;
       App.dictRegistry.activeKey = key;
-        try{ localStorage.setItem('lexiplexy.deckKey', String(key)); localStorage.setItem('lexiplexy.activeKey', String(key)); }catch(_){}
+        try{ localStorage.setItem('lexitron.deckKey', String(key)); localStorage.setItem('lexitron.activeKey', String(key)); }catch(_){}
 
       App.saveDictRegistry();
 
@@ -812,7 +812,7 @@ if (row.classList.contains('disabled')) return;
         }
       } catch(_) {}
       if (defKey) App.dictRegistry.activeKey = defKey;
-        try{ localStorage.setItem('lexiplexy.deckKey', String(defKey)); localStorage.setItem('lexiplexy.activeKey', String(defKey)); }catch(_){}
+        try{ localStorage.setItem('lexitron.deckKey', String(defKey)); localStorage.setItem('lexitron.activeKey', String(defKey)); }catch(_){}
 
       App.saveDictRegistry && App.saveDictRegistry();
     }
@@ -1052,9 +1052,9 @@ function showMotivation(type = "praise") {
   }
 
   // события
-  D.addEventListener('lexiplexy:word-shown',e=>render(valFor(e?.detail?.word)));
-  D.addEventListener('lexiplexy:answer-correct',e=>render(valFor(e?.detail?.word)));
-  D.addEventListener('lexiplexy:idk',e=>render(valFor(e?.detail?.word)));
+  D.addEventListener('lexitron:word-shown',e=>render(valFor(e?.detail?.word)));
+  D.addEventListener('lexitron:answer-correct',e=>render(valFor(e?.detail?.word)));
+  D.addEventListener('lexitron:idk',e=>render(valFor(e?.detail?.word)));
 
   if(D.readyState==='loading') D.addEventListener('DOMContentLoaded',()=>render(0),{once:true});
   else render(0);
@@ -1074,7 +1074,7 @@ function showMotivation(type = "praise") {
     try{
       if (window.App && App.settings && App.settings.lang)
         return String(App.settings.lang).toLowerCase();
-      var ls = localStorage.getItem('lexiplexy.uiLang');
+      var ls = localStorage.getItem('lexitron.uiLang');
       if (ls) return String(ls).toLowerCase();
     }catch(_){}
     return 'ru';
@@ -1105,7 +1105,7 @@ function showMotivation(type = "praise") {
   }
 
   document.addEventListener('i18n:lang-changed',applyFlag);
-  document.addEventListener('lexiplexy:setup:done',applyFlag);
+  document.addEventListener('lexitron:setup:done',applyFlag);
   document.addEventListener('visibilitychange',function(){
     if(!document.hidden) applyFlag();
   });
@@ -1189,7 +1189,7 @@ App.resetProgress = function(){
         }
       }
     }
-    try { localStorage.removeItem('lexiplexy.progress'); } catch(_){}
+    try { localStorage.removeItem('lexitron.progress'); } catch(_){}
     // optionally re-render UI
     if (typeof App.renderStats === 'function') App.renderStats();
   } catch(e){ console.error(e); }
@@ -1241,7 +1241,7 @@ App.resetProgress = function(){
     const isHard = newIsHard;
     App.settings = App.settings || {};
     App.settings.mode = isHard ? 'hard' : 'normal';
-    try{ localStorage.setItem('lexiplexy.mode', App.settings.mode); }catch(_){}
+    try{ localStorage.setItem('lexitron.mode', App.settings.mode); }catch(_){}
     if (typeof App.saveSettings === 'function') App.saveSettings(App.settings);
     // re-render current card/stats to reflect new step/threshold immediately
     try{ if (typeof renderStars==='function') renderStars(); }catch(_){}
@@ -1369,7 +1369,7 @@ if (document.readyState === 'loading') {
         if (App.decks && App.decks.getActiveKey) return App.decks.getActiveKey();
       } catch(e){}
       try {
-        return localStorage.getItem('lexiplexy.deckKey') || localStorage.getItem('lexiplexy.activeKey') || 'de';
+        return localStorage.getItem('lexitron.deckKey') || localStorage.getItem('lexitron.activeKey') || 'de';
       } catch(e){}
       return 'de';
     }
@@ -1403,7 +1403,7 @@ if (document.readyState === 'loading') {
     host.appendChild(details);
     if (details.open) { try { details.dispatchEvent(new Event('toggle')); } catch(_){} }
     try{
-      var so = localStorage.getItem('lexiplexy.spoilerOpen'); if (so==='1') details.setAttribute('open','open');
+      var so = localStorage.getItem('lexitron.spoilerOpen'); if (so==='1') details.setAttribute('open','open');
     }catch(_){}
 
     // When opened: temporarily swap IDs so original renderer draws tiles inside body
@@ -1431,11 +1431,11 @@ if (document.readyState === 'loading') {
         } finally {
           body.id = prev || '';
           if (origHost) origHost.id = had ? oldId : '';
-          try{ localStorage.setItem('lexiplexy.spoilerOpen','1'); }catch(_){}
+          try{ localStorage.setItem('lexitron.spoilerOpen','1'); }catch(_){}
         }
       } else {
         body.innerHTML='';
-        try{ localStorage.setItem('lexiplexy.spoilerOpen','0'); }catch(_){}
+        try{ localStorage.setItem('lexitron.spoilerOpen','0'); }catch(_){}
       }
     });
   }

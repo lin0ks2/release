@@ -25,8 +25,8 @@
   A().dictRegistry.activeKey = v;
   if (A().saveDictRegistry) A().saveDictRegistry();
   try{
-    localStorage.setItem('lexiplexy.deckKey', v);
-    localStorage.setItem('lexiplexy.activeKey', v);
+    localStorage.setItem('lexitron.deckKey', v);
+    localStorage.setItem('lexitron.activeKey', v);
   }catch(_){}
 },
     get activeSetIndex(){ return idx(); },
