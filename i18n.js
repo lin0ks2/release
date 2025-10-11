@@ -16,7 +16,7 @@
     ru: {
       // App & brand
       appTitle: "Lexiplexy",
-      tagline: "The best vocabulary trainer.",
+      tagline: "Лучший тренажёр слов.",
       
       
       
@@ -113,7 +113,7 @@ settingsTitle: "Настройки",
     uk: {
       // App & brand
       appTitle: "Lexiplexy",
-      tagline: "The best vocabulary trainer.",
+      tagline: "Найкращий тренажер слів.",
       
       
       
