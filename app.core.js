@@ -119,7 +119,70 @@ App.clamp = (n,min,max)=>Math.max(min,Math.min(max,n));
 ;
 
   function loadState(){ try{ const raw=localStorage.getItem(LS_STATE); if(raw) return JSON.parse(raw);}catch(e){} return null; }
-  App.saveState = function(){ try{ localStorage.setItem(LS_STATE, JSON.stringify(App.state)); }catch(e){} };
+  
+/* === Non-blocking saveState (debounced, idle if possible) === */
+App._saveStateNow = function(){
+  try{
+    localStorage.setItem(LS_STATE, JSON.stringify(App.state));
+  }catch(e){}
+};
+
+App._saveScheduled = false;
+App._saveTimer = null;
+App._saveIdleId = null;
+App._savePending = false;
+
+App.saveState = function(){
+  try{
+    App._savePending = true;
+    if (App._saveScheduled) return;
+    App._saveScheduled = true;
+
+    if (App._saveTimer) clearTimeout(App._saveTimer);
+    App._saveTimer = setTimeout(function(){
+      App._saveTimer = null;
+      var idle = window.requestIdleCallback || null;
+      if (idle){
+        if (App._saveIdleId && window.cancelIdleCallback){
+          try{ cancelIdleCallback(App._saveIdleId); }catch(_){}
+        }
+        App._saveIdleId = idle(function(){
+          App._saveIdleId = null;
+          App._savePending = false;
+          App._saveScheduled = false;
+          App._saveStateNow();
+        }, {timeout: 1000});
+      } else {
+        setTimeout(function(){
+          App._savePending = false;
+          App._saveScheduled = false;
+          App._saveStateNow();
+        }, 0);
+      }
+    }, 120);
+  }catch(_){}
+};
+
+/* Flush on page hide/unload */
+(function(){
+  var flush = function(){
+    try{
+      if (App && App._savePending){
+        App._savePending = false;
+        App._saveScheduled = false;
+        if (App._saveTimer) { clearTimeout(App._saveTimer); App._saveTimer = null; }
+        if (App._saveIdleId && window.cancelIdleCallback){ try{ cancelIdleCallback(App._saveIdleId); }catch(_){} App._saveIdleId = null; }
+        App._saveStateNow && App._saveStateNow();
+      }
+    }catch(e){}
+  };
+  window.addEventListener('pagehide', flush);
+  window.addEventListener('beforeunload', flush);
+  document.addEventListener('visibilitychange', function(){
+    if (document.visibilityState === 'hidden') flush();
+  });
+})();
+;
 
   function loadDictRegistrySafe(){ try{ const raw=localStorage.getItem(LS_DICTS); if(raw) return JSON.parse(raw);}catch(e){} return { activeKey:null, user:{} }; }
   App.saveDictRegistry = function(){ try{ localStorage.setItem(LS_DICTS, JSON.stringify(App.dictRegistry)); }catch(e){} };
