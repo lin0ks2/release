@@ -1,15 +1,11 @@
 /*
 ******************************************************************************
-  Module: app.mistakes.js
+  Module: app.mistakes.js (refined)
   Purpose: "Мои ошибки" virtual dictionary + gate
-  Storage: localStorage 'mistakes.v4' with per-(uiLang, dictLang) buckets
-  Notes:
-    - Adds a word after FIRST real wrong answer in a session (threshold = 1)
-    - Ignores "Не знаю" (handled upstream; gate listens only to 'answer-wrong')
-    - Never adds favorites
-    - No duplicates: neither within the session nor across sessions
-    - Strong isolation by UI language and dictionary language
-    - Stars inside "МО" are LOCAL and separate from global App.state.stars
+  Changes vs previous:
+    - addOnFailure: ignore virtual active keys ('mistakes','fav','favorites')
+    - M.count(): counts only items whose sourceKey resolves to an actual deck
+    - Gate fix retained: addedThisSession is set only after confirmed addition
 ******************************************************************************
 */
 
@@ -21,94 +17,82 @@
   var LS_KEY = 'mistakes.v4';
 
   // ------------------------------
-  // Helpers (safe accessors)
+  // Helpers
   // ------------------------------
   function clamp(v, lo, hi){ v = +v || 0; return Math.max(lo, Math.min(hi, v)); }
-
   function uiLang(){
     try {
-      // prefer explicit UI language if present
       return (App.settings && (App.settings.uiLang || App.settings.lang || App.settings.ui)) || 'ru';
     } catch(_){ return 'ru'; }
   }
-
   function activeDictLang(){
     try {
-      // language of currently active dictionary (study lang)
       return (App.settings && (App.settings.dictsLangFilter || App.settings.studyLang || App.settings.dictLang)) || 'en';
     } catch(_){ return 'en'; }
   }
-
-  // Extract language code from sourceKey like 'en_deckName'
   function langOfKey(sourceKey){
     try {
       var m = String(sourceKey||'').match(/^([a-z]{2})_/i);
       return m ? m[1].toLowerCase() : null;
     } catch(_){ return null; }
   }
-
+  function isVirtualKey(key){
+    key = String(key||'').toLowerCase();
+    return key === 'mistakes' || key === 'fav' || key === 'favorites';
+  }
   function load(){
     try {
       var raw = localStorage.getItem(LS_KEY);
-      if (!raw) return {};
-      var obj = JSON.parse(raw);
-      return (obj && typeof obj === 'object') ? obj : {};
+      return raw ? (JSON.parse(raw)||{}) : {};
     } catch(_){ return {}; }
   }
-
   function save(db){
-    try {
-      localStorage.setItem(LS_KEY, JSON.stringify(db));
-    } catch(_){}
+    try { localStorage.setItem(LS_KEY, JSON.stringify(db)); }catch(_){}
   }
-
-  function ensure(obj, k){
-    if (!obj[k]) obj[k] = {};
-    return obj[k];
-  }
-
+  function ensure(obj, k){ if (!obj[k]) obj[k] = {}; return obj[k]; }
   function ensureBucket(db, ul, dl){
     var u = ensure(db, ul);
     var b = ensure(u, dl);
-    if (!b.items)   b.items   = {}; // items[sourceKey][id] = true
-    if (!b.stars)   b.stars   = {}; // stars[sourceKey][id] = number
-    if (!b.sources) b.sources = {}; // sources[id] = sourceKey
+    if (!b.items)   b.items   = {};
+    if (!b.stars)   b.stars   = {};
+    if (!b.sources) b.sources = {};
     return b;
   }
-
   function starsBucket(db){
     var b = ensureBucket(db, uiLang(), activeDictLang());
     return b.stars || (b.stars = {});
   }
-
-  // Count total IDs in current bucket
-  function countBucket(b){
-    var sum = 0;
+  function deckByKey(sk){
     try {
-      Object.keys(b.items||{}).forEach(function(sk){
-        sum += Object.keys(b.items[sk]||{}).length;
-      });
+      if (App.Decks && typeof App.Decks.resolveDeckByKey === 'function'){
+        return App.Decks.resolveDeckByKey(sk);
+      }
     } catch(_){}
-    return sum;
+    return null;
+  }
+  function deckContainsId(deck, id){
+    if (!deck || !Array.isArray(deck.words)) return false;
+    id = String(id);
+    for (var i=0;i<deck.words.length;i++){
+      if (String(deck.words[i].id) === id) return true;
+    }
+    return false;
   }
 
   // ------------------------------
-  // Public API: App.Mistakes
+  // Public API
   // ------------------------------
   if (!App.Mistakes) App.Mistakes = {};
   var M = App.Mistakes;
 
-  // Return sourceKey if id is in current bucket; otherwise null
   M.sourceKeyFor = function(id){
     if (id == null) return null;
     id = String(id);
     var db = load();
-    var ul = uiLang(), dl = activeDictLang();
-    var b = ensureBucket(db, ul, dl);
+    var b = ensureBucket(db, uiLang(), activeDictLang());
     return b.sources ? (b.sources[id] || null) : null;
   };
 
-  // Get local Mistakes stars for (sourceKey, id)
   M.getStars = function(sourceKey, id){
     id = String(id);
     var db = load();
@@ -118,7 +102,6 @@
     return +bucket[id] || 0;
   };
 
-  // Set local Mistakes stars for (sourceKey, id) with clamping to [0, App.Trainer.starsMax()]
   M.setStars = function(sourceKey, id, val){
     id = String(id);
     var db = load();
@@ -131,12 +114,10 @@
     save(db);
   };
 
-  // Add word to Mistakes (id, optional word object, optional explicit sourceKey)
   M.add = function(id, word, sourceKey){
     if (id == null) return;
     id = String(id);
 
-    // Determine sourceKey:
     var sk = sourceKey || null;
     try {
       if (!sk && word && (word._mistakeSourceKey || word._favoriteSourceKey)){
@@ -144,10 +125,10 @@
       }
       if (!sk) {
         var ak = (App.dictRegistry && App.dictRegistry.activeKey) || null;
-        if (ak && ak !== 'mistakes') sk = ak;
+        if (ak && !isVirtualKey(ak)) sk = ak;
       }
     } catch(_){}
-    if (!sk) return;
+    if (!sk || isVirtualKey(sk)) return;
 
     // Never add favorites
     try{
@@ -155,19 +136,20 @@
       if (App && App.Favorites && typeof App.Favorites.has === 'function' && App.Favorites.has(id)) return;
     }catch(_){}
 
-    // Language isolation: ensure key language matches active dict language
+    // Language isolation
     try{
       var dl = activeDictLang();
       var kLang = langOfKey(sk);
       if (kLang && kLang !== dl) return;
     }catch(_){}
 
-    // Current bucket
-    var db = load();
-    var ul = uiLang(), dl2 = activeDictLang();
-    var b = ensureBucket(db, ul, dl2);
+    // Ensure the deck exists (prevents "active but empty" due to bad sk)
+    var deck = deckByKey(sk);
+    if (!deck) return;
 
-    // Already stored? (no duplicates across sessions)
+    var db = load();
+    var b = ensureBucket(db, uiLang(), activeDictLang());
+
     if ((b.sources && b.sources[id]) || ((b.items[sk]||{})[id])) return;
 
     if (!b.items[sk]) b.items[sk] = {};
@@ -176,7 +158,6 @@
     save(db);
   };
 
-  // Remove word from current bucket (not used by UI normally, but safe to expose)
   M.remove = function(id){
     id = String(id);
     var db = load();
@@ -194,46 +175,45 @@
     save(db);
   };
 
-  // List (flatten) current Mistakes deck (array of word objects)
   M.deck = function(){
     var db = load();
-    var ul = uiLang(), dl = activeDictLang();
-    var b = ensureBucket(db, ul, dl);
+    var b = ensureBucket(db, uiLang(), activeDictLang());
     var out = [];
     try{
       Object.keys(b.items||{}).forEach(function(sk){
         var idsMap = b.items[sk] || {};
-        var deck = null;
-        try {
-          if (App.Decks && typeof App.Decks.resolveDeckByKey === 'function'){
-            deck = App.Decks.resolveDeckByKey(sk);
-          }
-        } catch(_) {}
+        var deck = deckByKey(sk);
         if (!deck || !Array.isArray(deck.words)) return;
-        deck.words.forEach(function(w){
+        for (var i=0;i<deck.words.length;i++){
+          var w = deck.words[i];
           var id = String(w.id);
           if (idsMap[id]){
             var c = Object.assign({}, w);
             c._mistakeSourceKey = sk;
             out.push(c);
           }
-        });
+        }
       });
     }catch(_){}
     return out;
   };
 
-  // Alias
   M.list = function(){ return M.deck(); };
 
-  // Count items in current bucket
+  // Count ONLY items whose deck exists (prevents enabling empty)
   M.count = function(){
     var db = load();
     var b = ensureBucket(db, uiLang(), activeDictLang());
-    return countBucket(b);
+    var sum = 0;
+    try{
+      Object.keys(b.items||{}).forEach(function(sk){
+        if (!deckByKey(sk)) return;
+        sum += Object.keys(b.items[sk]||{}).length;
+      });
+    }catch(_){}
+    return sum;
   };
 
-  // Clear ONLY current (uiLang, dictLang) bucket
   M.clearActive = function(){
     var db = load();
     var ul = uiLang(), dl = activeDictLang();
@@ -242,21 +222,22 @@
     save(db);
   };
 
-  // Optional stats object for UI (safe)
   M.stats = function(){
     var db = load();
     var b = ensureBucket(db, uiLang(), activeDictLang());
-    return {
-      count: countBucket(b)
-    };
+    return { count: (function(){
+      var c=0;
+      Object.keys(b.items||{}).forEach(function(sk){ if (deckByKey(sk)) c += Object.keys(b.items[sk]||{}).length; });
+      return c;
+    })() };
   };
 
   // ------------------------------
-  // Gate: add on wrong answer (threshold = 1), with robust "addedThisSession" marking
+  // Gate
   // ------------------------------
   (function(){
-    var fail = Object.create(null);             // per-session wrong counters per wordId
-    var addedThisSession = Object.create(null); // only mark after confirmed addition
+    var fail = Object.create(null);
+    var addedThisSession = Object.create(null);
 
     function inc(map, id){ id=String(id); map[id]=(map[id]|0)+1; return map[id]; }
 
@@ -270,43 +251,35 @@
       return false;
     }
 
-    // The original UI provides window.addToMistakesOnFailure(word).
-    // Keep compatibility and also expose App.Mistakes.addOnFailure for callers that used it.
     function addOnFailure(word){
       try {
         var sk = null;
         if (word && word._mistakeSourceKey) sk = word._mistakeSourceKey;
         if (!sk){
           var ak = (App.dictRegistry && App.dictRegistry.activeKey) || null;
-          if (ak && ak !== 'mistakes') sk = ak;
+          if (ak && !isVirtualKey(ak)) sk = ak;
         }
         App.Mistakes.add(String(word.id), word, sk);
       } catch(_){}
     }
 
     window.addToMistakesOnFailure = addOnFailure;
-    App.Mistakes.addOnFailure = addOnFailure;
+    App.Mistakes.addOnFailure     = addOnFailure;
 
     function onFail(w){
       if (!w || w.id == null) return;
       var wid = String(w.id);
 
-      // Never from favorites
       if (isFav(w)) return;
-
-      // If we already CONFIRMED adding this session for the word, do nothing
       if (addedThisSession[wid]) return;
 
-      // threshold = 1
       var f = inc(fail, wid);
       if (f >= 1){
         try{
-          // Confirmed-add logic: check presence BEFORE and AFTER
           var before = (App.Mistakes && typeof App.Mistakes.sourceKeyFor==='function') ? App.Mistakes.sourceKeyFor(wid) : null;
           addOnFailure(w);
           var after  = (App.Mistakes && typeof App.Mistakes.sourceKeyFor==='function') ? App.Mistakes.sourceKeyFor(wid) : null;
           if (!before && after){
-            // Added successfully → suppress repeated attempts for this session
             addedThisSession[wid] = true;
           }
         }catch(_){}
@@ -315,7 +288,6 @@
 
     window.MistakesGate = { onFail: onFail };
 
-    // Listen only to real wrong answers (IDK is ignored upstream and doesn't dispatch this event)
     document.addEventListener('lexitron:answer-wrong', function(e){
       try { onFail(e && e.detail && e.detail.word); } catch(_){}
     });
