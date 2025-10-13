@@ -359,13 +359,13 @@ if (!w) return;
         if (D.wordEl) D.wordEl.textContent = '—';
         if (D.hintEl) D.hintEl.textContent = '—';
         if (D.optionsRow) D.optionsRow.innerHTML = '';
-        renderStars(); try{ if (typeof renderSetStats==='function') requestAnimationFrame(renderSetStats); }catch(_){ } updateStats();
+        renderStars(); try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ } updateStats();
         return;
       }
       if (D.wordEl) D.wordEl.textContent = '—';
       if (D.hintEl) D.hintEl.textContent = '—';
       if (D.optionsRow) D.optionsRow.innerHTML = '';
-      renderStars(); try{ if (typeof renderSetStats==='function') requestAnimationFrame(renderSetStats); }catch(_){ }
+      renderStars(); try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
       updateStats();
       return;
     }
@@ -590,15 +590,20 @@ if (!w) return;
       ? ((w && (w._mistakeSourceKey || (App.Mistakes && App.Mistakes.sourceKeyFor && App.Mistakes.sourceKeyFor(w.id)))) || 'mistakes')
       : activeKey;
 
-    App.toggleFavorite && App.toggleFavorite(dictKey, w.id);
-    if (D.favBtn) {
-      D.favBtn.textContent = (App.isFavorite && App.isFavorite(dictKey, w.id)) ? '♥' : '♡';
+    App.toggleFavorite && var __willFav = !(App.isFavorite && App.isFavorite(dictKey, w.id));
+App.toggleFavorite(dictKey, w.id);
+    if (D.favBtn){ D.favBtn.textContent = __willFav ? '♥' : '♡'; if (D.favBtn.classList) D.favBtn.classList.toggle('is-fav', __willFav); D.favBtn.setAttribute('aria-pressed', __willFav ? 'true' : 'false'); }
+if (D.favBtn) {
+      const __isFav = (App.isFavorite && App.isFavorite(dictKey, w.id));
+      D.favBtn.textContent = __isFav ? '♥' : '♡';
+      if (D.favBtn.classList) D.favBtn.classList.toggle('is-fav', !!__isFav);
+      D.favBtn.setAttribute('aria-pressed', __isFav ? 'true' : 'false');
       D.favBtn.style.transform = 'scale(1.2)';
       setTimeout(() => { D.favBtn.style.transform = 'scale(1)'; }, 140);
     }
-    if (typeof App._renderSetsBarOriginal === 'function') requestAnimationFrame(App._renderSetsBarOriginal);
-  try{ if (typeof renderSetStats==='function') requestAnimationFrame(renderSetStats); }catch(_){ }
-      try{ if (typeof updateSpoilerHeader==='function') updateSpoilerHeader(); }catch(_){ } try{ if (typeof renderSetStats==='function') requestAnimationFrame(renderSetStats); }catch(_){ }
+    if (typeof App._renderSetsBarOriginal === 'function') App._renderSetsBarOriginal();
+  try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
+      try{ if (typeof updateSpoilerHeader==='function') updateSpoilerHeader(); }catch(_){ } try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
       }
 
   function renderDictList() {
@@ -751,8 +756,8 @@ if (!w) return;
         try{ localStorage.setItem('lexitron.deckKey', String(defKey)); localStorage.setItem('lexitron.activeKey', String(defKey)); }catch(_){}
 
         App.saveDictRegistry && App.saveDictRegistry();
-        renderDictList(); App._renderSetsBarOriginal && App._renderSetsBarOriginal(); try{ if (typeof renderSetStats==='function') requestAnimationFrame(renderSetStats); }catch(_){ }
-      try{ if (typeof updateSpoilerHeader==='function') updateSpoilerHeader(); }catch(_){ } try{ if (typeof renderSetStats==='function') requestAnimationFrame(renderSetStats); }catch(_){ }
+        renderDictList(); App._renderSetsBarOriginal && App._renderSetsBarOriginal(); try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
+      try{ if (typeof updateSpoilerHeader==='function') updateSpoilerHeader(); }catch(_){ } try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
       renderCard(true); updateStats();
       });
       actions.appendChild(delBtn);
@@ -783,8 +788,8 @@ if (!w) return;
 
 
         App.saveDictRegistry && App.saveDictRegistry();
-        renderDictList(); App._renderSetsBarOriginal(); try{ if (typeof renderSetStats==='function') requestAnimationFrame(renderSetStats); }catch(_){ }
-      try{ if (typeof updateSpoilerHeader==='function') updateSpoilerHeader(); }catch(_){ } try{ if (typeof renderSetStats==='function') requestAnimationFrame(renderSetStats); }catch(_){ }
+        renderDictList(); App._renderSetsBarOriginal(); try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
+      try{ if (typeof updateSpoilerHeader==='function') updateSpoilerHeader(); }catch(_){ } try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
       renderCard(true); updateStats();
       });
       actions.appendChild(delBtn);
@@ -798,7 +803,7 @@ if (!w) return;
       
       try{ localStorage.setItem('lexitron.deckKey', String(key)); localStorage.setItem('lexitron.activeKey', String(key)); }catch(_){}
       try{ if (typeof updateSpoilerHeader==='function') updateSpoilerHeader(); }catch(_){ }
-      try{ if (typeof renderSetStats==='function') requestAnimationFrame(renderSetStats); }catch(_){ }
+      try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
 if (row.classList.contains('disabled')) return;
       App.dictRegistry.activeKey = key;
         try{ localStorage.setItem('lexitron.deckKey', String(key)); localStorage.setItem('lexitron.activeKey', String(key)); }catch(_){}
@@ -809,8 +814,8 @@ if (row.classList.contains('disabled')) return;
       App.state.lastIndex =  - App.getStarStep();
       renderDictList();
       App._renderSetsBarOriginal();
-      try{ if (typeof renderSetStats==='function') requestAnimationFrame(renderSetStats); }catch(_){ }
-      try{ if (typeof updateSpoilerHeader==='function') updateSpoilerHeader(); }catch(_){ } try{ if (typeof renderSetStats==='function') requestAnimationFrame(renderSetStats); }catch(_){ }
+      try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
+      try{ if (typeof updateSpoilerHeader==='function') updateSpoilerHeader(); }catch(_){ } try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
       renderCard(true);
       updateStats();
     });
@@ -887,8 +892,8 @@ if (row.classList.contains('disabled')) return;
     if (D.dictsBtn) D.dictsBtn.title = t.dictsHeader || 'Словари';
     renderDictList();
     App._renderSetsBarOriginal && App._renderSetsBarOriginal();
-    try{ if (typeof renderSetStats==='function') requestAnimationFrame(renderSetStats); }catch(_){ }
-      try{ if (typeof updateSpoilerHeader==='function') updateSpoilerHeader(); }catch(_){ } try{ if (typeof renderSetStats==='function') requestAnimationFrame(renderSetStats); }catch(_){ }
+    try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
+      try{ if (typeof updateSpoilerHeader==='function') updateSpoilerHeader(); }catch(_){ } try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
       updateStats();
   }
 
@@ -1276,8 +1281,8 @@ App.resetProgress = function(){
         if (App.Stats && typeof App.Stats.recomputeAndRender === 'function') App.Stats.recomputeAndRender();
       } catch(_){}
       try { if (typeof renderSetStats === 'function') renderSetStats(); } catch(_){}
-      try { if (typeof App._renderSetsBarOriginal === 'function') requestAnimationFrame(App._renderSetsBarOriginal); try{ if (typeof renderSetStats==='function') requestAnimationFrame(renderSetStats); }catch(_){ }
-      try{ if (typeof updateSpoilerHeader==='function') updateSpoilerHeader(); }catch(_){ } try{ if (typeof renderSetStats==='function') requestAnimationFrame(renderSetStats); }catch(_){ }
+      try { if (typeof App._renderSetsBarOriginal === 'function') App._renderSetsBarOriginal(); try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
+      try{ if (typeof updateSpoilerHeader==='function') updateSpoilerHeader(); }catch(_){ } try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
       } catch(_){}
       try { if (typeof renderStars === 'function') renderStars(); } catch(_){}
     }
@@ -1289,8 +1294,8 @@ App.resetProgress = function(){
     if (typeof App.saveSettings === 'function') App.saveSettings(App.settings);
     // re-render current card/stats to reflect new step/threshold immediately
     try{ if (typeof renderStars==='function') renderStars(); }catch(_){}
-    try{ if (typeof App._renderSetsBarOriginal==='function') App._renderSetsBarOriginal(); try{ if (typeof renderSetStats==='function') requestAnimationFrame(renderSetStats); }catch(_){ }
-      try{ if (typeof updateSpoilerHeader==='function') updateSpoilerHeader(); }catch(_){ } try{ if (typeof renderSetStats==='function') requestAnimationFrame(renderSetStats); }catch(_){ }
+    try{ if (typeof App._renderSetsBarOriginal==='function') App._renderSetsBarOriginal(); try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
+      try{ if (typeof updateSpoilerHeader==='function') updateSpoilerHeader(); }catch(_){ } try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
       }catch(_){}
   }
 if (document.readyState === 'loading') {
@@ -1469,8 +1474,8 @@ if (document.readyState === 'loading') {
         try {
           if (App.ui && App.ui._renderSetsBarOriginal) App.ui._renderSetsBarOriginal();
           else if (App._renderSetsBarOriginal) App._renderSetsBarOriginal();
-          try{ if (typeof renderSetStats==='function') requestAnimationFrame(renderSetStats); }catch(_){ }
-      try{ if (typeof updateSpoilerHeader==='function') updateSpoilerHeader(); }catch(_){ } try{ if (typeof renderSetStats==='function') requestAnimationFrame(renderSetStats); }catch(_){ }
+          try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
+      try{ if (typeof updateSpoilerHeader==='function') updateSpoilerHeader(); }catch(_){ } try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
       try { var statsEl = document.getElementById('setStats'); if (statsEl && statsEl.parentElement !== body) body.appendChild(statsEl); } catch(_){ }
         } finally {
           body.id = prev || '';
@@ -1491,8 +1496,8 @@ if (document.readyState === 'loading') {
   if (el && el.closest && el.closest('.setsSpoilerBody')){
     if (App.ui && App.ui._renderSetsBarOriginal) return App.ui._renderSetsBarOriginal();
     if (App._renderSetsBarOriginal) return App._renderSetsBarOriginal();
-  try{ if (typeof renderSetStats==='function') requestAnimationFrame(renderSetStats); }catch(_){ }
-      try{ if (typeof updateSpoilerHeader==='function') updateSpoilerHeader(); }catch(_){ } try{ if (typeof renderSetStats==='function') requestAnimationFrame(renderSetStats); }catch(_){ }
+  try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
+      try{ if (typeof updateSpoilerHeader==='function') updateSpoilerHeader(); }catch(_){ } try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
       }
   return renderSpoilers(host);
 };
@@ -1502,8 +1507,8 @@ if (document.readyState === 'loading') {
   if (el && el.closest && el.closest('.setsSpoilerBody')){
     if (App.ui && App.ui._renderSetsBarOriginal) return App.ui._renderSetsBarOriginal();
     if (App._renderSetsBarOriginal) return App._renderSetsBarOriginal();
-  try{ if (typeof renderSetStats==='function') requestAnimationFrame(renderSetStats); }catch(_){ }
-      try{ if (typeof updateSpoilerHeader==='function') updateSpoilerHeader(); }catch(_){ } try{ if (typeof renderSetStats==='function') requestAnimationFrame(renderSetStats); }catch(_){ }
+  try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
+      try{ if (typeof updateSpoilerHeader==='function') updateSpoilerHeader(); }catch(_){ } try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
       }
   return renderSpoilers(host);
 };
@@ -1604,8 +1609,8 @@ if (document.readyState === 'loading') {
           var el = host || document.getElementById('setsBar');
           if (!el) return;
           App._renderSetsBarOriginal();
-          try{ if (typeof renderSetStats==='function') requestAnimationFrame(renderSetStats); }catch(_){ }
-      try{ if (typeof updateSpoilerHeader==='function') updateSpoilerHeader(); }catch(_){ } try{ if (typeof renderSetStats==='function') requestAnimationFrame(renderSetStats); }catch(_){ }
+          try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
+      try{ if (typeof updateSpoilerHeader==='function') updateSpoilerHeader(); }catch(_){ } try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
       try{ updateSpoilerHeader(); }catch(_){}
           try{ if (typeof renderSetStats === 'function') renderSetStats(); }catch(_){}
         };
