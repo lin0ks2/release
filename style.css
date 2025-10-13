@@ -867,46 +867,22 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
 
 
 
-/* =====================================================================
-   Icons — unify stars & heart (LIGHT & DARK), no logic changes.
-   Idle: outline only | Active: solid fill | Hover: brighten
-   ===================================================================== */
-:root{
-  --icon-muted: #cbd5e1;   /* matches star idle */
-  --icon-active: #fbbf24;  /* matches star filled (light) */
-  --icon-hover: #facc15;
+/* === Heart ↔ Stars strict unification === */
+.card .topRow .heart,
+.heart { 
+  color: var(--icon-muted, #cbd5e1) !important;
+  transition: color .25s ease, transform .2s ease;
 }
-:root[data-theme="dark"]{
-  --icon-muted: #9aa3af;
-  --icon-active: #facc15;  /* matches star filled (dark) */
-  --icon-hover: #fde047;
+.card .topRow .heart.is-fav,
+.heart.is-fav {
+  color: var(--icon-active, #fbbf24) !important;
 }
-
-/* Base color/transition */
-.starIcon, .star, .stars .starIcon,
-.heart { color: var(--icon-muted) !important; transition: color .25s ease, transform .2s ease; }
-.starIcon:active, .star:active, .stars .starIcon:active, .heart:active { transform: scale(0.96); }
-
-/* Force SVG to outline in idle (if used) */
-.starIcon svg, .star svg, .stars .starIcon svg, .heart svg { width: 1em; height: 1em; display: inline-block; vertical-align: -0.2em; }
-.starIcon svg *, .star svg *, .stars .starIcon svg *,
-.heart svg *, .heart svg path, .heart svg g, .heart svg polygon {
-  fill: none !important; stroke: currentColor !important; stroke-width: 1.6; vector-effect: non-scaling-stroke;
-}
-
-/* Active/favorite state — share star color */
-.starIcon.filled, .star.filled, .stars .starIcon.filled,
-.heart.is-fav, .heart.active, .heart.filled {
-  color: var(--icon-active) !important; transform: scale(1.06);
-}
-.starIcon.filled svg *, .star.filled svg *, .stars .starIcon.filled svg *,
-.heart.is-fav svg *, .heart.active svg *, .heart.filled svg * {
-  fill: currentColor !important; stroke: currentColor !important;
-}
-
-/* Hover (desktop) */
 @media (hover:hover){
-  .starIcon:hover, .star:hover, .stars .starIcon:hover, .heart:hover {
-    color: var(--icon-hover) !important;
-  }
+  .card .topRow .heart:hover,
+  .heart:hover { color: var(--icon-hover, #facc15) !important; }
 }
+.heart svg { width: 1em; height: 1em; display: inline-block; vertical-align: -0.2em; }
+.heart svg * { fill: none !important; stroke: currentColor !important; stroke-width: 1.6; vector-effect: non-scaling-stroke; }
+.heart.is-fav svg * { fill: currentColor !important; stroke: currentColor !important; }
+:root[data-theme="dark"] .heart { color: var(--icon-muted, #9aa3af) !important; }
+:root[data-theme="dark"] .heart.is-fav { color: var(--icon-active, #facc15) !important; }
