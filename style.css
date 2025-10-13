@@ -864,3 +864,9 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
   border-top-right-radius: var(--spoiler-radius);
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;}.dictSpoiler > summary::-webkit-details-marker{ display: none; }.dictSpoiler > summary::marker{content: "";}
+
+
+/* Unify heart with stars */
+.heart{ color:#cbd5e1 !important; }              /* same as .starIcon idle */
+.heart.is-fav{ color:#fbbf24 !important; }       /* same as .starIcon.filled */
+
