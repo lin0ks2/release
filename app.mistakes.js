@@ -1,11 +1,13 @@
 /*
 ******************************************************************************
-  Module: app.mistakes.js (refined)
+  Module: app.mistakes.js (strict deck membership)
   Purpose: "Мои ошибки" virtual dictionary + gate
-  Changes vs previous:
-    - addOnFailure: ignore virtual active keys ('mistakes','fav','favorites')
-    - M.count(): counts only items whose sourceKey resolves to an actual deck
-    - Gate fix retained: addedThisSession is set only after confirmed addition
+  Highlights:
+    - Adds only if (a) sourceKey is real (not virtual), (b) resolved deck exists,
+      (c) resolved deck actually CONTAINS the word id.
+    - Counts only ids that are present in their source deck (prevents "active but empty").
+    - Session gate marks addedThisSession only after confirmed addition.
+    - Favorites never added; IDK ignored upstream; strong (uiLang, dictLang) isolation.
 ******************************************************************************
 */
 
@@ -21,34 +23,26 @@
   // ------------------------------
   function clamp(v, lo, hi){ v = +v || 0; return Math.max(lo, Math.min(hi, v)); }
   function uiLang(){
-    try {
-      return (App.settings && (App.settings.uiLang || App.settings.lang || App.settings.ui)) || 'ru';
-    } catch(_){ return 'ru'; }
+    try { return (App.settings && (App.settings.uiLang || App.settings.lang || App.settings.ui)) || 'ru'; }
+    catch(_){ return 'ru'; }
   }
   function activeDictLang(){
-    try {
-      return (App.settings && (App.settings.dictsLangFilter || App.settings.studyLang || App.settings.dictLang)) || 'en';
-    } catch(_){ return 'en'; }
+    try { return (App.settings && (App.settings.dictsLangFilter || App.settings.studyLang || App.settings.dictLang)) || 'en'; }
+    catch(_){ return 'en'; }
   }
   function langOfKey(sourceKey){
-    try {
-      var m = String(sourceKey||'').match(/^([a-z]{2})_/i);
-      return m ? m[1].toLowerCase() : null;
-    } catch(_){ return null; }
+    try { var m = String(sourceKey||'').match(/^([a-z]{2})_/i); return m ? m[1].toLowerCase() : null; }
+    catch(_){ return null; }
   }
   function isVirtualKey(key){
     key = String(key||'').toLowerCase();
     return key === 'mistakes' || key === 'fav' || key === 'favorites';
   }
   function load(){
-    try {
-      var raw = localStorage.getItem(LS_KEY);
-      return raw ? (JSON.parse(raw)||{}) : {};
-    } catch(_){ return {}; }
+    try { var raw = localStorage.getItem(LS_KEY); return raw ? (JSON.parse(raw)||{}) : {}; }
+    catch(_){ return {}; }
   }
-  function save(db){
-    try { localStorage.setItem(LS_KEY, JSON.stringify(db)); }catch(_){}
-  }
+  function save(db){ try { localStorage.setItem(LS_KEY, JSON.stringify(db)); }catch(_){ } }
   function ensure(obj, k){ if (!obj[k]) obj[k] = {}; return obj[k]; }
   function ensureBucket(db, ul, dl){
     var u = ensure(db, ul);
@@ -63,14 +57,13 @@
     return b.stars || (b.stars = {});
   }
   function deckByKey(sk){
-    try {
-      if (App.Decks && typeof App.Decks.resolveDeckByKey === 'function'){
+    try{
+      if (App.Decks && typeof App.Decks.resolveDeckByKey === 'function')
         return App.Decks.resolveDeckByKey(sk);
-      }
-    } catch(_){}
+    }catch(_){}
     return null;
   }
-  function deckContainsId(deck, id){
+  function deckHasId(deck, id){
     if (!deck || !Array.isArray(deck.words)) return false;
     id = String(id);
     for (var i=0;i<deck.words.length;i++){
@@ -118,6 +111,7 @@
     if (id == null) return;
     id = String(id);
 
+    // Determine sourceKey
     var sk = sourceKey || null;
     try {
       if (!sk && word && (word._mistakeSourceKey || word._favoriteSourceKey)){
@@ -143,9 +137,9 @@
       if (kLang && kLang !== dl) return;
     }catch(_){}
 
-    // Ensure the deck exists (prevents "active but empty" due to bad sk)
+    // Ensure the deck exists and actually contains this id
     var deck = deckByKey(sk);
-    if (!deck) return;
+    if (!deck || !deckHasId(deck, id)) return;
 
     var db = load();
     var b = ensureBucket(db, uiLang(), activeDictLang());
@@ -200,15 +194,19 @@
 
   M.list = function(){ return M.deck(); };
 
-  // Count ONLY items whose deck exists (prevents enabling empty)
+  // Count ONLY ids that actually exist in their source deck
   M.count = function(){
     var db = load();
     var b = ensureBucket(db, uiLang(), activeDictLang());
     var sum = 0;
     try{
       Object.keys(b.items||{}).forEach(function(sk){
-        if (!deckByKey(sk)) return;
-        sum += Object.keys(b.items[sk]||{}).length;
+        var deck = deckByKey(sk);
+        if (!deck || !Array.isArray(deck.words)) return;
+        var idsMap = b.items[sk] || {};
+        Object.keys(idsMap).forEach(function(id){
+          if (deckHasId(deck, id)) sum += 1;
+        });
       });
     }catch(_){}
     return sum;
@@ -225,11 +223,18 @@
   M.stats = function(){
     var db = load();
     var b = ensureBucket(db, uiLang(), activeDictLang());
-    return { count: (function(){
-      var c=0;
-      Object.keys(b.items||{}).forEach(function(sk){ if (deckByKey(sk)) c += Object.keys(b.items[sk]||{}).length; });
-      return c;
-    })() };
+    var c = 0;
+    try{
+      Object.keys(b.items||{}).forEach(function(sk){
+        var deck = deckByKey(sk);
+        if (!deck || !Array.isArray(deck.words)) return;
+        var idsMap = b.items[sk] || {};
+        Object.keys(idsMap).forEach(function(id){
+          if (deckHasId(deck, id)) c += 1;
+        });
+      });
+    }catch(_){}
+    return { count: c };
   };
 
   // ------------------------------
