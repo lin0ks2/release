@@ -48,27 +48,39 @@ App.starKey = function(wid, dk){
 
   // Apply localized tooltips from App.i18n() for elements with [data-title-key]
   App.applyI18nTitles = function(root){
+    
     try{
-      var t = (App.i18n && App.i18n()) || {};
+      var lang = (App.settings && (App.settings.uiLang || App.settings.lang)) || document.documentElement.getAttribute('lang') || 'ru';
+      var t = (App.i18n && App.i18n(lang)) || {};
       (root || document).querySelectorAll('[data-title-key]').forEach(function(el){
         var k = el.getAttribute('data-title-key');
         var val = (t && t[k]) || el.getAttribute('data-title-fallback') || el.getAttribute('title') || '';
         if (val) el.setAttribute('title', val);
       });
     }catch(_){}
-  };
-
+};
+      
+  
   // Apply once at startup (handles both defer and non-defer loads)
   try{
     if (document.readyState !== 'loading') { App.applyI18nTitles(); }
     else { document.addEventListener('DOMContentLoaded', function(){ App.applyI18nTitles(); }, { once: true }); }
   }catch(_){}
 
-  // Re-apply on language change signals
+  // Re-apply on language changes
   window.addEventListener('storage', function(){ App.applyI18nTitles(); });
   document.addEventListener('lexitron:ui-lang-changed', function(){ App.applyI18nTitles(); });
 
+}
+  }catch(_){}
 
+(root || document).querySelectorAll('[data-title-key]').forEach(function(el){
+        var k = el.getAttribute('data-title-key');
+        var val = (t && t[k]) || el.getAttribute('data-title-fallback') || el.getAttribute('title') || '';
+        if (val) el.setAttribute('title', val);
+      });
+    }catch(_){}
+  };
 
 
   App.clamp = (n,min,max)=>Math.max(min,Math.min(max,n));
@@ -294,5 +306,7 @@ App.clearFavoritesAll = function(){
     trainerStrategy: "medium+penalties"
   };
 })();
+
+  // Re-apply tooltips on language change
   window.addEventListener('storage', function(){ App.applyI18nTitles(); });
   document.addEventListener('lexitron:ui-lang-changed', function(){ App.applyI18nTitles(); });
