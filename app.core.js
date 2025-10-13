@@ -51,10 +51,18 @@ App.starKey = function(wid, dk){
     try{
       var t = (App.i18n && App.i18n()) || {};
       
+  
   // Apply once at startup (handles both defer and non-defer loads)
   try{
     if (document.readyState !== 'loading') { App.applyI18nTitles(); }
     else { document.addEventListener('DOMContentLoaded', function(){ App.applyI18nTitles(); }, { once: true }); }
+  }catch(_){}
+
+  // Re-apply on language changes
+  window.addEventListener('storage', function(){ App.applyI18nTitles(); });
+  document.addEventListener('lexitron:ui-lang-changed', function(){ App.applyI18nTitles(); });
+
+}
   }catch(_){}
 
 (root || document).querySelectorAll('[data-title-key]').forEach(function(el){
