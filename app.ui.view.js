@@ -721,6 +721,33 @@ if (!w) return;
         const msg = App.i18n().confirmMistakesReset;
         if (!(await App.showConfirmModal({text: msg, title: App.i18n().confirmTitle, okText: App.i18n().confirmOk, cancelText: App.i18n().confirmCancel, title: (App.i18n&&App.i18n().confirmTitle)||'Подтверждение'}))) return;
         if (App.Mistakes && typeof App.Mistakes.clearActive==='function') App.Mistakes.clearActive();
+
+        // After clearing, auto-switch to a sensible default deck (prefer verbs for current dict language)
+        var defKey = null;
+        try {
+          if (App.Decks && typeof App.Decks.pickDefaultKey === 'function') {
+            defKey = App.Decks.pickDefaultKey();
+          } else if (App.Decks && typeof App.Decks.builtinKeys === 'function') {
+            var arr = App.Decks.builtinKeys() || [];
+            var lang = (App.settings && (App.settings.dictsLangFilter || App.settings.studyLang || App.settings.lang)) || null;
+            if (lang) {
+              // prefer verbs for this language if available
+              var verbKey = null;
+              for (var i=0;i<arr.length;i++){
+                var k = arr[i];
+                if (String(k).indexOf(lang + '_') === 0 && String(k).toLowerCase().indexOf('verb') !== -1) { verbKey = k; break; }
+              }
+              if (verbKey) defKey = verbKey;
+              else defKey = arr && arr.length ? arr[0] : null;
+            } else {
+              defKey = arr && arr.length ? arr[0] : null;
+            }
+          }
+        } catch(_) {}
+        if (defKey) App.dictRegistry.activeKey = defKey;
+        try{ localStorage.setItem('lexitron.deckKey', String(defKey)); localStorage.setItem('lexitron.activeKey', String(defKey)); }catch(_){}
+
+        App.saveDictRegistry && App.saveDictRegistry();
         renderDictList(); App._renderSetsBarOriginal && App._renderSetsBarOriginal(); try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
       try{ if (typeof updateSpoilerHeader==='function') updateSpoilerHeader(); }catch(_){ } try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
       renderCard(true); updateStats();
