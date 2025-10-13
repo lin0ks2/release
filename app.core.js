@@ -46,6 +46,19 @@ App.starKey = function(wid, dk){
     return base;
   };
 
+  // Apply localized tooltips from App.i18n() for elements with [data-title-key]
+  App.applyI18nTitles = function(root){
+    try{
+      var t = (App.i18n && App.i18n()) || {};
+      (root || document).querySelectorAll('[data-title-key]').forEach(function(el){
+        var k = el.getAttribute('data-title-key');
+        var val = (t && t[k]) || el.getAttribute('data-title-fallback') || el.getAttribute('title') || '';
+        if (val) el.setAttribute('title', val);
+      });
+    }catch(_){}
+  };
+
+
   App.clamp = (n,min,max)=>Math.max(min,Math.min(max,n));
   App.shuffle = (a)=>{const arr=a.slice();for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr;};
   App.escapeHtml = (s)=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -269,3 +282,7 @@ App.clearFavoritesAll = function(){
     trainerStrategy: "medium+penalties"
   };
 })();
+
+  // Re-apply tooltips on language change
+  window.addEventListener('storage', function(){ App.applyI18nTitles(); });
+  document.addEventListener('lexitron:ui-lang-changed', function(){ App.applyI18nTitles(); });

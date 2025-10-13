@@ -48,6 +48,14 @@ settingsTitle: "Настройки",
       langLabel: "Язык",
       repeatLabel: "Сложность",
       themeLabel: "Тема",
+      // Tooltips (header controls)
+      tt_ui_theme: "Тема",
+      tt_ui_lang: "Язык интерфейса",
+      tt_dicts: "Словари",
+      tt_favorites: "Избранное",
+      tt_help: "Инструкция",
+      tt_support: "Поддержка",
+      tt_settings: "Настройки",
 
       // Stats & badges
       totalWords: "Всего слов в словаре",
@@ -121,6 +129,14 @@ settingsTitle: "Налаштування",
       langLabel: "Мова",
       repeatLabel: "Складність",
       themeLabel: "Тема",
+      // Підказки (кнопки в шапці)
+      tt_ui_theme: "Тема",
+      tt_ui_lang: "Мова інтерфейсу",
+      tt_dicts: "Словники",
+      tt_favorites: "Обране",
+      tt_help: "Інструкція",
+      tt_support: "Підтримка",
+      tt_settings: "Налаштування",
 
       // Stats & badges
       totalWords: "Всього слів в словнику",

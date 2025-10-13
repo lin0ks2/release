@@ -94,9 +94,9 @@
       </div>
     </div>
     <div class="controls">
-      <button id="themeToggleBtn" class="iconBtn" title="Тема" aria-label="Тема">🌞</button>
-      <button id="langToggleBtn"  class="iconBtn" title="Язык интерфейса" aria-label="Язык интерфейса">🇺🇦</button>
-      <button id="dictsBtn"       class="iconBtn gear" title="Словари" aria-label="Словари">📚</button>
+      <button id="themeToggleBtn" class="iconBtn" data-title-key="tt_ui_theme" aria-label="Тема">🌞</button>
+      <button id="langToggleBtn"  class="iconBtn" data-title-key="tt_ui_lang" aria-label="Язык интерфейса">🇺🇦</button>
+      <button id="dictsBtn"       class="iconBtn gear" data-title-key="tt_dicts" aria-label="Словари">📚</button>
     </div>
   </header>
 
@@ -112,7 +112,7 @@
     <section class="card">
       <div class="topRow">
         <div class="stars" id="stars"></div>
-        <button id="favBtn" class="heart" title="Избранное" aria-label="Добавить в избранное">♡</button>
+        <button id="favBtn" class="heart" data-title-key="tt_favorites" aria-label="Добавить в избранное">♡</button>
       </div>
 
       <div class="word" id="wordText">—</div>
@@ -126,10 +126,10 @@
     </section>
   
     <div class="extraActions" aria-label="Extra actions">
-      <button id="btnInfo" class="iconBtn" title="Инструкция" aria-label="Инструкция">ℹ️</button>
-      <button id="btnDonate" class="iconBtn" title="Поддержка" aria-label="Поддержка">💰</button>
+      <button id="btnInfo" class="iconBtn" data-title-key="tt_help" aria-label="Инструкция">ℹ️</button>
+      <button id="btnDonate" class="iconBtn" data-title-key="tt_support" aria-label="Поддержка">💰</button>
 
-      <button id="btnSettings" class="iconBtn" title="Настройки" aria-label="Настройки">⚙️</button>
+      <button id="btnSettings" class="iconBtn" data-title-key="tt_settings" aria-label="Настройки">⚙️</button>
     </div>
 
     <!-- Info modal with footer OK in same style as Dicts modal -->
@@ -465,6 +465,5 @@
   } catch(e){ /* ignore */ }
 })();
 </script>
-
 </body>
 </html>
