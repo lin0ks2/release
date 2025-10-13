@@ -56,7 +56,28 @@ App.starKey = function(wid, dk){
       var lang = (App.settings && (App.settings.uiLang || App.settings.lang)) ||
                  document.documentElement.getAttribute('lang') || 'ru';
       var t = (App.i18n && App.i18n(lang)) || {};
-      (root || document).querySelectorAll('[data-title-key]').forEach(function(el){
+      
+  // --- Tooltip auto-refresh guard ---
+  (function(){
+    var LAST_LANG = (App.settings && (App.settings.uiLang || App.settings.lang)) ||
+                    document.documentElement.getAttribute('lang') || 'ru';
+    setInterval(function(){
+      var cur = (App.settings && (App.settings.uiLang || App.settings.lang)) ||
+                document.documentElement.getAttribute('lang') || 'ru';
+      if (cur !== LAST_LANG){
+        LAST_LANG = cur;
+        try{ App.applyI18nTitles(); }catch(_){}
+      }
+    }, 500);
+
+    // Defensive: re-apply on hover over header controls (ensures freshest text)
+    document.addEventListener('mouseover', function(ev){
+      var el = ev.target && ev.target.closest && ev.target.closest('[data-title-key]');
+      if (el) { try{ App.applyI18nTitles(el); }catch(_){ } }
+    }, true);
+  })();
+
+(root || document).querySelectorAll('[data-title-key]').forEach(function(el){
         var k = el.getAttribute('data-title-key');
         var val = (t && t[k]) || el.getAttribute('data-title-fallback') || el.getAttribute('title') || '';
 
