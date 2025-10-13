@@ -40,60 +40,52 @@ App.starKey = function(wid, dk){
     }
   })();
 
-  App.i18n = function(){
-    const lang = App.settings.lang || 'uk';
-    const base = (I18N_FALLBACK && I18N_FALLBACK[lang]) ? I18N_FALLBACK[lang] : I18N_FALLBACK.uk;
-    return base;
+  
+  App.i18n = function(lang){
+    // Return language pack by code; fallback to I18N_FALLBACK.uk
+    try{
+      lang = (lang || (App.settings && (App.settings.uiLang || App.settings.lang)) || 'uk').toLowerCase();
+      const base = (I18N_FALLBACK && I18N_FALLBACK[lang]) ? I18N_FALLBACK[lang] : (I18N_FALLBACK && I18N_FALLBACK.uk) || {};
+      return base;
+    }catch(_){ return (I18N_FALLBACK && I18N_FALLBACK.uk) || {}; }
   };
 
   // Apply localized tooltips from App.i18n() for elements with [data-title-key]
   App.applyI18nTitles = function(root){
-  try{
-    var lang = (App.settings && (App.settings.uiLang || App.settings.lang)) ||
-               document.documentElement.getAttribute('lang') || 'ru';
-    var t = (App.i18n && App.i18n(lang)) || {};
-    (root || document).querySelectorAll('[data-title-key]').forEach(function(el){
-      var k = el.getAttribute('data-title-key');
-      var val = (t && t[k]) || el.getAttribute('data-title-fallback') || el.getAttribute('title') || '';
-
-      // Dynamic tooltip text for the UI-language toggle button
-      if (k === 'tt_ui_lang') {
-        var pretty = (t && t.langNameCurrent) || null;
-        if (!pretty) {
-          var names = { ru:'Русский язык', uk:'Українська мова', ua:'Українська мова', en:'English language' };
-          pretty = names[(lang||'').toLowerCase()] || val || '';
-        }
-        if (pretty) val = pretty;
-      }
-
-      if (val) el.setAttribute('title', val);
-    });
-  }catch(e){}
-};
-
-// Apply once at startup (handles both defer and non-defer loads)
-try{
-  if (document.readyState !== 'loading') { App.applyI18nTitles(); }
-  else { document.addEventListener('DOMContentLoaded', function(){ App.applyI18nTitles(); }, { once: true }); }
-}catch(e){}
-
-// Re-apply on language changes
-window.addEventListener('storage', function(){ App.applyI18nTitles(); });
-document.addEventListener('lexitron:ui-lang-changed', function(){ App.applyI18nTitles(); });
-;
-}
-  }catch(_){}
-
-(root || document).querySelectorAll('[data-title-key]').forEach(function(el){
+    try{
+      var lang = (App.settings && (App.settings.uiLang || App.settings.lang)) ||
+                 document.documentElement.getAttribute('lang') || 'ru';
+      var t = (App.i18n && App.i18n(lang)) || {};
+      (root || document).querySelectorAll('[data-title-key]').forEach(function(el){
         var k = el.getAttribute('data-title-key');
         var val = (t && t[k]) || el.getAttribute('data-title-fallback') || el.getAttribute('title') || '';
+
+        // Dynamic tooltip text for the UI-language toggle button
+        if (k === 'tt_ui_lang') {
+          var pretty = (t && t.langNameCurrent) || null;
+          if (!pretty) {
+            var names = { ru:'Русский язык', uk:'Українська мова', ua:'Українська мова', en:'English language' };
+            pretty = names[(lang||'').toLowerCase()] || val || '';
+          }
+          if (pretty) val = pretty;
+        }
+
         if (val) el.setAttribute('title', val);
       });
     }catch(_){}
   };
 
+  // Apply once at startup (handles both defer and non-defer loads)
+  try{
+    if (document.readyState !== 'loading') { App.applyI18nTitles(); }
+    else { document.addEventListener('DOMContentLoaded', function(){ App.applyI18nTitles(); }, { once: true }); }
+  }catch(_){}
 
-  App.clamp = (n,min,max)=>Math.max(min,Math.min(max,n));
+  // Re-apply on language changes
+  window.addEventListener('storage', function(){ App.applyI18nTitles(); });
+  document.addEventListener('lexitron:ui-lang-changed', function(){ App.applyI18nTitles(); });
+
+App.clamp = (n,min,max)=>Math.max(min,Math.min(max,n));
   App.shuffle = (a)=>{const arr=a.slice();for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr;};
   App.escapeHtml = (s)=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
@@ -316,5 +308,3 @@ App.clearFavoritesAll = function(){
     trainerStrategy: "medium+penalties"
   };
 })();
-
-  // Re-apply tooltips on language change
