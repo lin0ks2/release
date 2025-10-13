@@ -864,3 +864,21 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
   border-top-right-radius: var(--spoiler-radius);
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;}.dictSpoiler > summary::-webkit-details-marker{ display: none; }.dictSpoiler > summary::marker{content: "";}
+
+
+
+/* === Heart visual parity with stars === */
+.heart {
+  color: var(--muted);
+  transition: color 0.25s ease, transform 0.2s ease;
+}
+.heart.active {
+  color: var(--star-color, #fbbf24); /* same as stars */
+  transform: scale(1.1);
+}
+.heart:hover {
+  color: var(--star-hover-color, #facc15);
+}
+[data-theme="dark"] .heart.active {
+  color: var(--star-color-dark, #facc15);
+}
