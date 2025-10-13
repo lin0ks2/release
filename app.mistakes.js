@@ -1,7 +1,6 @@
-
 /*
 *************************************************************************
- Version: 1.7 • Updated: 2025-10-13 • File: app.mistakes.js 
+ Version: 1.8 • Updated: 2025-10-13 • File: app.mistakes.js
 *************************************************************************
 */
 (function(){
@@ -17,8 +16,8 @@
 
   function uiLang(){
     try{
-      if (App.settings && (App.settings.uiLang || App.settings.lang === 'uk')) {
-        return App.settings.uiLang || (App.settings.lang === 'uk' ? 'uk' : 'ru');
+      if (App.settings){
+        return App.settings.uiLang || App.settings.lang || 'ru';
       }
     }catch(_){}
     return 'ru';
@@ -26,11 +25,14 @@
   function langOfKey(k){ try{ const m = String(k||'').match(/^([a-z]{2})_/i); return m?m[1].toLowerCase():null; }catch(e){ return null; } }
   function activeDictLang(){
     try{
-      if (App.settings && App.settings.dictsLangFilter) return App.settings.dictsLangFilter;
-      const key = (App.dictRegistry && App.dictRegistry.activeKey) || null;
-      return langOfKey(key) || 'de';
+      if (App.settings){
+        return App.settings.dictsLangFilter || App.settings.studyLang || App.settings.dictLang || App.settings.lang || (App.dictRegistry && langOfKey(App.dictRegistry.activeKey)) || 'en';
+      }
     }catch(_){}
-    return 'de';
+    try{
+      if (App.dictRegistry && App.dictRegistry.activeKey) return langOfKey(App.dictRegistry.activeKey) || 'en';
+    }catch(_){}
+    return 'en';
   }
   function isVirtualKey(k){
     k = String(k||'').toLowerCase();
@@ -42,48 +44,61 @@
     return db[ul][dl];
   }
 
-  // robust deck resolution: returns array of words (possibly empty)
-  function deckWordsByKey(sk){
+  // Resolve to deck object and/or words
+  function resolveDeck(sk){
     try{
       if (App.Decks && typeof App.Decks.resolveDeckByKey === 'function'){
-        const deck = App.Decks.resolveDeckByKey(sk);
-        if (!deck) return [];
-        // deck could be an array of words or an object with .words
-        if (Array.isArray(deck)) return deck;
-        if (Array.isArray(deck.words)) return deck.words;
+        return App.Decks.resolveDeckByKey(sk) || null;
       }
     }catch(_){}
+    return null;
+  }
+  function deckWords(deck){
+    if (!deck) return [];
+    if (Array.isArray(deck)) return deck;
+    if (Array.isArray(deck.words)) return deck.words;
     return [];
+  }
+  function deckWordsByKey(sk){ return deckWords(resolveDeck(sk)); }
+
+  // Extract sourceKey from the word reliably across different decks
+  function extractSourceKey(word){
+    // preferred explicit fields
+    const fields = [
+      '_sourceKey','sourceKey','_deckKey','deckKey',
+      '_originDeckKey','_originKey','_fromKey','_homeKey',
+      '_mistakeSourceKey','_favoriteSourceKey','key','k'
+    ];
+    for (let i=0;i<fields.length;i++){
+      const v = word && word[fields[i]];
+      if (v) return String(v);
+    }
+    // fallback: current active key if not virtual
+    try{
+      const ak = (App.dictRegistry && App.dictRegistry.activeKey) || null;
+      if (ak && !isVirtualKey(ak)) return ak;
+    }catch(_){}
+    return null;
   }
 
   // ---------------- public API ----------------
 
   // Public: add
   M.add = function(id, word, sourceKey){
-    if (!id) return;
+    if (id == null) return;
     id = String(id);
 
     // Resolve sourceKey reliably
-    let sk = sourceKey || null;
-    try{
-      if (!sk && word && (word._mistakeSourceKey || word._favoriteSourceKey)) sk = word._mistakeSourceKey || word._favoriteSourceKey;
-      if (!sk){
-        const ak = (App.dictRegistry && App.dictRegistry.activeKey) || null;
-        if (ak && !isVirtualKey(ak)) sk = ak; // never take virtual keys
-      }
-    }catch(_){}
-    if (!sk) return;
+    let sk = sourceKey || extractSourceKey(word);
+    if (!sk || isVirtualKey(sk)) return;
 
-    // Never add favorites (support both signatures + fallback store)
+    // Never add favorites (prefer 2-arg check + store-based check)
     try{
       if (App && typeof App.isFavorite === 'function'){
-        // try 2-arg form
         try{ if (App.isFavorite(sk, id)) return; }catch(_){}
-        // try 1-arg form
-        try{ if (App.isFavorite(id)) return; }catch(_){}
       }
       if (App && App.Favorites && typeof App.Favorites.has === 'function'){
-        if (App.Favorites.has(id)) return;
+        try{ if (App.Favorites.has(id)) return; }catch(_){}
       }
     }catch(_){}
 
@@ -94,16 +109,15 @@
       if (kLang && kLang !== dl) return;
     }catch(_){}
 
-    // Require deck to exist (avoid broken keys)
-    const words = deckWordsByKey(sk);
-    if (!words.length) return;
+    // Require deck object to exist (do NOT require words at add-time)
+    const deck = resolveDeck(sk);
+    if (!deck) return;
 
     // Write
     const ul = uiLang(), dl2 = langOfKey(sk) || activeDictLang();
     const db = load(), b = ensureBucket(db, ul, dl2);
     if (!b.items[sk]) b.items[sk] = {};
-    // do not duplicate across sessions
-    if ((b.sources||{})[id] || (b.items[sk]||{})[id]) return;
+    if ((b.sources||{})[id] || (b.items[sk]||{})[id]) return; // avoid duplicates
     b.items[sk][id] = true;
     b.sources[id] = sk;
     save(db);
@@ -131,7 +145,6 @@
     const db = load(); const sb = starsBucket(db);
     const sk = String(sourceKey||''); const wid = String(id||'');
     if (!sb[sk]) sb[sk] = {};
-    // clamp to [0, starsMax]
     let max = 5; try{ if (App.Trainer && typeof App.Trainer.starsMax === 'function') max = +App.Trainer.starsMax() || 5; }catch(_){}
     const v = Math.max(0, Math.min(max, Number(val)||0));
     sb[sk][wid] = v;
@@ -174,7 +187,9 @@
   // Clear only active scope
   M.clearActive = function(){
     const db = load(); const ul = uiLang(); const dl = activeDictLang();
-    db[ul] && (db[ul][dl] = { items:{}, stars:{}, sources:{} }); save(db);
+    if (!db[ul]) db[ul] = {};
+    db[ul][dl] = { items:{}, stars:{}, sources:{} };
+    save(db);
   };
 
   M.onShow = function(id){}; // reserved
@@ -182,7 +197,7 @@
 })(); 
 /* -------------------------------  К О Н Е Ц  ------------------------------- */
 
-/* ---- Merged Gate (threshold=1, robust favorites, confirmed add) ---- */
+/* ---- Gate (threshold=1, prefer original UI hook, confirmed-add) ---- */
 (function(){
   'use strict';
   var fail = Object.create(null);
@@ -193,11 +208,9 @@
   function isFav(w){
     try{
       if(!w || w.id==null) return false;
-      // Prefer 2-arg check with sourceKey if available
       var sk = (w._mistakeSourceKey || (window.App && App.dictRegistry && App.dictRegistry.activeKey) || null);
       if (window.App && typeof App.isFavorite === 'function'){
         try{ if (sk && App.isFavorite(sk, String(w.id))) return true; }catch(_){}
-        try{ if (App.isFavorite(String(w.id))) return true; }catch(_){}
       }
       if (window.App && App.Favorites && typeof App.Favorites.has === 'function'){
         try{ if (App.Favorites.has(String(w.id))) return true; }catch(_){}
@@ -206,24 +219,20 @@
     return false;
   }
 
-  var orig = null;
-  if (typeof window.addToMistakesOnFailure === 'function') orig = window.addToMistakesOnFailure;
-  else if (window.App && App.Mistakes && typeof App.Mistakes.addOnFailure === 'function')
+  var orig = (typeof window.addToMistakesOnFailure === 'function') ? window.addToMistakesOnFailure : null;
+  if (!orig && window.App && App.Mistakes && typeof App.Mistakes.addOnFailure === 'function') {
     orig = App.Mistakes.addOnFailure.bind(App.Mistakes);
-  else {
-    // Minimal fallback uses App.Mistakes.add directly, but only if present
-    orig = function(w){
-      try{
-        if (!window.App || !App.Mistakes || typeof App.Mistakes.add !== 'function') return;
-        var sk = null;
-        if (w && w._mistakeSourceKey) sk = w._mistakeSourceKey;
-        if (!sk && window.App && App.dictRegistry) {
-          var ak = App.dictRegistry.activeKey || null;
-          if (ak && ak !== 'mistakes' && ak !== 'fav' && ak !== 'favorites') sk = ak;
-        }
-        App.Mistakes.add(String(w.id), w, sk);
-      }catch(_){}
-    };
+  }
+  function fallbackAdd(word){
+    try{
+      if (!window.App || !App.Mistakes || typeof App.Mistakes.add !== 'function') return;
+      var sk = (word && (word._sourceKey||word.sourceKey||word._deckKey||word.deckKey||word._originDeckKey||word._originKey||word._fromKey||word._homeKey||word._mistakeSourceKey)) || null;
+      if (!sk && window.App && App.dictRegistry){
+        var ak = App.dictRegistry.activeKey || null;
+        if (ak && ak !== 'mistakes' && ak !== 'fav' && ak !== 'favorites') sk = ak;
+      }
+      App.Mistakes.add(String(word.id), word, sk);
+    }catch(_){}
   }
 
   function onFail(w){
@@ -231,24 +240,19 @@
     var wid=String(w.id);
     if (isFav(w)) return;
     if (addedThisSession[wid]) return;
-
     var f = inc(fail,wid);
-    if (f>=1 && orig){
+    if (f>=1){
       try{
-        // confirm-before/after
         var before = (window.App && App.Mistakes && typeof App.Mistakes.sourceKeyFor==='function') ? App.Mistakes.sourceKeyFor(wid) : null;
-        orig(w);
+        if (orig) orig(w); else fallbackAdd(w);
         var after  = (window.App && App.Mistakes && typeof App.Mistakes.sourceKeyFor==='function') ? App.Mistakes.sourceKeyFor(wid) : null;
-        if (!before && after){
-          addedThisSession[wid] = true;
-        }
+        if (!before && after){ addedThisSession[wid] = true; }
       }catch(_){}
     }
   }
 
   window.MistakesGate={ onFail:onFail };
-
   document.addEventListener('lexitron:answer-wrong', function(e){
     onFail(e && e.detail && e.detail.word);
   });
-})();    
+})();
