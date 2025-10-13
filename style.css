@@ -866,76 +866,7 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
   border-bottom-right-radius: 0;}.dictSpoiler > summary::-webkit-details-marker{ display: none; }.dictSpoiler > summary::marker{content: "";}
 
 
-
-/* =====================================================================
-   Icons — unified stars & heart behavior (LIGHT & DARK)
-   - Idle: outline only (no fill) for both stars and heart
-   - Active: solid fill (same color as stars)
-   - Hover: slight brighten
-   This block deliberately uses strong selectors + !important to override
-   inline SVG attributes (fill/stroke) and older rules.
-   ===================================================================== */
-:root{
-  --icon-muted: #9aa3af;
-  --icon-active: #fbbf24;
-  --icon-hover: #facc15;
-}
-:root[data-theme="dark"]{
-  --icon-muted: #9aa3af;
-  --icon-active: #facc15;
-  --icon-hover: #fde047;
-}
-
-/* Base color/transition for icons */
-.starIcon, .star, .stars .starIcon,
-.heart, .fav, .favorite {
-  color: var(--icon-muted);
-  transition: color .25s ease, transform .2s ease;
-}
-
-/* Ensure SVGs render as outline in idle even if SVG has inline fill */
-.starIcon svg, .star svg, .stars .starIcon svg,
-.heart svg, .fav svg, .favorite svg { width: 1em; height: 1em; display: block; }
-
-.starIcon svg *, .star svg *, .stars .starIcon svg *,
-.heart svg *, .fav svg *, .favorite svg * {
-  fill: none !important;
-  stroke: currentColor !important;
-  stroke-width: 1.6;
-  vector-effect: non-scaling-stroke;
-}
-
-/* Active states (stars use .filled; heart uses .active/.filled/.is-on or container flags) */
-.starIcon.filled, .star.filled, .stars .starIcon.filled,
-.heart.active, .heart.filled, .heart.is-on,
-.fav.active, .fav.filled, .fav.is-on,
-.favorite.active, .favorite.filled, .favorite.is-on,
-.favorited .heart, .is-favorite .heart,
-[data-fav="1"] .heart, .heart[data-fav="1"] {
-  color: var(--icon-active);
-  transform: scale(1.06);
-}
-
-/* When active — actually fill SVG */
-.starIcon.filled svg *, .star.filled svg *, .stars .starIcon.filled svg *,
-.heart.active svg *, .heart.filled svg *, .heart.is-on svg *,
-.fav.active svg *, .fav.filled svg *, .fav.is-on svg *,
-.favorite.active svg *, .favorite.filled svg *, .favorite.is-on svg *,
-.favorited .heart svg *, .is-favorite .heart svg *,
-[data-fav="1"] .heart svg *, .heart[data-fav="1"] svg * {
-  fill: currentColor !important;
-  stroke: currentColor !important;
-}
-
-/* Hover (desktop) */
-@media (hover:hover){
-  .starIcon:hover, .star:hover, .stars .starIcon:hover,
-  .heart:hover, .fav:hover, .favorite:hover {
-    color: var(--icon-hover);
-  }
-}
-
-/* Press feedback */
-.starIcon:active, .star:active, .stars .starIcon:active,
-.heart:active, .fav:active, .favorite:active { transform: scale(0.96); }
+/* Unify heart with stars */
+.heart{ color:#cbd5e1 !important; }              /* same as .starIcon idle */
+.heart.is-fav{ color:#fbbf24 !important; }       /* same as .starIcon.filled */
 
