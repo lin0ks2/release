@@ -866,7 +866,47 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
   border-bottom-right-radius: 0;}.dictSpoiler > summary::-webkit-details-marker{ display: none; }.dictSpoiler > summary::marker{content: "";}
 
 
-/* Unify heart with stars */
-.heart{ color:#cbd5e1 !important; }              /* same as .starIcon idle */
-.heart.is-fav{ color:#fbbf24 !important; }       /* same as .starIcon.filled */
 
+/* =====================================================================
+   Icons — unify stars & heart (LIGHT & DARK), no logic changes.
+   Idle: outline only | Active: solid fill | Hover: brighten
+   ===================================================================== */
+:root{
+  --icon-muted: #cbd5e1;   /* matches star idle */
+  --icon-active: #fbbf24;  /* matches star filled (light) */
+  --icon-hover: #facc15;
+}
+:root[data-theme="dark"]{
+  --icon-muted: #9aa3af;
+  --icon-active: #facc15;  /* matches star filled (dark) */
+  --icon-hover: #fde047;
+}
+
+/* Base color/transition */
+.starIcon, .star, .stars .starIcon,
+.heart { color: var(--icon-muted) !important; transition: color .25s ease, transform .2s ease; }
+.starIcon:active, .star:active, .stars .starIcon:active, .heart:active { transform: scale(0.96); }
+
+/* Force SVG to outline in idle (if used) */
+.starIcon svg, .star svg, .stars .starIcon svg, .heart svg { width: 1em; height: 1em; display: inline-block; vertical-align: -0.2em; }
+.starIcon svg *, .star svg *, .stars .starIcon svg *,
+.heart svg *, .heart svg path, .heart svg g, .heart svg polygon {
+  fill: none !important; stroke: currentColor !important; stroke-width: 1.6; vector-effect: non-scaling-stroke;
+}
+
+/* Active/favorite state — share star color */
+.starIcon.filled, .star.filled, .stars .starIcon.filled,
+.heart.is-fav, .heart.active, .heart.filled {
+  color: var(--icon-active) !important; transform: scale(1.06);
+}
+.starIcon.filled svg *, .star.filled svg *, .stars .starIcon.filled svg *,
+.heart.is-fav svg *, .heart.active svg *, .heart.filled svg * {
+  fill: currentColor !important; stroke: currentColor !important;
+}
+
+/* Hover (desktop) */
+@media (hover:hover){
+  .starIcon:hover, .star:hover, .stars .starIcon:hover, .heart:hover {
+    color: var(--icon-hover) !important;
+  }
+}

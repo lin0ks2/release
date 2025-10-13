@@ -428,7 +428,10 @@ if (!w) return;
       const dictKey = (key === 'mistakes')
         ? ((w && (w._mistakeSourceKey || (App.Mistakes && App.Mistakes.sourceKeyFor && App.Mistakes.sourceKeyFor(w.id)))) || 'mistakes')
         : key;
-      D.favBtn.textContent = (App.isFavorite && App.isFavorite(dictKey, w.id)) ? '♥' : '♡';
+      const __isFav = (App.isFavorite && App.isFavorite(dictKey, w.id));
+      D.favBtn.textContent = __isFav ? '♥' : '♡';
+      if (D.favBtn.classList) D.favBtn.classList.toggle('is-fav', !!__isFav);
+      D.favBtn.setAttribute('aria-pressed', __isFav ? 'true' : 'false');
     }
 
     addIDontKnowButton();
