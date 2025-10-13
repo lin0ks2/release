@@ -1,6 +1,6 @@
 /*
 ************************************************************************
-
+ Version: 1.5 • Updated: 2025-10-10 • File: release-main/app.ui.view.js 
 ************************************************************************
 */
 
@@ -617,7 +617,35 @@ if (!w) return;
       } catch (e) {}
     })();
 
-    if (canShowFav()) host.appendChild(makeDictRow('fav'));
+    
+    (function appendFavoritesRow(){
+      try{
+        const row = makeDictRow('fav');
+        if (!row) return;
+        host.appendChild(row);
+        // compute favorites count for current language
+        let cnt = 0;
+        try{
+          App.migrateFavoritesToV2 && App.migrateFavoritesToV2();
+          const v2 = (App.state && App.state.favorites_v2) || {};
+          const lang = (App.settings && (App.settings.dictsLangFilter || App.settings.studyLang || App.settings.lang)) || null;
+          if (lang){
+            Object.keys(v2).forEach(sourceKey => {
+              const m = String(sourceKey||'').match(/^([a-z]{2})_/i);
+              const kLang = m ? m[1].toLowerCase() : null;
+              if (kLang === String(lang).toLowerCase()) {
+                cnt += Object.keys(v2[sourceKey] || {}).filter(x => v2[sourceKey][x]).length;
+              }
+            });
+          }
+        }catch(_){}
+        if (cnt < 4) {
+          row.classList.add('disabled');
+          row.setAttribute('aria-disabled', 'true');
+        }
+      }catch(e){}
+    })();
+
 
     (function(){
       const all = App.Decks.builtinKeys();
@@ -878,80 +906,9 @@ if (row.classList.contains('disabled')) return;
   const contentEl = document.getElementById('infoContent');
   const closeEl   = document.getElementById('infoClose');
 
-  
   function fillFromI18n(){
     try{
-      const T = (typeof App.i18n==='function') ? (App.i18n()||{}) : {};
-      if (titleEl && (T.infoTitle||'').length) titleEl.textContent = String(T.infoTitle||'Инструкция');
-
-      if (!contentEl) return;
-
-      // Initialize once
-      if (!contentEl.dataset.tabsInit){
-        const lang = (App.settings && App.settings.lang) || 'uk';
-        const L = {
-          ru: { help:'Инструкция', about:'О программе', version:'Версия', user:'Пользователь', check:'Проверить обновления', lic:'Ключ регистрации', confirm:'Подтвердить регистрацию' },
-          uk: { help:'Інструкція', about:'Про програму', version:'Версія', user:'Користувач', check:'Перевірити оновлення', lic:'Ключ реєстрації', confirm:'Підтвердити реєстрацію' },
-          en: { help:'Help', about:'About', version:'Version', user:'User', check:'Check for updates', lic:'License key', confirm:'Apply license' },
-        }[lang] || { help:'Help', about:'About', version:'Version', user:'User', check:'Check for updates', lic:'License key', confirm:'Apply license' };
-
-        contentEl.innerHTML = ''
-          + '<header class="tabs" role="tablist">'
-          +   '<button class="tab is-active" role="tab" aria-selected="true" aria-controls="tab-help" id="tab-help-btn">'+L.help+'</button>'
-          +   '<button class="tab" role="tab" aria-selected="false" aria-controls="tab-about" id="tab-about-btn">'+L.about+'</button>'
-          + '</header>'
-          + '<section id="tab-help" role="tabpanel" aria-labelledby="tab-help-btn"></section>'
-          + '<section id="tab-about" role="tabpanel" aria-labelledby="tab-about-btn" hidden>'
-          +   '<div class="about-grid">'
-          +     '<div><strong>'+L.version+':</strong> <span id="app;
-
-        // Fill help tab with infoSteps
-        const helpSec = contentEl.querySelector('#tab-help');
-        if (Array.isArray(T.infoSteps) && helpSec){
-          const ul = document.createElement('ul');
-          T.infoSteps.forEach(function(s){ const li=document.createElement('li'); li.textContent=String(s||''); ul.appendChild(li); });
-          helpSec.appendChild(ul);
-        }
-
-        // Wire tabs
-        const helpBtn  = contentEl.querySelector('#tab-help-btn');
-        const aboutBtn = contentEl.querySelector('#tab-about-btn');
-        const helpTab  = contentEl.querySelector('#tab-help');
-        const aboutTab = contentEl.querySelector('#tab-about');
-        function activate(tab){
-          const isHelp = (tab==='help');
-          helpBtn.classList.toggle('is-active', isHelp);
-          aboutBtn.classList.toggle('is-active', !isHelp);
-          helpBtn.setAttribute('aria-selected', isHelp?'true':'false');
-          aboutBtn.setAttribute('aria-selected', !isHelp?'true':'false');
-          helpTab.hidden  = !isHelp;
-          aboutTab.hidden = isHelp;
-        }
-        helpBtn.addEventListener('click', ()=>activate('help'));
-        aboutBtn.addEventListener('click', ()=>activate('about'));
-
-        // Fill about values
-        const ver = (window.APP_BUILD || (window.App && App.APP_VER) || 'unknown');
-        const user = (App.user && App.user.name) || 'free';
-        const vEl = contentEl. if (vEl) vEl.append(document.createTextNode(ver));
-        const uEl = contentEl.querySelector('#aboutUser'); if (uEl) uEl.append(document.createTextNode(user));
-
-        // Wire actions
-        const updBtn = contentEl.querySelector('#btnCheckUpdate');
-        if (updBtn) updBtn.addEventListener('click', ()=>{ try{ App.checkForUpdates && App.checkForUpdates(); }catch(e){} });
-        const regBtn = contentEl.querySelector('#btnRegister');
-        const keyEl  = contentEl.querySelector('#licenseKey');
-        if (regBtn && keyEl) regBtn.addEventListener('click', ()=>{ try{ App.applyLicenseKey && App.applyLicenseKey(keyEl.value||''); }catch(e){} });
-
-        contentEl.dataset.tabsInit = '1';
-      } else {
-        // update dynamic fields
-        const vEl = contentEl. if (vEl) { vEl.textContent=''; vEl.append(document.createTextNode(window.APP_BUILD || App.APP_VER || 'unknown')); }
-        const uEl = contentEl.querySelector('#aboutUser'); if (uEl) { uEl.textContent=''; uEl.append(document.createTextNode((App.user&&App.user.name)||'free')); }
-      }
-    }catch(_){}
-  }
-) : {};
+      const t = (typeof App.i18n==='function') ? (App.i18n()||{}) : {};
       if (titleEl && t.infoTitle) titleEl.textContent = t.infoTitle;
       if (Array.isArray(t.infoSteps) && contentEl){
         // keep existing content; no wipe
@@ -986,80 +943,9 @@ if (row.classList.contains('disabled')) return;
   const toggleEl  = document.getElementById('modeToggle');
   if (toggleEl) toggleEl.addEventListener('change', function(){ try{ App.applyFromUI && App.applyFromUI(); }catch(e){} });
 
-  
   function fillFromI18n(){
     try{
-      const T = (typeof App.i18n==='function') ? (App.i18n()||{}) : {};
-      if (titleEl && (T.infoTitle||'').length) titleEl.textContent = String(T.infoTitle||'Инструкция');
-
-      if (!contentEl) return;
-
-      // Initialize once
-      if (!contentEl.dataset.tabsInit){
-        const lang = (App.settings && App.settings.lang) || 'uk';
-        const L = {
-          ru: { help:'Инструкция', about:'О программе', version:'Версия', user:'Пользователь', check:'Проверить обновления', lic:'Ключ регистрации', confirm:'Подтвердить регистрацию' },
-          uk: { help:'Інструкція', about:'Про програму', version:'Версія', user:'Користувач', check:'Перевірити оновлення', lic:'Ключ реєстрації', confirm:'Підтвердити реєстрацію' },
-          en: { help:'Help', about:'About', version:'Version', user:'User', check:'Check for updates', lic:'License key', confirm:'Apply license' },
-        }[lang] || { help:'Help', about:'About', version:'Version', user:'User', check:'Check for updates', lic:'License key', confirm:'Apply license' };
-
-        contentEl.innerHTML = ''
-          + '<header class="tabs" role="tablist">'
-          +   '<button class="tab is-active" role="tab" aria-selected="true" aria-controls="tab-help" id="tab-help-btn">'+L.help+'</button>'
-          +   '<button class="tab" role="tab" aria-selected="false" aria-controls="tab-about" id="tab-about-btn">'+L.about+'</button>'
-          + '</header>'
-          + '<section id="tab-help" role="tabpanel" aria-labelledby="tab-help-btn"></section>'
-          + '<section id="tab-about" role="tabpanel" aria-labelledby="tab-about-btn" hidden>'
-          +   '<div class="about-grid">'
-          +     '<div><strong>'+L.version+':</strong> <span id="app;
-
-        // Fill help tab with infoSteps
-        const helpSec = contentEl.querySelector('#tab-help');
-        if (Array.isArray(T.infoSteps) && helpSec){
-          const ul = document.createElement('ul');
-          T.infoSteps.forEach(function(s){ const li=document.createElement('li'); li.textContent=String(s||''); ul.appendChild(li); });
-          helpSec.appendChild(ul);
-        }
-
-        // Wire tabs
-        const helpBtn  = contentEl.querySelector('#tab-help-btn');
-        const aboutBtn = contentEl.querySelector('#tab-about-btn');
-        const helpTab  = contentEl.querySelector('#tab-help');
-        const aboutTab = contentEl.querySelector('#tab-about');
-        function activate(tab){
-          const isHelp = (tab==='help');
-          helpBtn.classList.toggle('is-active', isHelp);
-          aboutBtn.classList.toggle('is-active', !isHelp);
-          helpBtn.setAttribute('aria-selected', isHelp?'true':'false');
-          aboutBtn.setAttribute('aria-selected', !isHelp?'true':'false');
-          helpTab.hidden  = !isHelp;
-          aboutTab.hidden = isHelp;
-        }
-        helpBtn.addEventListener('click', ()=>activate('help'));
-        aboutBtn.addEventListener('click', ()=>activate('about'));
-
-        // Fill about values
-        const ver = (window.APP_BUILD || (window.App && App.APP_VER) || 'unknown');
-        const user = (App.user && App.user.name) || 'free';
-        const vEl = contentEl. if (vEl) vEl.append(document.createTextNode(ver));
-        const uEl = contentEl.querySelector('#aboutUser'); if (uEl) uEl.append(document.createTextNode(user));
-
-        // Wire actions
-        const updBtn = contentEl.querySelector('#btnCheckUpdate');
-        if (updBtn) updBtn.addEventListener('click', ()=>{ try{ App.checkForUpdates && App.checkForUpdates(); }catch(e){} });
-        const regBtn = contentEl.querySelector('#btnRegister');
-        const keyEl  = contentEl.querySelector('#licenseKey');
-        if (regBtn && keyEl) regBtn.addEventListener('click', ()=>{ try{ App.applyLicenseKey && App.applyLicenseKey(keyEl.value||''); }catch(e){} });
-
-        contentEl.dataset.tabsInit = '1';
-      } else {
-        // update dynamic fields
-        const vEl = contentEl. if (vEl) { vEl.textContent=''; vEl.append(document.createTextNode(window.APP_BUILD || App.APP_VER || 'unknown')); }
-        const uEl = contentEl.querySelector('#aboutUser'); if (uEl) { uEl.textContent=''; uEl.append(document.createTextNode((App.user&&App.user.name)||'free')); }
-      }
-    }catch(_){}
-  }
-) : {};
+      const t = (typeof App.i18n==='function') ? (App.i18n()||{}) : {};
       if (titleEl && t.settingsTitle) titleEl.textContent = String(t.settingsTitle);
       if (contentEl){
         const normalEl = contentEl.querySelector('[data-i18n="modeNormal"]');
@@ -1254,80 +1140,9 @@ if (row.classList.contains('disabled')) return;
   const closeEl   = document.getElementById('donateClose');
   const okEl      = document.getElementById('donateOk');
 
-  
   function fillFromI18n(){
     try{
-      const T = (typeof App.i18n==='function') ? (App.i18n()||{}) : {};
-      if (titleEl && (T.infoTitle||'').length) titleEl.textContent = String(T.infoTitle||'Инструкция');
-
-      if (!contentEl) return;
-
-      // Initialize once
-      if (!contentEl.dataset.tabsInit){
-        const lang = (App.settings && App.settings.lang) || 'uk';
-        const L = {
-          ru: { help:'Инструкция', about:'О программе', version:'Версия', user:'Пользователь', check:'Проверить обновления', lic:'Ключ регистрации', confirm:'Подтвердить регистрацию' },
-          uk: { help:'Інструкція', about:'Про програму', version:'Версія', user:'Користувач', check:'Перевірити оновлення', lic:'Ключ реєстрації', confirm:'Підтвердити реєстрацію' },
-          en: { help:'Help', about:'About', version:'Version', user:'User', check:'Check for updates', lic:'License key', confirm:'Apply license' },
-        }[lang] || { help:'Help', about:'About', version:'Version', user:'User', check:'Check for updates', lic:'License key', confirm:'Apply license' };
-
-        contentEl.innerHTML = ''
-          + '<header class="tabs" role="tablist">'
-          +   '<button class="tab is-active" role="tab" aria-selected="true" aria-controls="tab-help" id="tab-help-btn">'+L.help+'</button>'
-          +   '<button class="tab" role="tab" aria-selected="false" aria-controls="tab-about" id="tab-about-btn">'+L.about+'</button>'
-          + '</header>'
-          + '<section id="tab-help" role="tabpanel" aria-labelledby="tab-help-btn"></section>'
-          + '<section id="tab-about" role="tabpanel" aria-labelledby="tab-about-btn" hidden>'
-          +   '<div class="about-grid">'
-          +     '<div><strong>'+L.version+':</strong> <span id="app;
-
-        // Fill help tab with infoSteps
-        const helpSec = contentEl.querySelector('#tab-help');
-        if (Array.isArray(T.infoSteps) && helpSec){
-          const ul = document.createElement('ul');
-          T.infoSteps.forEach(function(s){ const li=document.createElement('li'); li.textContent=String(s||''); ul.appendChild(li); });
-          helpSec.appendChild(ul);
-        }
-
-        // Wire tabs
-        const helpBtn  = contentEl.querySelector('#tab-help-btn');
-        const aboutBtn = contentEl.querySelector('#tab-about-btn');
-        const helpTab  = contentEl.querySelector('#tab-help');
-        const aboutTab = contentEl.querySelector('#tab-about');
-        function activate(tab){
-          const isHelp = (tab==='help');
-          helpBtn.classList.toggle('is-active', isHelp);
-          aboutBtn.classList.toggle('is-active', !isHelp);
-          helpBtn.setAttribute('aria-selected', isHelp?'true':'false');
-          aboutBtn.setAttribute('aria-selected', !isHelp?'true':'false');
-          helpTab.hidden  = !isHelp;
-          aboutTab.hidden = isHelp;
-        }
-        helpBtn.addEventListener('click', ()=>activate('help'));
-        aboutBtn.addEventListener('click', ()=>activate('about'));
-
-        // Fill about values
-        const ver = (window.APP_BUILD || (window.App && App.APP_VER) || 'unknown');
-        const user = (App.user && App.user.name) || 'free';
-        const vEl = contentEl. if (vEl) vEl.append(document.createTextNode(ver));
-        const uEl = contentEl.querySelector('#aboutUser'); if (uEl) uEl.append(document.createTextNode(user));
-
-        // Wire actions
-        const updBtn = contentEl.querySelector('#btnCheckUpdate');
-        if (updBtn) updBtn.addEventListener('click', ()=>{ try{ App.checkForUpdates && App.checkForUpdates(); }catch(e){} });
-        const regBtn = contentEl.querySelector('#btnRegister');
-        const keyEl  = contentEl.querySelector('#licenseKey');
-        if (regBtn && keyEl) regBtn.addEventListener('click', ()=>{ try{ App.applyLicenseKey && App.applyLicenseKey(keyEl.value||''); }catch(e){} });
-
-        contentEl.dataset.tabsInit = '1';
-      } else {
-        // update dynamic fields
-        const vEl = contentEl. if (vEl) { vEl.textContent=''; vEl.append(document.createTextNode(window.APP_BUILD || App.APP_VER || 'unknown')); }
-        const uEl = contentEl.querySelector('#aboutUser'); if (uEl) { uEl.textContent=''; uEl.append(document.createTextNode((App.user&&App.user.name)||'free')); }
-      }
-    }catch(_){}
-  }
-) : {};
+      const t = (typeof App==='object' && typeof App.i18n==='function') ? (App.i18n()||{}) : {};
       if (titleEl && t.donateTitle)  titleEl.textContent = String(t.donateTitle);
       if (contentEl && t.donateText){
         const p = contentEl.querySelector('p');

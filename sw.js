@@ -1,6 +1,6 @@
 /*
 ***************************************************************
-
+ Version: 1.5 • Updated: 2025-10-10 • File: release-main/sw.js 
 ***************************************************************
 */
 const CACHE_VERSION = 'v1.0.4';
@@ -16,7 +16,9 @@ self.addEventListener('install',e=>{
   e.waitUntil((async()=>{
     const c=await caches.open(CACHE_NAME);
     await c.addAll(CORE.filter(Boolean));
-    await Promise.all(DECKS.map(async f=>{ try{ await c.add('./'+f);}catch(e){} }));
+    await Promise.all(DECKS.map(async f=>{ try{ await c.add('./'+f);
+  self.skipWaiting();
+}catch(e){} }));
     self.skipWaiting();
   })());
 });
@@ -55,3 +57,13 @@ self.addEventListener('fetch',e=>{
     }catch(err){ throw err; }
   })());
 });
+
+
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
+
+console.log('[SW] Service Worker active:', typeof CACHE_VERSION !== 'undefined' ? CACHE_VERSION : 'no-version');

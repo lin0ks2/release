@@ -1,58 +1,11 @@
 /*
 *********************************************************************
-
+ Version: 1.5 • Updated: 2025-10-10 • File: release-main/app.core.js 
 *********************************************************************
 */
 (function(){
   const App = window.App = (window.App||{});
   App.APP_VER = '1.5';
-
-// --- App build & user info ---
-window.APP_BUILD = window.APP_BUILD || ('1.6.0 (2025-10-12)');
-App.user = App.user || { name: (localStorage.getItem('lexitron.userName') || 'free') };
-
-// --- Manual update check (works with updated sw.js) ---
-App.checkForUpdates = async function () {
-  if (!('serviceWorker' in navigator)) { alert('Service Worker недоступен'); return; }
-  try {
-    const reg = await navigator.serviceWorker.getRegistration();
-    if (!reg) { alert('Регистрация SW не найдена'); return; }
-    if (reg.waiting) {
-      reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-      navigator.serviceWorker.addEventListener('controllerchange', () => location.reload());
-      alert('Устанавливаем обновление…');
-      return;
-    }
-    await reg.update();
-    if (reg.installing) {
-      const sw = reg.installing;
-      sw.addEventListener('statechange', () => {
-        if (sw.state === 'installed' && navigator.serviceWorker.controller) {
-          sw.postMessage({ type: 'SKIP_WAITING' });
-          navigator.serviceWorker.addEventListener('controllerchange', () => location.reload());
-          alert('Обновление найдено и устанавливается…');
-        }
-      });
-      return;
-    }
-    alert('Обновлений не найдено');
-  } catch (e) {
-    console.error('Update check failed', e);
-    alert('Не удалось проверить обновления');
-  }
-};
-
-// --- License key placeholder ---
-App.applyLicenseKey = function (key) {
-  const cleaned = String(key||'').trim();
-  if (!cleaned) { alert('Введите ключ'); return false; }
-  localStorage.setItem('lexitron.licenseKey', cleaned);
-  localStorage.setItem('lexitron.userName', 'registered');
-  App.user.name = 'registered';
-  const u = document.getElementById('aboutUser'); if (u) u.textContent = App.user.name;
-  alert('Ключ сохранён (демо)');
-  return true;
-};
 
   const LS_SETTINGS = 'k_settings_v1_3_1';
   const LS_STATE    = 'k_state_v1_3_1';
