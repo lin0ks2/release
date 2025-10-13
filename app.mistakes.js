@@ -1,13 +1,12 @@
 /*
 ******************************************************************************
-  Module: app.mistakes.js (strict deck membership)
-  Purpose: "Мои ошибки" virtual dictionary + gate
-  Highlights:
-    - Adds only if (a) sourceKey is real (not virtual), (b) resolved deck exists,
-      (c) resolved deck actually CONTAINS the word id.
-    - Counts only ids that are present in their source deck (prevents "active but empty").
-    - Session gate marks addedThisSession only after confirmed addition.
-    - Favorites never added; IDK ignored upstream; strong (uiLang, dictLang) isolation.
+  Module: app.mistakes.js (revised fallback + sensible validation)
+  Key points:
+    - Gate uses existing window.addToMistakesOnFailure if present (do not override UI logic).
+    - Fallback addOnFailure only when original is absent.
+    - M.add requires a real source deck (exists), but not membership check at add time.
+    - M.deck / M.count filter by actual membership to avoid "active but empty".
+    - Session gate marks as added only after confirmed presence in bucket.
 ******************************************************************************
 */
 
@@ -107,17 +106,16 @@
     save(db);
   };
 
+  // Add: require real deck, but no strict membership check here
   M.add = function(id, word, sourceKey){
     if (id == null) return;
     id = String(id);
 
-    // Determine sourceKey
     var sk = sourceKey || null;
     try {
-      if (!sk && word && (word._mistakeSourceKey || word._favoriteSourceKey)){
+      if (!sk && word && (word._mistakeSourceKey || word._favoriteSourceKey))
         sk = word._mistakeSourceKey || word._favoriteSourceKey;
-      }
-      if (!sk) {
+      if (!sk){
         var ak = (App.dictRegistry && App.dictRegistry.activeKey) || null;
         if (ak && !isVirtualKey(ak)) sk = ak;
       }
@@ -137,9 +135,9 @@
       if (kLang && kLang !== dl) return;
     }catch(_){}
 
-    // Ensure the deck exists and actually contains this id
+    // Require deck to exist (prevents broken keys), membership will be validated on listing/counting
     var deck = deckByKey(sk);
-    if (!deck || !deckHasId(deck, id)) return;
+    if (!deck) return;
 
     var db = load();
     var b = ensureBucket(db, uiLang(), activeDictLang());
@@ -192,9 +190,7 @@
     return out;
   };
 
-  M.list = function(){ return M.deck(); };
-
-  // Count ONLY ids that actually exist in their source deck
+  // Count only ids that exist in their deck (prevents "active but empty")
   M.count = function(){
     var db = load();
     var b = ensureBucket(db, uiLang(), activeDictLang());
@@ -238,7 +234,7 @@
   };
 
   // ------------------------------
-  // Gate
+  // Gate (do not override original UI hook)
   // ------------------------------
   (function(){
     var fail = Object.create(null);
@@ -256,7 +252,13 @@
       return false;
     }
 
-    function addOnFailure(word){
+    // Prefer the original UI function if present
+    var origAddOnFailure = (typeof window.addToMistakesOnFailure === 'function')
+      ? window.addToMistakesOnFailure
+      : null;
+
+    // Fallback implementation (only if UI one is absent)
+    function fallbackAddOnFailure(word){
       try {
         var sk = null;
         if (word && word._mistakeSourceKey) sk = word._mistakeSourceKey;
@@ -268,8 +270,10 @@
       } catch(_){}
     }
 
-    window.addToMistakesOnFailure = addOnFailure;
-    App.Mistakes.addOnFailure     = addOnFailure;
+    function callAdd(word){
+      if (origAddOnFailure) return origAddOnFailure(word);
+      return fallbackAddOnFailure(word);
+    }
 
     function onFail(w){
       if (!w || w.id == null) return;
@@ -282,7 +286,7 @@
       if (f >= 1){
         try{
           var before = (App.Mistakes && typeof App.Mistakes.sourceKeyFor==='function') ? App.Mistakes.sourceKeyFor(wid) : null;
-          addOnFailure(w);
+          callAdd(w);
           var after  = (App.Mistakes && typeof App.Mistakes.sourceKeyFor==='function') ? App.Mistakes.sourceKeyFor(wid) : null;
           if (!before && after){
             addedThisSession[wid] = true;
