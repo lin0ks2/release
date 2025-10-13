@@ -626,7 +626,6 @@ if (!w) return;
         // compute favorites count for current language
         let cnt = 0;
         try{
-          App.migrateFavoritesToV2 && App.migrateFavoritesToV2();
           const v2 = (App.state && App.state.favorites_v2) || {};
           const lang = (App.settings && (App.settings.dictsLangFilter || App.settings.studyLang || App.settings.lang)) || null;
           if (lang){
@@ -661,7 +660,6 @@ if (!w) return;
 
   function canShowFav() {
   try {
-    App.migrateFavoritesToV2 && App.migrateFavoritesToV2();
     const v2 = (App.state && App.state.favorites_v2) || {};
     // determine active dict language: dictsLangFilter -> studyLang -> ui lang
     const lang = (App.settings && (App.settings.dictsLangFilter || App.settings.studyLang || App.settings.lang)) || null;
