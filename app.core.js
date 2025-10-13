@@ -151,21 +151,6 @@ App.clamp = (n,min,max)=>Math.max(min,Math.min(max,n));
   if (App.DOM.copyYearEl) App.DOM.copyYearEl.textContent = new Date().getFullYear();
 
   App.bootstrap = function(){
-    // Safe-start: delay favorites migration until Decks API is ready
-    (function waitMigrate(){
-      try{
-        if (window.App && App.migrateFavoritesToV2 && App.Decks && typeof App.Decks.resolveDeckByKey === 'function'){
-          App.migrateFavoritesToV2();
-        } else {
-          setTimeout(waitMigrate, 150);
-        }
-      }catch(e){
-        setTimeout(waitMigrate, 300);
-      }
-    })();
-
-    try{ App.migrateFavoritesToV2 && App.migrateFavoritesToV2(); }catch(_){}
-
     // set version label
     if (App.DOM.appVerEl) App.DOM.appVerEl.textContent = 'v' + App.APP_VER;
   };
@@ -176,64 +161,10 @@ App.clamp = (n,min,max)=>Math.max(min,Math.min(max,n));
 /* === Favorites v2 (per-dictionary) migration === */
 App.migrateFavoritesToV2 = function(){
   try{
-    // Re-entrancy / already done guards
-    if (App._favMigrationInProgress) return;
     const st = App.state || (App.state = {});
     if (st.favorites_v2 && typeof st.favorites_v2 === 'object') return; // already migrated
 
-    App._favMigrationInProgress = true;
-
     const old = st.favorites || {};
-    const v2 = {};
-
-    const dictKeys = []
-      .concat(App.Decks.builtinKeys ? App.Decks.builtinKeys() : [])
-      .concat(Object.keys((App.dictRegistry && App.dictRegistry.user) || {}));
-
-    const idToDicts = {};
-    // Chunked processing to avoid long main-thread stall
-    var i = 0;
-    function step(){
-      var t0 = performance.now();
-      while (i < dictKeys.length){
-        const key = dictKeys[i++];
-        try{
-          const arr = App.Decks.resolveDeckByKey(key) || [];
-          for (var j=0;j<arr.length;j++){
-            var w = arr[j]; if (!w || w.id==null) continue;
-            var id = Number(w.id);
-            if (!idToDicts[id]) idToDicts[id] = [];
-            idToDicts[id].push(key);
-          }
-        }catch(_){}
-        if (performance.now() - t0 > 12) break; // yield ~ per frame
-      }
-      if (i < dictKeys.length){ return setTimeout(step, 0); }
-
-      // Map old favorites -> v2 (only if unambiguous)
-      try{
-        Object.keys(old || {}).forEach(function(idStr){
-          try{
-            if (!old[idStr]) return;
-            var id = +idStr;
-            var dicts = idToDicts[id] || [];
-            if (dicts.length === 1){
-              var k = dicts[0];
-              if (!v2[k]) v2[k] = {};
-              v2[k][id] = true;
-            }
-          }catch(_){}
-        });
-      }catch(_){}
-
-      st.favorites_v2 = v2;
-      st.favorites_legacy = old;
-      try { App.saveState && App.saveState(); } catch(_){}
-      App._favMigrationInProgress = false;
-    }
-    setTimeout(step, 0);
-  }catch(e){ App._favMigrationInProgress = false; /* log removed */ }
-};
     const v2 = {};
 
     const dictKeys = []
