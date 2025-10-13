@@ -151,6 +151,19 @@ App.clamp = (n,min,max)=>Math.max(min,Math.min(max,n));
   if (App.DOM.copyYearEl) App.DOM.copyYearEl.textContent = new Date().getFullYear();
 
   App.bootstrap = function(){
+    // Safe-start: delay favorites migration until Decks API is ready
+    (function waitMigrate(){
+      try{
+        if (window.App && App.migrateFavoritesToV2 && App.Decks && typeof App.Decks.resolveDeckByKey === 'function'){
+          App.migrateFavoritesToV2();
+        } else {
+          setTimeout(waitMigrate, 150);
+        }
+      }catch(e){
+        setTimeout(waitMigrate, 300);
+      }
+    })();
+
     try{ App.migrateFavoritesToV2 && App.migrateFavoritesToV2(); }catch(_){}
 
     // set version label
