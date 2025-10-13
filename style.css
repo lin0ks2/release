@@ -882,3 +882,47 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
 [data-theme="dark"] .heart.active {
   color: var(--star-color-dark, #facc15);
 }
+
+
+
+/* === Heart ↔ Stars unified (robust for font/SVG) === */
+/* Base state: muted outline */
+.heart, .fav, .favorite {
+  color: var(--muted);
+  transition: color .25s ease, transform .2s ease;
+}
+.heart:active, .fav:active, .favorite:active { transform: scale(0.96); }
+
+/* If the heart is an SVG: draw outline in idle */
+.heart svg, .fav svg, .favorite svg { width: 1em; height: 1em; display: block; }
+.heart svg path, .fav svg path, .favorite svg path { fill: none; stroke: currentColor; }
+
+/* Active/on state — same color as stars */
+.heart.active, .heart.filled, .heart.is-on,
+.fav.active, .fav.filled, .fav.is-on,
+.favorite.active, .favorite.filled, .favorite.is-on,
+.favorited .heart, .is-favorite .heart {
+  color: var(--star-color, #fbbf24);
+  transform: scale(1.05);
+}
+
+/* And if it's an SVG — fill it when active */
+.heart.active svg path, .heart.filled svg path, .heart.is-on svg path,
+.fav.active svg path, .fav.filled svg path, .fav.is-on svg path,
+.favorite.active svg path, .favorite.filled svg path, .favorite.is-on svg path,
+.favorited .heart svg path, .is-favorite .heart svg path {
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+/* Hover tint */
+.heart:hover, .fav:hover, .favorite:hover { color: var(--star-hover-color, #facc15); }
+
+/* Dark theme keeps same palette */
+[data-theme="dark"] .heart.active,
+[data-theme="dark"] .fav.active,
+[data-theme="dark"] .favorite.active,
+[data-theme="dark"] .favorited .heart,
+[data-theme="dark"] .is-favorite .heart {
+  color: var(--star-color-dark, #facc15);
+}
