@@ -144,7 +144,7 @@ main{flex:1;display:grid;place-items:center;padding:12px}/* ====================
   width:30px; height:30px; border:1px solid var(--border); border-radius:12px; background:var(--card); cursor:pointer;
   display:flex; align-items:center; justify-content:center; font-size:15px; transition: filter .2s ease, transform .08s ease;
 }.iconOnly:hover{ filter:brightness(1.06); }.iconOnly:active{ transform:scale(0.96); }/* Кнопка OK в модалке */
-.modalActions{ display:flex; justify-content:center; margin-top:10px; }.modalActions .primary{
+.modalActions{ display:flex; justify-content:center; margin-top: 4px; }.modalActions .primary{
   padding:9px 20px; font-size:15px; border-radius:12px;
   background:var(--mint); border:none; color:#073b3a;
 }.modalActions .primary:hover{ background:var(--mint-strong); color:#fff; }/* Footer */
@@ -240,7 +240,7 @@ a#donate, .donate, .donate a, .donate-btn, .donate-btn a, .icon-donate,
   width:min( 560px, 92vw); background:var(--card); color:var(--text);
   border-radius:16px; box-shadow: 0 10px 30px rgba(0,0,0,.15); border:1px solid var(--border);
 }#infoModal .modalBody{ padding:14px; font-size:14px; line-      min-height: 240px; 
-  padding-bottom: 7px;
+  padding-bottom: 6px;
   height: var(--info-modal-body-h, 360px);
   overflow-y: auto;}#infoModal .iconBtn.small{ width:36px; height:36px; border-radius:12px; }.infoContent p{ margin: 0 0 8px; }.infoContent ul{ margin: 6px 0 0 18px; }/* Dicts modal — symmetric spacing around flags + list breathing + footer divider */
 #modal #langFlags, #modal .flagsRow{ margin:8px 0; padding:0 14px 14px; border-bottom:1px solid var(--border); }#modal .dictList{ margin-top:8px; padding-top:4px; padding-bottom:14px; max-height:230px; overflow-y:auto; }#modal .modalActions{ display:flex; justify-content:center; padding:14px 16px 20px; border-top:1px solid var(--border); }/* === Info modal: inset dividers to match Dicts modal === */
@@ -253,7 +253,7 @@ a#donate, .donate, .donate a, .donate-btn, .donate-btn a, .icon-donate,
   padding-left: 14px;
   padding-right: 14px;}#infoModal .modalActions{display: flex;
   justify-content: center;
-  padding: 14px 14px 14px;
+  padding: 6px 14px 14px;
   border-top: none;
   position: relative;
   padding-left: 14px;
