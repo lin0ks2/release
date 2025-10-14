@@ -915,7 +915,7 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
 
 /* === [PATCH 2025-10-14] Info modal scoped tweaks — safe === */
 #infoModal .aboutSep { margin: 8px 0 12px; height: 1px; background: var(--border); }
-#infoModal #panel-about { text-align: left; }
+#infoModal #panel-about:not(.hidden){ text-align: left; }
 #infoModal .aboutGrid { justify-items: start; }
 #infoModal .aboutRow { display: grid; grid-template-columns: auto auto; align-items: center; gap: 8px; }
 #infoModal .aboutLabel { color: var(--text); font-weight: 600; text-align:left; }
@@ -1017,7 +1017,7 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
 
 
 /* === Layout distribution for "About" tab (fill space, balanced air) === */
-#infoModal #panel-about{ display:flex !important; flex-direction:column !important; }
+#infoModal #panel-about:not(.hidden){ display:flex !important; flex-direction:column !important; }
 #infoModal #panel-about .aboutGrid{ flex:0 0 auto !important; }
 #infoModal #panel-about .actionsRow{ flex:0 0 auto !important; margin:10px 0 12px !important; }
 #infoModal #panel-about .aboutSep{ flex:0 0 auto !important; margin:12px 0 !important; margin-top:auto !important; }
@@ -1025,4 +1025,12 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
 #infoModal #panel-about .regRow{ margin-top:8px !important; }
 /* keep modal body min-height so layout has room to distribute */
 #infoModal .modalBody{ min-height:260px !important; }
+
+
+
+/* === Equal vertical spacing around action buttons in About tab === */
+#infoModal #panel-about .actionsRow{ margin: 12px 0 12px !important; }
+#infoModal #panel-about .aboutSep{ margin: 12px 0 12px !important; }
+#infoModal #panel-about .regBlock{ margin: 12px 0 12px !important; }
+#infoModal #panel-about .regRow{ margin-top: 8px !important; }
 
