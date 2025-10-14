@@ -1,17 +1,26 @@
-/* === Info Modal UI patch (2025-10-14) === */
+/* === Info modal (scoped styles only) — 2025-10-14 === */
+#infoModal .tabPanel.hidden { display: none; }
 
-/* Tabs base (kept) */
-.tabPanel.hidden { display: none; }
-.tabs { display:flex; gap:8px; padding:8px 12px 0; border-bottom:none; }
-.tab { border:none; background:none; padding:8px 12px; cursor:pointer; border-bottom:2px solid transparent; }
-.tab.active { border-bottom-color: var(--accent, #888); font-weight:600; }
-.tab:focus { outline: 2px solid var(--accent, #888); outline-offset: 2px; }
+#infoModal .tabs {
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px 0;
+  border-bottom: none;
+}
+#infoModal .tab {
+  border: none;
+  background: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+#infoModal .tab.active {
+  border-bottom-color: var(--accent, #888);
+  font-weight: 600;
+}
+#infoModal .tab:focus { outline: 2px solid var(--accent, #888); outline-offset: 2px; }
 
-/* Use app text color (no blue highlight) */
-.tabs .tab, .btnPill { color: inherit; }
-
-/* Pill buttons */
-.btnPill {
+#infoModal .btnPill {
   border: 1px solid rgba(0,0,0,.15);
   background: rgba(0,0,0,.06);
   padding: 8px 14px;
@@ -19,28 +28,28 @@
   font-weight: 600;
   line-height: 1.2;
   cursor: pointer;
+  transition: transform .02s ease, background .15s ease, border-color .15s ease;
+  color: inherit;
 }
-.btnPill:hover { background: rgba(0,0,0,.08); }
-.btnPill:active { transform: translateY(1px); }
+#infoModal .btnPill:hover { background: rgba(0,0,0,.08); }
+#infoModal .btnPill:active { transform: translateY(1px); }
 
-/* Scroll area for instruction */
-.scrollArea { max-height: 38vh; overflow:auto; padding-right:4px; }
+#infoModal .scrollArea { max-height: 38vh; overflow: auto; padding-right: 4px; }
 
-/* Center About content and darken labels */
-#panel-about { text-align: center; }
-.aboutGrid { justify-items: center; }
-.aboutRow { display: grid; grid-template-columns: auto auto; align-items: center; gap: 8px; }
-.aboutLabel { color: rgba(0,0,0,.85); font-weight: 600; }
-.aboutValue .muted, .muted { opacity: .6; }
-.actionsRow { margin: 12px 0; display: flex; justify-content: center; }
+#infoModal #panel-about { text-align: center; }
+#infoModal .aboutGrid { justify-items: center; }
+#infoModal .aboutRow { display: grid; grid-template-columns: auto auto; align-items: center; gap: 8px; }
+#infoModal .aboutLabel { color: rgba(0,0,0,.85); font-weight: 600; }
+#infoModal .aboutValue .muted, #infoModal .muted { opacity: .6; }
+#infoModal .actionsRow { margin: 12px 0; display: flex; justify-content: center; }
 
-/* Separator between update button and registration block */
-.aboutSep { margin: 8px 0 12px; height:1px; background: rgba(0,0,0,.1); }
+#infoModal .aboutSep { margin: 8px 0 12px; height: 1px; background: rgba(0,0,0,.1); }
 
-/* Registration block */
-.regBlock { margin-top: 12px; display: grid; gap: 6px; }
-.regRow { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-.regRow input[type="text"] { padding: 8px 10px; border: 1px solid rgba(0,0,0,.2); border-radius: 6px; width: 100%; max-width: 320px; }
+#infoModal .regBlock { margin-top: 12px; display: grid; gap: 6px; }
+#infoModal .regRow { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+#infoModal .regRow input[type="text"] {
+  padding: 8px 10px; border: 1px solid rgba(0,0,0,.2); border-radius: 6px;
+  width: 100%; max-width: 320px;
+}
 
-/* Remove placeholder hint completely */
-#regHint { display: none !important; }
+#infoModal #regHint { display: none !important; margin: 0 !important; padding: 0 !important; }
