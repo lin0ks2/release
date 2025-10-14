@@ -657,7 +657,46 @@ if (!w) return;
     })();
 
     for (const k of Object.keys(App.dictRegistry.user || {})) host.appendChild(makeDictRow(k));
-  }
+
+    // --- AUTO-SELECT DEFAULT DECK (safe) ---
+    (function autoSelectDefaultDeck(){
+      try{
+        const host = D && D.dictListHost;
+        if (!host) return;
+
+        if (__DictsUI && __DictsUI.userPickedDeck) return;
+
+        const lg = (App.settings && App.settings.dictsLangFilter) || null;
+        const rows = Array.from(host.querySelectorAll('.dictRow'));
+        if (!rows.length) return;
+
+        const anyActive = rows.some(r => r.classList.contains('active'));
+        if (anyActive) return;
+
+        const isVirtual = (k) => /^(fav|favorites|mistakes)$/.test(String(k||'').toLowerCase());
+        const normalRows = rows.filter(r => !isVirtual(r.dataset.key));
+        if (!normalRows.length) return;
+
+        const keyLangSafe = (k) => {
+          try { return (typeof keyLang==='function') ? keyLang(k) : (String(k).split('_')[0]||''); }
+          catch(_) { return ''; }
+        };
+
+        const rowsSameLang = lg ? normalRows.filter(r => keyLangSafe(r.dataset.key) === lg) : normalRows;
+        if (!rowsSameLang.length) return;
+
+        const remembered = (App.settings && App.settings.lastActivePerLang && lg) ? App.settings.lastActivePerLang[lg] : null;
+        let target = null;
+        if (remembered) target = rowsSameLang.find(r => r.dataset.key === remembered) || null;
+        if (!target) target = rowsSameLang.find(r => /_verbs$/i.test(String(r.dataset.key))) || null;
+        if (!target) target = rowsSameLang[0];
+
+        if (target && !target.classList.contains('disabled')) {
+          target.click();
+        }
+      }catch(_){}
+    })();
+}
 
   function canShowFav() {
   try {
@@ -793,45 +832,12 @@ if (!w) return;
 
     row.addEventListener('click', () => {
       
-      try{ localStorage.setItem('lexitron.deckKey', String(key)); localStorage.setItem('lexitron.activeKey', String(key)); }catch(_){}
+      
+      __DictsUI.userPickedDeck = true;
+try{ localStorage.setItem('lexitron.deckKey', String(key)); localStorage.setItem('lexitron.activeKey', String(key)); }catch(_){}
       try{ if (typeof updateSpoilerHeader==='function') updateSpoilerHeader(); }catch(_){ }
       try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
-
-      if (row.classList.contains('disabled')) {
-        // Allow activation for virtual decks when threshold is met
-        if (key === 'mistakes') {
-          try{
-            var mcount = (App.Mistakes && typeof App.Mistakes.count==='function') ? App.Mistakes.count() : 0;
-            if (mcount < 4) return;
-            row.classList.remove('disabled');
-            row.removeAttribute('aria-disabled');
-          }catch(_){ return; }
-        } else if (key === 'fav' || key === 'favorites') {
-          try{
-            var cnt = 0;
-            try{
-              App.migrateFavoritesToV2 && App.migrateFavoritesToV2();
-              var v2 = (App.state && App.state.favorites_v2) || {};
-              var lang = (App.settings && (App.settings.dictsLangFilter || App.settings.studyLang || App.settings.lang)) || null;
-              if (lang){
-                Object.keys(v2).forEach(function(sourceKey){
-                  var m = String(sourceKey||'').match(/^([a-z]{2})_/i);
-                  var kLang = m ? m[1].toLowerCase() : null;
-                  if (kLang === String(lang).toLowerCase()) {
-                    cnt += Object.keys(v2[sourceKey] || {}).filter(function(x){ return v2[sourceKey][x] && v2[sourceKey][x].a; }).length;
-                  }
-                });
-              }
-            }catch(_){ cnt = 0; }
-            if (cnt < 4) return;
-            row.classList.remove('disabled');
-            row.removeAttribute('aria-disabled');
-          }catch(_){ return; }
-        } else {
-          return;
-        }
-      }
-
+if (row.classList.contains('disabled')) return;
       App.dictRegistry.activeKey = key;
         try{ localStorage.setItem('lexitron.deckKey', String(key)); localStorage.setItem('lexitron.activeKey', String(key)); }catch(_){}
 
@@ -876,7 +882,8 @@ if (!w) return;
       b.addEventListener('click', () => {
         App.settings.dictsLangFilter = lg;
         App.saveSettings && App.saveSettings(App.settings);
-        renderDictList();
+        __DictsUI.userPickedDeck = false;
+renderDictList();
         App.renderLangFlags();
       });
       D.langFlags.appendChild(b);
@@ -1086,6 +1093,10 @@ if (!w) return;
  */
 (function(){
   'use strict';
+
+// Global dicts UI state
+window.__DictsUI = window.__DictsUI || {};
+__DictsUI.userPickedDeck = false;
   var D=document,W=window;
 
   // CSS
