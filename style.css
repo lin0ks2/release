@@ -1014,3 +1014,15 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
 #infoModal #panel-about .aboutRow{ gap:6px !important; }
 #infoModal #panel-about .actionsRow{ margin:8px 0 6px !important; }
 #infoModal #panel-about .aboutSep{ margin:6px 0 10px !important; }
+
+
+/* === Layout distribution for "About" tab (fill space, balanced air) === */
+#infoModal #panel-about{ display:flex !important; flex-direction:column !important; }
+#infoModal #panel-about .aboutGrid{ flex:0 0 auto !important; }
+#infoModal #panel-about .actionsRow{ flex:0 0 auto !important; margin:10px 0 12px !important; }
+#infoModal #panel-about .aboutSep{ flex:0 0 auto !important; margin:12px 0 !important; margin-top:auto !important; }
+#infoModal #panel-about .regBlock{ flex:0 0 auto !important; margin:12px 0 0 !important; }
+#infoModal #panel-about .regRow{ margin-top:8px !important; }
+/* keep modal body min-height so layout has room to distribute */
+#infoModal .modalBody{ min-height:260px !important; }
+
