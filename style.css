@@ -240,10 +240,7 @@ a#donate, .donate, .donate a, .donate-btn, .donate-btn a, .icon-donate,
   width:min( 560px, 92vw); background:var(--card); color:var(--text);
   border-radius:16px; box-shadow: 0 10px 30px rgba(0,0,0,.15); border:1px solid var(--border);
 }#infoModal .modalBody{ padding:14px; font-size:14px; line-      min-height: 240px; 
-  padding-bottom: 8px;
-  max-height: none;
-  overflow-y: auto;
-  height: var(--info-modal-body-h, 360px);}#infoModal .iconBtn.small{ width:36px; height:36px; border-radius:12px; }.infoContent p{ margin: 0 0 8px; }.infoContent ul{ margin: 6px 0 0 18px; }/* Dicts modal — symmetric spacing around flags + list breathing + footer divider */
+  padding-bottom: 8px;}#infoModal .iconBtn.small{ width:36px; height:36px; border-radius:12px; }.infoContent p{ margin: 0 0 8px; }.infoContent ul{ margin: 6px 0 0 18px; }/* Dicts modal — symmetric spacing around flags + list breathing + footer divider */
 #modal #langFlags, #modal .flagsRow{ margin:8px 0; padding:0 14px 14px; border-bottom:1px solid var(--border); }#modal .dictList{ margin-top:8px; padding-top:4px; padding-bottom:14px; max-height:230px; overflow-y:auto; }#modal .modalActions{ display:flex; justify-content:center; padding:14px 16px 20px; border-top:1px solid var(--border); }/* === Info modal: inset dividers to match Dicts modal === */
 #infoModal .modalFrame{ overflow:visible; }#infoModal .modalHeader{display: flex;
   align-items: center;
@@ -1015,10 +1012,10 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
 
 #infoModal .modalFrame{ width: min(560px, 92vw) !important; }
 
-#infoModal #panel-about .aboutGrid{     row-gap: 4px; }
-#infoModal #panel-about .aboutRow{   gap: 4px; }
-#infoModal #panel-about .actionsRow{       margin: 2px 0 0; }
-#infoModal #panel-about .aboutSep{   margin-top:auto !important;  margin: 8px 0 10px; }
+#infoModal #panel-about .aboutGrid{     row-gap:6px !important; }
+#infoModal #panel-about .aboutRow{   gap:6px !important; }
+#infoModal #panel-about .actionsRow{       margin:12px 0 12px !important; }
+#infoModal #panel-about .aboutSep{   margin-top:auto !important;  margin:10px 0 !important; }
 
 
 /* === Layout distribution for "About" tab (fill space, balanced air) === */
@@ -1026,11 +1023,8 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
 #infoModal #panel-about .aboutGrid{ flex:0 0 auto !important;    row-gap:6px !important; }
 #infoModal #panel-about .actionsRow{ flex:0 0 auto !important;       margin:12px 0 12px !important; }
 #infoModal #panel-about .aboutSep{ flex:0 0 auto !important;   margin-top:auto !important;  margin:10px 0 !important; }
-#infoModal #panel-about .regBlock{ flex:0 0 auto !important;     margin: 6px 0 6px; 
-  margin-top: 0;
-  gap: 6px;}
-#infoModal #panel-about .regRow{     margin-top: 4px; 
-  margin: 0;}
+#infoModal #panel-about .regBlock{ flex:0 0 auto !important;     margin:10px 0 12px !important; }
+#infoModal #panel-about .regRow{     margin-top:6px !important; }
 /* keep modal body min-height so layout has room to distribute */
 #infoModal .modalBody{      min-height: 240px; 
   padding-bottom: 8px;}
@@ -1045,36 +1039,5 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
 
 
 #infoModal .regBlock .actionsRow{
-  margin: 4px 0 4px;
-}
-
-#infoModal .tabPanels{
-  position: relative;
-  height: 100%;
-}
-
-#infoModal .tabPanel{
-  position: absolute;
-  inset: 0;
-  overflow-y: auto;
-}
-
-#infoModal .tabPanel.hidden{
-  visibility: hidden;
-  pointer-events: none;
-  opacity: 0;
-}
-
-#infoModal #panel-about .regRow input[type="text"]{
-  padding: 8px 10px;
-}
-
-
-@media (max-height: 640px) {
-  #infoModal .modalBody { height: var(--info-modal-body-h, 320px); }
-}
-
-
-@media (min-height: 900px) {
-  #infoModal .modalBody { height: var(--info-modal-body-h, 400px); }
+  margin: 6px 0 4px;
 }
