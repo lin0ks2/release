@@ -887,24 +887,7 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
 :root[data-theme="dark"] .heart { color: var(--icon-muted, #9aa3af) !important; }
 :root[data-theme="dark"] .heart.is-fav { color: var(--icon-active, #facc15) !important; }
 
-/* === UI tweaks for "Информация" (2025-10-14) === */
-.btnPill {
-  border: 1px solid rgba(0,0,0,.15);
-  background: rgba(0,0,0,.06);
-  padding: 8px 14px;
-  border-radius: 999px;
-  font-weight: 600;
-  line-height: 1.2;
-  cursor: pointer;
-  transition: transform .02s ease, background .15s ease, border-color .15s ease;
-}
-.btnPill:hover { background: rgba(0,0,0,.08); }
-.btnPill:active { transform: translateY(1px); }
-
-#panel-about { text-align: center; }
-.aboutGrid { justify-items: center; }
-.aboutRow { grid-template-columns: auto auto; }
-.aboutLabel, .aboutValue { text-align: center; }
-.actionsRow { margin: 14px 0; display: flex; justify-content: center; }
-
-#panel-instr .scrollArea { margin-bottom: 0; }
+/* keep about centered */
+#panel-about{text-align:center}
+.aboutGrid{justify-items:center}
+.aboutRow{grid-template-columns:auto auto}

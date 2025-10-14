@@ -1628,13 +1628,12 @@ if (document.readyState === 'loading') {
 // applyFromUI removed, handled by App.init()
 
 
-/* === Info Modal: Информация (обновлено 2025-10-14) === */
+/* === Info Modal: Информация (tabs fix, title fix) — 2025-10-14 === */
 (function(){
   try{
     const modal = document.getElementById('infoModal');
     if (!modal) return;
 
-    // Восстанавливаем фрейм
     let frame = modal.querySelector('.modalFrame');
     if (!frame){
       frame = document.createElement('div');
@@ -1643,7 +1642,6 @@ if (document.readyState === 'loading') {
     }
     frame.setAttribute('tabindex','-1');
 
-    // Новая разметка без чекбокса
     frame.innerHTML = `
       <div class="modalHeader">
         <div class="modalTitle" id="infoTitle">Информация</div>
@@ -1661,11 +1659,11 @@ if (document.readyState === 'loading') {
         <section id="panel-about" class="tabPanel hidden" role="tabpanel" aria-labelledby="tab-about">
           <div class="aboutGrid">
             <div class="aboutRow">
-              <div class="aboutLabel" data-i18n="version">Версия</div>
+              <div class="aboutLabel">Версия</div>
               <div class="aboutValue"><span id="appVersion">—</span></div>
             </div>
             <div class="aboutRow">
-              <div class="aboutLabel" data-i18n="status">Статус</div>
+              <div class="aboutLabel">Статус</div>
               <div class="aboutValue">
                 <span id="licStatus">—</span>
                 <span id="licUser" class="muted"></span>
@@ -1674,16 +1672,16 @@ if (document.readyState === 'loading') {
           </div>
 
           <div class="actionsRow">
-            <button id="btnCheckUpdates" class="btnPill"></button>
+            <button id="btnCheckUpdates" class="btnPill">Проверить обновления</button>
           </div>
 
           <div class="regBlock">
-            <label for="regKey" id="regKeyLabel"></label>
+            <label for="regKey" id="regKeyLabel">Ключ регистрации</label>
             <div class="regRow">
               <input id="regKey" type="text" inputmode="latin" autocomplete="off" placeholder="XXXX-XXXX-XXXX-XXXX">
-              <button id="btnRegister" class="btnPill"></button>
+              <button id="btnRegister" class="btnPill">Зарегистрировать</button>
             </div>
-            <div id="regHint" class="muted"></div>
+            <div id="regHint" class="muted">Пока заглушка — логика активации будет добавлена позже.</div>
           </div>
         </section>
       </div>
@@ -1693,12 +1691,12 @@ if (document.readyState === 'loading') {
       </div>
     `;
 
-    /* === Основная логика === */
-
+    // Nodes
     const tabInstr = document.getElementById('tab-instr');
     const tabAbout = document.getElementById('tab-about');
     const panelInstr = document.getElementById('panel-instr');
     const panelAbout = document.getElementById('panel-about');
+    const titleEl = document.getElementById('infoTitle');
     const okBtn = document.getElementById('infoOk');
     const xBtn = document.getElementById('infoClose');
     const btnUpdates = document.getElementById('btnCheckUpdates');
@@ -1711,80 +1709,60 @@ if (document.readyState === 'loading') {
     const licStatusEl = document.getElementById('licStatus');
     const licUserEl = document.getElementById('licUser');
 
-    const T = (()=>{
-      const lang = (window.App && App.settings && App.settings.lang) || 'uk';
-      const base = (window.I18N && I18N[lang]) || (window.I18N && I18N.uk) || {};
-      return Object.assign({
-        infoTitle:'Информация',
-        tabInstruction:'Инструкция',
-        tabAbout:'О программе',
-        ok:'OK',
-        checkUpdates:'Проверить обновления',
-        regKey:'Ключ регистрации',
-        register:'Зарегистрировать',
-        version:'Версия',
-        status:'Статус',
-        licensed:'Зарегистрировано',
-        notLicensed:'Не зарегистрировано',
-        regStubHint:'Пока заглушка — логика активации будет добавлена позже.'
-      }, base);
-    })();
-
-    // Жестко пробиваем заголовок при показе
+    // Force title "Информация" regardless of i18n leftovers
     function fillTitle(){
-      const title = T.infoTitle || 'Информация';
-      modal.querySelectorAll('.modalTitle, #infoTitle').forEach(n => n.textContent = title);
+      const title = 'Информация';
+      modal.querySelectorAll('.modalTitle,#infoTitle').forEach(n=> n.textContent = title);
     }
 
-    const setText = (el,txt)=> el && (el.textContent = txt);
-    setText(okBtn, T.ok);
-    setText(tabInstr, T.tabInstruction);
-    setText(tabAbout, T.tabAbout);
-    setText(btnUpdates, T.checkUpdates);
-    setText(btnRegister, T.register);
-    setText(regKeyLabel, T.regKey);
-    setText(regHintEl, T.regStubHint);
-
-    // Инструкция
-    if (Array.isArray(T.infoSteps))
-      bodyEl.innerHTML = '<ul>' + T.infoSteps.map(s=>`<li>${s}</li>`).join('') + '</ul>';
-
-    // Версия / статус
-    const meta = {
-      version: (window.App && (App.meta && App.meta.version)) || (window.App && App.version) || (window.App && App.APP_VER) || '—',
-      isActivated: !!(window.App && App.lic && App.lic.isActivated),
-      userName: (window.App && App.lic && App.lic.userName) || ''
-    };
-    setText(verEl, meta.version);
-    if (meta.isActivated){
-      setText(licStatusEl, T.licensed);
-      if (meta.userName) licUserEl.textContent = '— ' + meta.userName;
-    } else {
-      setText(licStatusEl, T.notLicensed);
-      licStatusEl.classList.add('muted');
-    }
-
-    // Табы
+    // Tabs
     function switchTab(which){
       const instr = which==='instr';
       tabInstr.classList.toggle('active', instr);
       tabAbout.classList.toggle('active', !instr);
       panelInstr.classList.toggle('hidden', !instr);
       panelAbout.classList.toggle('hidden', instr);
+      (instr ? tabInstr : tabAbout).setAttribute('aria-selected','true');
+      (instr ? tabAbout : tabInstr).setAttribute('aria-selected','false');
     }
     tabInstr.addEventListener('click', ()=> switchTab('instr'));
     tabAbout.addEventListener('click', ()=> switchTab('about'));
 
-    // Открытие/закрытие
+    // Fill Instruction list from existing i18n if present
+    try{
+      const lang = (window.App && App.settings && App.settings.lang) || 'uk';
+      const t = (window.I18N && I18N[lang]) || (window.I18N && I18N.uk) || {};
+      if (Array.isArray(t.infoSteps)) {
+        bodyEl.innerHTML = '<ul>' + t.infoSteps.map(s=>`<li>${String(s||'')}</li>`).join('') + '</ul>';
+      }
+    }catch(_){}
+
+    // Version / license
+    const meta = {
+      version: (window.App && (App.meta && App.meta.version)) || (window.App && App.version) || (window.App && App.APP_VER) || '—',
+      isActivated: !!(window.App && App.lic && App.lic.isActivated),
+      userName: (window.App && App.lic && App.lic.userName) || ''
+    };
+    verEl.textContent = meta.version;
+    if (meta.isActivated){
+      licStatusEl.textContent = 'Зарегистрировано';
+      if (meta.userName) licUserEl.textContent = '— ' + meta.userName;
+    } else {
+      licStatusEl.textContent = 'Не зарегистрировано';
+      licStatusEl.classList.add('muted');
+    }
+
+    // Open/close
     function close(){ modal.classList.add('hidden'); }
     function open(){
       fillTitle();
+      switchTab('instr');        // ensure only Instruction is visible on open
       modal.classList.remove('hidden');
       setTimeout(()=>{ try{ frame && frame.focus(); }catch(_){} }, 0);
     }
-    okBtn && okBtn.addEventListener('click', close);
-    xBtn && xBtn.addEventListener('click', close);
-    modal.addEventListener('click', e=>{ if (e.target === modal) close(); });
+    okBtn.addEventListener('click', close);
+    xBtn.addEventListener('click', close);
+    modal.addEventListener('click', e=>{ if (e.target===modal) close(); });
 
     document.addEventListener('keydown', e=>{
       if (e.key==='Escape') close();
@@ -1793,38 +1771,35 @@ if (document.readyState === 'loading') {
       }
     });
 
-    // Проверка обновлений
+    // Update check via SW
     async function fetchRemoteVersion(){
       try{
-        const r = await fetch('./app.core.js?ts=' + Date.now(), { cache: 'no-store' });
+        const r = await fetch('./app.core.js?ts='+Date.now(), {cache:'no-store'});
         const t = await r.text();
         const m = t.match(/APP_VER\s*=\s*['"]([^'"]+)['"]/);
-        return m ? m[1] : null;
-      }catch{ return null; }
+        return m?m[1]:null;
+      }catch(_){ return null; }
     }
     async function updateServiceWorker(){
-      if (!('serviceWorker' in navigator)) return { waiting:false };
+      if(!('serviceWorker' in navigator)) return {waiting:false};
       const reg = await navigator.serviceWorker.getRegistration();
-      if (!reg) return { waiting:false };
+      if(!reg) return {waiting:false};
       await reg.update().catch(()=>{});
-      if (reg.waiting) return { waiting:true, reg };
-      return { waiting:false, reg };
+      if(reg.waiting) return {waiting:true, reg};
+      return {waiting:false, reg};
     }
     async function applyUpdate(reg){
       const worker = reg.waiting || reg.installing;
-      if (!worker) return;
-      const changed = new Promise(resolve => {
-        navigator.serviceWorker.addEventListener('controllerchange', () => resolve(), { once:true });
-      });
-      worker.postMessage({ type:'SKIP_WAITING' });
+      if(!worker) return;
+      const changed = new Promise(res=>navigator.serviceWorker.addEventListener('controllerchange',()=>res(),{once:true}));
+      worker.postMessage({type:'SKIP_WAITING'});
       await changed; location.reload();
     }
-    btnUpdates && btnUpdates.addEventListener('click', async ()=>{
+    btnUpdates.addEventListener('click', async ()=>{
       const current = meta.version;
       const remote = await fetchRemoteVersion();
       const sw = await updateServiceWorker();
-      const newer = remote && remote !== current;
-      if (newer || sw.waiting){
+      if ((remote && remote !== current) || sw.waiting){
         if (confirm(`Доступна новая версия (${remote}). Перезагрузить?`)){
           if (sw.waiting) await applyUpdate(sw.reg);
           else location.reload();
@@ -1834,11 +1809,9 @@ if (document.readyState === 'loading') {
       }
     });
 
-    // Регистрация (заглушка)
-    btnRegister && btnRegister.addEventListener('click', ()=>{
-      const key = (regKeyEl && regKeyEl.value || '').trim();
-      if (!key) return alert('Введите ключ регистрации');
-      alert('Проверка ключа пока не реализована.');
-    });
-  }catch(e){ console.warn('Info modal error', e); }
+    // Expose open() if external button exists
+    const infoBtn = document.getElementById('btnInfo');
+    if (infoBtn) infoBtn.addEventListener('click', open);
+    // Autopopup logic can be added back if нужно; пока отключено чтобы не мешать
+  }catch(e){ console.warn('Info modal fix error', e); }
 })();
