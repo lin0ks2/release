@@ -1673,7 +1673,9 @@ if (document.readyState === 'loading') {
           <div class="actionsRow">
             <button id="btnCheckUpdates" class="btnPill"></button>
           </div>
-          <div class="regBlock">
+          
+          <div class="aboutSep"></div>
+<div class="regBlock">
             <label for="regKey" id="regKeyLabel"></label>
             <div class="regRow">
               <input id="regKey" type="text" inputmode="latin" autocomplete="off" placeholder="XXXX-XXXX-XXXX-XXXX">

@@ -892,3 +892,23 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
 .tabs { display:flex; gap:8px; padding:8px 12px 0; border-bottom:1px solid rgba(0,0,0,.1); }
 .tab { border:none; background:none; padding:8px 12px; cursor:pointer; border-bottom:2px solid transparent; }
 .tab.active { border-bottom-color: var(--accent, #888); font-weight:600; }
+
+
+/* === Patch: About tab visuals (remove top divider, center, separator) — 2025-10-14 === */
+/* Remove the top border under tabs */
+.tabs { border-bottom: none !important; }
+
+/* Center entire About content */
+#panel-about { text-align: center; }
+.aboutGrid { justify-items: center; }
+.aboutRow { grid-template-columns: auto auto; }
+.aboutLabel, .aboutValue { text-align: center; }
+.actionsRow { margin: 12px 0; display: flex; justify-content: center; }
+
+/* Separator between update button and registration key (same look as modal bottom line) */
+.aboutSep {
+  margin: 8px 0 12px;
+  height: 1px;
+  background: rgba(0,0,0,.1);
+  border: 0;
+}
