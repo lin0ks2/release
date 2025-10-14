@@ -926,8 +926,8 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
 #infoModal .tabs .tab, 
 
 /* === [PATCH 2025-10-14] Info modal visuals: mint active tab + stacked rows (scoped) === */
-#infoModal .tabs .tab.active{ background: transparent !important; border-color: #10b981 !important; box-shadow: none !important; color: var(--text); }
-#infoModal .tabs .tab{ color: var(--text); border:1px solid var(--border); border-radius:12px; background:transparent; }
+#infoModal .tabs .tab.active{ background: transparent !important; border:2px solid #10b981 !important; color: var(--text); }
+#infoModal .tabs .tab{ color: var(--text); background: var(--tool-bg); border:none; border-radius:12px; padding:6px 18px; }
 
 :root[data-theme="dark"] #infoModal .aboutRow,
 .theme-dark #infoModal .aboutRow,
