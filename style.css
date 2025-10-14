@@ -239,8 +239,7 @@ a#donate, .donate, .donate a, .donate-btn, .donate-btn a, .icon-donate,
 #infoModal.modal{ display:flex; align-items:center; justify-content:center; }#infoModal.hidden{ display:none; }#infoModal .modalFrame{
   width:min( 560px, 92vw); background:var(--card); color:var(--text);
   border-radius:16px; box-shadow: 0 10px 30px rgba(0,0,0,.15); border:1px solid var(--border);
-}#infoModal .modalBody{ padding:14px; font-size:14px; line-      min-height: 240px; 
-  padding-bottom: 8px;}#infoModal .iconBtn.small{ width:36px; height:36px; border-radius:12px; }.infoContent p{ margin: 0 0 8px; }.infoContent ul{ margin: 6px 0 0 18px; }/* Dicts modal — symmetric spacing around flags + list breathing + footer divider */
+}#infoModal .modalBody{ padding:14px; font-size:14px; line-      min-height: 240px; }#infoModal .iconBtn.small{ width:36px; height:36px; border-radius:12px; }.infoContent p{ margin: 0 0 8px; }.infoContent ul{ margin: 6px 0 0 18px; }/* Dicts modal — symmetric spacing around flags + list breathing + footer divider */
 #modal #langFlags, #modal .flagsRow{ margin:8px 0; padding:0 14px 14px; border-bottom:1px solid var(--border); }#modal .dictList{ margin-top:8px; padding-top:4px; padding-bottom:14px; max-height:230px; overflow-y:auto; }#modal .modalActions{ display:flex; justify-content:center; padding:14px 16px 20px; border-top:1px solid var(--border); }/* === Info modal: inset dividers to match Dicts modal === */
 #infoModal .modalFrame{ overflow:visible; }#infoModal .modalHeader{display: flex;
   align-items: center;
@@ -915,7 +914,7 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
 }
 
 /* === [PATCH 2025-10-14] Info modal scoped tweaks — safe === */
-#infoModal .aboutSep { margin: 8px 0 10px; height: 1px; background: var(--border); }
+#infoModal .aboutSep { margin: 8px 0 12px; height: 1px; background: var(--border); }
 #infoModal #panel-about:not(.hidden){ text-align: left;  display:flex !important; flex-direction:column !important; overflow-y:visible; }
 #infoModal .aboutGrid { justify-items: start; }
 #infoModal .aboutRow { display: grid; grid-template-columns: auto auto; align-items: center; gap: 8px; }
@@ -1006,8 +1005,7 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
   border: 2px solid #10b981 !important;
   color: var(--text) !important;
 }
-#infoModal .modalBody{      min-height: 240px; 
-  padding-bottom: 8px;}
+#infoModal .modalBody{      min-height: 240px; }
 
 
 #infoModal .modalFrame{ width: min(560px, 92vw) !important; }
@@ -1026,8 +1024,7 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
 #infoModal #panel-about .regBlock{ flex:0 0 auto !important;     margin:10px 0 12px !important; }
 #infoModal #panel-about .regRow{     margin-top:6px !important; }
 /* keep modal body min-height so layout has room to distribute */
-#infoModal .modalBody{      min-height: 240px; 
-  padding-bottom: 8px;}
+#infoModal .modalBody{      min-height: 240px; }
 
 
 
@@ -1037,7 +1034,3 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
 #infoModal #panel-about .regBlock{     margin:10px 0 12px !important; }
 #infoModal #panel-about .regRow{     margin-top:6px !important; }
 
-
-#infoModal .regBlock .actionsRow{
-  margin: 6px 0 4px;
-}
