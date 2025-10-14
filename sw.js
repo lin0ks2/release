@@ -3,7 +3,7 @@
  Version: 1.5 • Updated: 2025-10-10 • File: release-main/sw.js 
 ***************************************************************
 */
-const CACHE_VERSION = 'v1.0.4';
+const CACHE_VERSION = 'v1.0.5';
 const CACHE_NAME='lexitron-'+CACHE_VERSION;
 const CORE=[
   './','./index.html','./style.css','./site.webmanifest',
