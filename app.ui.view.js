@@ -1628,301 +1628,217 @@ if (document.readyState === 'loading') {
 // applyFromUI removed, handled by App.init()
 
 
-/* === Info Modal: "Информация" tabs + SW update checker (auto-injected) === */
+/* === Info Modal: Информация (обновлено 2025-10-14) === */
 (function(){
   try{
-    var modal = document.getElementById('infoModal');
+    const modal = document.getElementById('infoModal');
     if (!modal) return;
 
-    // Rebuild inner structure to tabs-based layout
-    modal.setAttribute('role','dialog');
-    modal.setAttribute('aria-modal','true');
-    modal.setAttribute('aria-labelledby','infoTitle');
-    modal.setAttribute('aria-describedby','infoTabs');
-
-    // Keep outer wrapper and replace its content
-    var frame = modal.querySelector('.modalFrame');
+    // Восстанавливаем фрейм
+    let frame = modal.querySelector('.modalFrame');
     if (!frame){
       frame = document.createElement('div');
       frame.className = 'modalFrame';
       modal.appendChild(frame);
     }
     frame.setAttribute('tabindex','-1');
-    frame.innerHTML = [
-      '<div class="modalHeader">',
-        '<div class="modalTitle" id="infoTitle">Информация</div>',
-        '<button class="iconBtn small" id="infoClose" aria-label="Закрыть">✖️</button>',
-      '</div>',
-      '<div id="infoTabs" class="tabs" role="tablist" aria-label="Информация">',
-        '<button class="tab active" id="tab-instr" role="tab" aria-controls="panel-instr" aria-selected="true" tabindex="0"></button>',
-        '<button class="tab" id="tab-about" role="tab" aria-controls="panel-about" aria-selected="false" tabindex="-1"></button>',
-      '</div>',
-      '<div class="modalBody">',
-        '<section id="panel-instr" class="tabPanel" role="tabpanel" aria-labelledby="tab-instr">',
-          '<div id="infoContent" class="infoContent scrollArea"></div>',
-          '<label class="dontShowRow" style="display:flex;align-items:center;gap:8px;margin-top:12px">',
-            '<input type="checkbox" id="infoDontShow">',
-            '<span data-i18n="dontShowAgain"></span>',
-          '</label>',
-        '</section>',
-        '<section id="panel-about" class="tabPanel hidden" role="tabpanel" aria-labelledby="tab-about">',
-          '<div class="aboutGrid">',
-            '<div class="aboutRow">',
-              '<div class="aboutLabel" data-i18n="version">Версия</div>',
-              '<div class="aboutValue"><span id="appVersion">—</span></div>',
-            '</div>',
-            '<div class="aboutRow">',
-              '<div class="aboutLabel" data-i18n="status">Статус</div>',
-              '<div class="aboutValue">',
-                '<span id="licStatus">—</span>',
-                '<span id="licUser" class="muted"></span>',
-              '</div>',
-            '</div>',
-          '</div>',
-          '<div class="actionsRow">',
-            '<button id="btnCheckUpdates" class="secondary"></button>',
-          '</div>',
-          '<div class="regBlock">',
-            '<label for="regKey" id="regKeyLabel"></label>',
-            '<div class="regRow">',
-              '<input id="regKey" type="text" inputmode="latin" autocomplete="off" placeholder="XXXX-XXXX-XXXX-XXXX">',
-              '<button id="btnRegister" class="primary"></button>',
-            '</div>',
-            '<div id="regHint" class="muted"></div>',
-          '</div>',
-        '</section>',
-      '</div>',
-      '<div class="modalActions" style="text-align:center">',
-        '<button id="infoOk" class="primary">OK</button>',
-      '</div>'
-    ].join('');
 
-    // Helpers
-    function tr(){
-      var lang = (window.App && App.settings && App.settings.lang) || 'uk';
-      var t = (window.I18N && I18N[lang]) || (window.I18N && I18N.uk) || {};
-      // Defaults if keys missing
+    // Новая разметка без чекбокса
+    frame.innerHTML = `
+      <div class="modalHeader">
+        <div class="modalTitle" id="infoTitle">Информация</div>
+        <button class="iconBtn small" id="infoClose" aria-label="Закрыть">✖️</button>
+      </div>
+      <div id="infoTabs" class="tabs" role="tablist" aria-label="Информация">
+        <button class="tab active" id="tab-instr" role="tab" aria-controls="panel-instr" aria-selected="true" tabindex="0"></button>
+        <button class="tab" id="tab-about" role="tab" aria-controls="panel-about" aria-selected="false" tabindex="-1"></button>
+      </div>
+      <div class="modalBody">
+        <section id="panel-instr" class="tabPanel" role="tabpanel" aria-labelledby="tab-instr">
+          <div id="infoContent" class="infoContent scrollArea"></div>
+        </section>
+
+        <section id="panel-about" class="tabPanel hidden" role="tabpanel" aria-labelledby="tab-about">
+          <div class="aboutGrid">
+            <div class="aboutRow">
+              <div class="aboutLabel" data-i18n="version">Версия</div>
+              <div class="aboutValue"><span id="appVersion">—</span></div>
+            </div>
+            <div class="aboutRow">
+              <div class="aboutLabel" data-i18n="status">Статус</div>
+              <div class="aboutValue">
+                <span id="licStatus">—</span>
+                <span id="licUser" class="muted"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="actionsRow">
+            <button id="btnCheckUpdates" class="btnPill"></button>
+          </div>
+
+          <div class="regBlock">
+            <label for="regKey" id="regKeyLabel"></label>
+            <div class="regRow">
+              <input id="regKey" type="text" inputmode="latin" autocomplete="off" placeholder="XXXX-XXXX-XXXX-XXXX">
+              <button id="btnRegister" class="btnPill"></button>
+            </div>
+            <div id="regHint" class="muted"></div>
+          </div>
+        </section>
+      </div>
+
+      <div class="modalActions" style="text-align:center">
+        <button id="infoOk" class="primary">OK</button>
+      </div>
+    `;
+
+    /* === Основная логика === */
+
+    const tabInstr = document.getElementById('tab-instr');
+    const tabAbout = document.getElementById('tab-about');
+    const panelInstr = document.getElementById('panel-instr');
+    const panelAbout = document.getElementById('panel-about');
+    const okBtn = document.getElementById('infoOk');
+    const xBtn = document.getElementById('infoClose');
+    const btnUpdates = document.getElementById('btnCheckUpdates');
+    const btnRegister = document.getElementById('btnRegister');
+    const regKeyEl = document.getElementById('regKey');
+    const regHintEl = document.getElementById('regHint');
+    const regKeyLabel = document.getElementById('regKeyLabel');
+    const bodyEl = document.getElementById('infoContent');
+    const verEl = document.getElementById('appVersion');
+    const licStatusEl = document.getElementById('licStatus');
+    const licUserEl = document.getElementById('licUser');
+
+    const T = (()=>{
+      const lang = (window.App && App.settings && App.settings.lang) || 'uk';
+      const base = (window.I18N && I18N[lang]) || (window.I18N && I18N.uk) || {};
       return Object.assign({
-        infoTitle: (lang==='en'?'Information': (lang==='uk'?'Інформація':'Информация')),
-        tabInstruction: (lang==='en'?'Instruction': (lang==='uk'?'Інструкція':'Инструкция')),
-        tabAbout: (lang==='en'?'About': (lang==='uk'?'Про програму':'О программе')),
-        dontShowAgain: (lang==='en'?'Don’t show again': (lang==='uk'?'Більше не показувати':'Не показывать снова')),
-        ok: 'OK',
-        checkUpdates: (lang==='en'?'Check for updates': (lang==='uk'?'Перевірити оновлення':'Проверить обновления')),
-        regKey: (lang==='en'?'Registration key': (lang==='uk'?'Ключ реєстрації':'Ключ регистрации')),
-        register: (lang==='en'?'Register': (lang==='uk'?'Зареєструвати':'Зарегистрировать')),
-        version: (lang==='en'?'Version': (lang==='uk'?'Версія':'Версия')),
-        status: (lang==='en'?'Status': (lang==='uk'?'Статус':'Статус')),
-        licensedTo: (lang==='en'?'Licensed to: {name}': (lang==='uk'?'Зареєстровано на: {name}':'Зарегистрировано на: {name}')),
-        notLicensed: (lang==='en'?'Not licensed': (lang==='uk'?'Не зареєстровано':'Не зарегистрировано')),
-        licensed: (lang==='en'?'Licensed': (lang==='uk'?'Зареєстровано':'Зарегистрировано')),
-        regStubHint: (lang==='en'?'Placeholder — activation logic will be added later.': (lang==='uk'?'Поки заглушка — логіку активації додамо пізніше.':'Пока заглушка — логика активации будет добавлена позже.')),
-      }, t);
+        infoTitle:'Информация',
+        tabInstruction:'Инструкция',
+        tabAbout:'О программе',
+        ok:'OK',
+        checkUpdates:'Проверить обновления',
+        regKey:'Ключ регистрации',
+        register:'Зарегистрировать',
+        version:'Версия',
+        status:'Статус',
+        licensed:'Зарегистрировано',
+        notLicensed:'Не зарегистрировано',
+        regStubHint:'Пока заглушка — логика активации будет добавлена позже.'
+      }, base);
+    })();
+
+    // Жестко пробиваем заголовок при показе
+    function fillTitle(){
+      const title = T.infoTitle || 'Информация';
+      modal.querySelectorAll('.modalTitle, #infoTitle').forEach(n => n.textContent = title);
     }
-    function setText(el, text){ if (el) el.textContent = String(text||''); }
 
-    // Grab nodes
-    var titleEl = document.getElementById('infoTitle');
-    var okBtn = document.getElementById('infoOk');
-    var xBtn = document.getElementById('infoClose');
-    var tabInstr = document.getElementById('tab-instr');
-    var tabAbout = document.getElementById('tab-about');
-    var panelInstr = document.getElementById('panel-instr');
-    var panelAbout = document.getElementById('panel-about');
-    var bodyEl = document.getElementById('infoContent');
-    var dontShowEl = document.getElementById('infoDontShow');
-    var verEl = document.getElementById('appVersion');
-    var licStatusEl = document.getElementById('licStatus');
-    var licUserEl = document.getElementById('licUser');
-    var btnUpdates = document.getElementById('btnCheckUpdates');
-    var regKeyEl = document.getElementById('regKey');
-    var btnRegister = document.getElementById('btnRegister');
-    var regHintEl = document.getElementById('regHint');
-    var regKeyLabel = document.getElementById('regKeyLabel');
-
-    // Fill texts
-    var T = tr();
-    setText(titleEl, T.infoTitle);
+    const setText = (el,txt)=> el && (el.textContent = txt);
     setText(okBtn, T.ok);
     setText(tabInstr, T.tabInstruction);
     setText(tabAbout, T.tabAbout);
-    var span = dontShowEl && dontShowEl.parentElement && dontShowEl.parentElement.querySelector('span[data-i18n="dontShowAgain"]');
-    if (span) setText(span, T.dontShowAgain);
     setText(btnUpdates, T.checkUpdates);
     setText(btnRegister, T.register);
+    setText(regKeyLabel, T.regKey);
     setText(regHintEl, T.regStubHint);
-    if (regKeyLabel){ setText(regKeyLabel, T.regKey); }
 
-    // Instruction content
-    if (Array.isArray(T.infoSteps) && bodyEl){
-      bodyEl.innerHTML = '<ul>' + T.infoSteps.map(function(s){return '<li>'+ String(s||'') +'</li>';}).join('') + '</ul>';
-    }
+    // Инструкция
+    if (Array.isArray(T.infoSteps))
+      bodyEl.innerHTML = '<ul>' + T.infoSteps.map(s=>`<li>${s}</li>`).join('') + '</ul>';
 
-    // App meta
-    function getAppMeta(){
-      var version = (window.App && App.meta && App.meta.version)
-                 || (window.App && App.version)
-                 || (window.__BUILD_VERSION)
-                 || (window.App && App.APP_VER)
-                 || '—';
-      var isActivated = false, userName = '';
-      if (window.App && App.lic){
-        isActivated = !!App.lic.isActivated;
-        userName = App.lic.userName || '';
-      } else {
-        try{
-          isActivated = (localStorage.getItem('lexitron.lic.activated') === 'true');
-          userName = localStorage.getItem('lexitron.lic.name') || '';
-        }catch(e){}
-      }
-      return { version: version, isActivated: isActivated, userName: userName };
-    }
-    var meta = getAppMeta();
+    // Версия / статус
+    const meta = {
+      version: (window.App && (App.meta && App.meta.version)) || (window.App && App.version) || (window.App && App.APP_VER) || '—',
+      isActivated: !!(window.App && App.lic && App.lic.isActivated),
+      userName: (window.App && App.lic && App.lic.userName) || ''
+    };
     setText(verEl, meta.version);
     if (meta.isActivated){
       setText(licStatusEl, T.licensed);
-      licStatusEl.classList.remove('muted');
-      if (meta.userName){
-        licUserEl.textContent = '— ' + (T.licensedTo ? T.licensedTo.replace('{name}', meta.userName) : meta.userName);
-        licUserEl.classList.remove('hidden');
-      }
+      if (meta.userName) licUserEl.textContent = '— ' + meta.userName;
     } else {
       setText(licStatusEl, T.notLicensed);
       licStatusEl.classList.add('muted');
-      licUserEl.textContent = '';
-      licUserEl.classList.add('hidden');
     }
 
-    // Tabs behavior
+    // Табы
     function switchTab(which){
-      var onInstr = (which === 'instr');
-      tabInstr.classList.toggle('active', onInstr);
-      tabAbout.classList.toggle('active', !onInstr);
-      tabInstr.setAttribute('aria-selected', onInstr?'true':'false');
-      tabAbout.setAttribute('aria-selected', !onInstr?'true':'false');
-      tabInstr.tabIndex = onInstr ? 0 : -1;
-      tabAbout.tabIndex = !onInstr ? 0 : -1;
-      panelInstr.classList.toggle('hidden', !onInstr);
-      panelAbout.classList.toggle('hidden', onInstr);
-      (onInstr ? tabInstr : tabAbout).focus();
+      const instr = which==='instr';
+      tabInstr.classList.toggle('active', instr);
+      tabAbout.classList.toggle('active', !instr);
+      panelInstr.classList.toggle('hidden', !instr);
+      panelAbout.classList.toggle('hidden', instr);
     }
-    tabInstr.addEventListener('click', function(){ switchTab('instr'); });
-    tabAbout.addEventListener('click', function(){ switchTab('about'); });
+    tabInstr.addEventListener('click', ()=> switchTab('instr'));
+    tabAbout.addEventListener('click', ()=> switchTab('about'));
 
-    // Close / OK
-    function close(){
-      modal.classList.add('hidden');
-      try{
-        if (dontShowEl && dontShowEl.checked) localStorage.setItem('lexitron.info.dismissed', 'true');
-        else localStorage.setItem('lexitron.info.dismissed', 'false');
-      }catch(e){}
-    }
+    // Открытие/закрытие
+    function close(){ modal.classList.add('hidden'); }
     function open(){
+      fillTitle();
       modal.classList.remove('hidden');
-      setTimeout(function(){ try{ frame && frame.focus(); }catch(e){} }, 0);
+      setTimeout(()=>{ try{ frame && frame.focus(); }catch(_){} }, 0);
     }
-    var okBtnNode = okBtn; var xBtnNode = xBtn;
-    okBtnNode && okBtnNode.addEventListener('click', close);
-    xBtnNode && xBtnNode.addEventListener('click', close);
-    modal.addEventListener('click', function(e){ if (e.target === modal) close(); });
+    okBtn && okBtn.addEventListener('click', close);
+    xBtn && xBtn.addEventListener('click', close);
+    modal.addEventListener('click', e=>{ if (e.target === modal) close(); });
 
-    // Keyboard
-    function onKey(e){
-      if (e.key === 'Escape'){ e.preventDefault(); close(); }
-      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft'){
-        var onInstr = tabInstr.classList.contains('active');
-        switchTab(onInstr ? 'about' : 'instr');
-        e.preventDefault();
+    document.addEventListener('keydown', e=>{
+      if (e.key==='Escape') close();
+      if (e.key==='ArrowLeft' || e.key==='ArrowRight'){
+        switchTab(tabInstr.classList.contains('active') ? 'about' : 'instr');
       }
-    }
-    document.addEventListener('keydown', onKey, true);
+    });
 
-    // Updates: SW + version compare
-    function currentVersion(){
-      return (window.App && (App.APP_VER || App.version)) || '—';
-    }
+    // Проверка обновлений
     async function fetchRemoteVersion(){
       try{
-        var res = await fetch('./app.core.js?ts=' + Date.now(), { cache: 'no-store' });
-        var txt = await res.text();
-        var m = txt.match(/APP_VER\s*=\s*['"]([^'"]+)['"]/);
+        const r = await fetch('./app.core.js?ts=' + Date.now(), { cache: 'no-store' });
+        const t = await r.text();
+        const m = t.match(/APP_VER\s*=\s*['"]([^'"]+)['"]/);
         return m ? m[1] : null;
-      }catch(e){ return null; }
+      }catch{ return null; }
     }
     async function updateServiceWorker(){
-      if (!('serviceWorker' in navigator)) return { waiting:false, reg:null };
-      try{
-        var reg = await navigator.serviceWorker.getRegistration();
-        if (!reg) return { waiting:false, reg:null };
-        await reg.update().catch(function(){});
-        if (reg.waiting) return { waiting:true, reg:reg };
-        if (reg.installing){
-          await new Promise(function(resolve){
-            var sw = reg.installing;
-            sw.addEventListener('statechange', function(){
-              if (sw.state === 'installed') resolve();
-            });
-            if (sw.state === 'installed') resolve();
-          });
-          return { waiting: !!reg.waiting, reg: reg };
-        }
-        return { waiting:false, reg:reg };
-      }catch(e){ return { waiting:false, reg:null }; }
+      if (!('serviceWorker' in navigator)) return { waiting:false };
+      const reg = await navigator.serviceWorker.getRegistration();
+      if (!reg) return { waiting:false };
+      await reg.update().catch(()=>{});
+      if (reg.waiting) return { waiting:true, reg };
+      return { waiting:false, reg };
     }
     async function applyUpdate(reg){
-      try{
-        var worker = reg.waiting || reg.installing || reg.active;
-        if (!worker) return;
-        var changed = new Promise(function(resolve){
-          navigator.serviceWorker.addEventListener('controllerchange', function(){ resolve(); }, { once:true });
-        });
-        worker.postMessage({ type: 'SKIP_WAITING' });
-        await changed;
-        location.reload();
-      }catch(e){}
+      const worker = reg.waiting || reg.installing;
+      if (!worker) return;
+      const changed = new Promise(resolve => {
+        navigator.serviceWorker.addEventListener('controllerchange', () => resolve(), { once:true });
+      });
+      worker.postMessage({ type:'SKIP_WAITING' });
+      await changed; location.reload();
     }
-    btnUpdates && btnUpdates.addEventListener('click', async function(){
-      var cver = currentVersion();
-      var results = await Promise.all([fetchRemoteVersion(), updateServiceWorker()]);
-      var rver = results[0], sw = results[1];
-      var hasNew = rver && cver && (rver !== cver);
-      var canApply = sw.waiting && sw.reg;
-      if (hasNew || canApply){
-        var msg = "Доступна новая версия" + (rver?(" ("+rver+")"):"") + ". Текущая: " + cver + ". Перезагрузить для обновления?";
-        if (confirm(msg)){
-          if (canApply) await applyUpdate(sw.reg);
+    btnUpdates && btnUpdates.addEventListener('click', async ()=>{
+      const current = meta.version;
+      const remote = await fetchRemoteVersion();
+      const sw = await updateServiceWorker();
+      const newer = remote && remote !== current;
+      if (newer || sw.waiting){
+        if (confirm(`Доступна новая версия (${remote}). Перезагрузить?`)){
+          if (sw.waiting) await applyUpdate(sw.reg);
           else location.reload();
         }
       } else {
-        alert("Обновлений не найдено. Текущая версия: " + cver + (rver?(" (сервер: "+rver+")"):"") + ".");
+        alert(`Обновлений нет. Текущая версия: ${current}.`);
       }
     });
 
-    // Stub: registration flow (keeps placeholder, stores last key attempt)
-    btnRegister && btnRegister.addEventListener('click', function(){
-      var key = (regKeyEl && regKeyEl.value || '').trim();
-      if (!key){ alert('Введите ключ регистрации'); regKeyEl && regKeyEl.focus(); return; }
-      if (window.App && App.lic && typeof App.lic.register === 'function'){
-        App.lic.register(key);
-        return;
-      }
-      try{ localStorage.setItem('lexitron.lic.lastAttempt', key); }catch(e){}
+    // Регистрация (заглушка)
+    btnRegister && btnRegister.addEventListener('click', ()=>{
+      const key = (regKeyEl && regKeyEl.value || '').trim();
+      if (!key) return alert('Введите ключ регистрации');
       alert('Проверка ключа пока не реализована.');
     });
-
-    // Autopopup once after setup
-    try{
-      var setupDone = localStorage.getItem('lexitron.setupDone') === 'true';
-      var hidden = localStorage.getItem('lexitron.info.dismissed') === 'true';
-      if (setupDone && !hidden){
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', open, { once:true });
-        } else {
-          open();
-        }
-      }
-    }catch(e){}
-  }catch(e){
-    console.warn('Info modal injection failed', e);
-  }
+  }catch(e){ console.warn('Info modal error', e); }
 })();
