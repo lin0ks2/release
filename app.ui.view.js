@@ -428,10 +428,7 @@ if (!w) return;
       const dictKey = (key === 'mistakes')
         ? ((w && (w._mistakeSourceKey || (App.Mistakes && App.Mistakes.sourceKeyFor && App.Mistakes.sourceKeyFor(w.id)))) || 'mistakes')
         : key;
-      const __isFav = (App.isFavorite && App.isFavorite(dictKey, w.id));
-      D.favBtn.textContent = __isFav ? '♥' : '♡';
-      if (D.favBtn.classList) D.favBtn.classList.toggle('is-fav', !!__isFav);
-      D.favBtn.setAttribute('aria-pressed', __isFav ? 'true' : 'false');
+      D.favBtn.textContent = (App.isFavorite && App.isFavorite(dictKey, w.id)) ? '♥' : '♡';
     }
 
     addIDontKnowButton();
@@ -590,14 +587,9 @@ if (!w) return;
       ? ((w && (w._mistakeSourceKey || (App.Mistakes && App.Mistakes.sourceKeyFor && App.Mistakes.sourceKeyFor(w.id)))) || 'mistakes')
       : activeKey;
 
-    App.toggleFavorite && var __willFav = !(App.isFavorite && App.isFavorite(dictKey, w.id));
-App.toggleFavorite(dictKey, w.id);
-    if (D.favBtn){ D.favBtn.textContent = __willFav ? '♥' : '♡'; if (D.favBtn.classList) D.favBtn.classList.toggle('is-fav', __willFav); D.favBtn.setAttribute('aria-pressed', __willFav ? 'true' : 'false'); }
-if (D.favBtn) {
-      const __isFav = (App.isFavorite && App.isFavorite(dictKey, w.id));
-      D.favBtn.textContent = __isFav ? '♥' : '♡';
-      if (D.favBtn.classList) D.favBtn.classList.toggle('is-fav', !!__isFav);
-      D.favBtn.setAttribute('aria-pressed', __isFav ? 'true' : 'false');
+    App.toggleFavorite && App.toggleFavorite(dictKey, w.id);
+    if (D.favBtn) {
+      D.favBtn.textContent = (App.isFavorite && App.isFavorite(dictKey, w.id)) ? '♥' : '♡';
       D.favBtn.style.transform = 'scale(1.2)';
       setTimeout(() => { D.favBtn.style.transform = 'scale(1)'; }, 140);
     }
