@@ -886,8 +886,3 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
 .heart.is-fav svg * { fill: currentColor !important; stroke: currentColor !important; }
 :root[data-theme="dark"] .heart { color: var(--icon-muted, #9aa3af) !important; }
 :root[data-theme="dark"] .heart.is-fav { color: var(--icon-active, #facc15) !important; }
-
-/* keep about centered */
-#panel-about{text-align:center}
-.aboutGrid{justify-items:center}
-.aboutRow{grid-template-columns:auto auto}
