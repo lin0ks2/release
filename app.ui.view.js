@@ -657,46 +657,7 @@ if (!w) return;
     })();
 
     for (const k of Object.keys(App.dictRegistry.user || {})) host.appendChild(makeDictRow(k));
-
-    // --- AUTO-SELECT DEFAULT DECK (safe) ---
-    (function autoSelectDefaultDeck(){
-      try{
-        const host = D && D.dictListHost;
-        if (!host) return;
-
-        if (__DictsUI && __DictsUI.userPickedDeck) return;
-
-        const lg = (App.settings && App.settings.dictsLangFilter) || null;
-        const rows = Array.from(host.querySelectorAll('.dictRow'));
-        if (!rows.length) return;
-
-        const anyActive = rows.some(r => r.classList.contains('active'));
-        if (anyActive) return;
-
-        const isVirtual = (k) => /^(fav|favorites|mistakes)$/.test(String(k||'').toLowerCase());
-        const normalRows = rows.filter(r => !isVirtual(r.dataset.key));
-        if (!normalRows.length) return;
-
-        const keyLangSafe = (k) => {
-          try { return (typeof keyLang==='function') ? keyLang(k) : (String(k).split('_')[0]||''); }
-          catch(_) { return ''; }
-        };
-
-        const rowsSameLang = lg ? normalRows.filter(r => keyLangSafe(r.dataset.key) === lg) : normalRows;
-        if (!rowsSameLang.length) return;
-
-        const remembered = (App.settings && App.settings.lastActivePerLang && lg) ? App.settings.lastActivePerLang[lg] : null;
-        let target = null;
-        if (remembered) target = rowsSameLang.find(r => r.dataset.key === remembered) || null;
-        if (!target) target = rowsSameLang.find(r => /_verbs$/i.test(String(r.dataset.key))) || null;
-        if (!target) target = rowsSameLang[0];
-
-        if (target && !target.classList.contains('disabled')) {
-          target.click();
-        }
-      }catch(_){}
-    })();
-}
+  }
 
   function canShowFav() {
   try {
@@ -832,9 +793,7 @@ if (!w) return;
 
     row.addEventListener('click', () => {
       
-      
-      __DictsUI.userPickedDeck = true;
-try{ localStorage.setItem('lexitron.deckKey', String(key)); localStorage.setItem('lexitron.activeKey', String(key)); }catch(_){}
+      try{ localStorage.setItem('lexitron.deckKey', String(key)); localStorage.setItem('lexitron.activeKey', String(key)); }catch(_){}
       try{ if (typeof updateSpoilerHeader==='function') updateSpoilerHeader(); }catch(_){ }
       try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
 if (row.classList.contains('disabled')) return;
@@ -882,8 +841,7 @@ if (row.classList.contains('disabled')) return;
       b.addEventListener('click', () => {
         App.settings.dictsLangFilter = lg;
         App.saveSettings && App.saveSettings(App.settings);
-        __DictsUI.userPickedDeck = false;
-renderDictList();
+        renderDictList();
         App.renderLangFlags();
       });
       D.langFlags.appendChild(b);
@@ -1093,10 +1051,6 @@ renderDictList();
  */
 (function(){
   'use strict';
-
-// Global dicts UI state
-window.__DictsUI = window.__DictsUI || {};
-__DictsUI.userPickedDeck = false;
   var D=document,W=window;
 
   // CSS
@@ -1672,3 +1626,303 @@ if (document.readyState === 'loading') {
 })();
 
 // applyFromUI removed, handled by App.init()
+
+
+/* === Info Modal: "Информация" tabs + SW update checker (auto-injected) === */
+(function(){
+  try{
+    var modal = document.getElementById('infoModal');
+    if (!modal) return;
+
+    // Rebuild inner structure to tabs-based layout
+    modal.setAttribute('role','dialog');
+    modal.setAttribute('aria-modal','true');
+    modal.setAttribute('aria-labelledby','infoTitle');
+    modal.setAttribute('aria-describedby','infoTabs');
+
+    // Keep outer wrapper and replace its content
+    var frame = modal.querySelector('.modalFrame');
+    if (!frame){
+      frame = document.createElement('div');
+      frame.className = 'modalFrame';
+      modal.appendChild(frame);
+    }
+    frame.setAttribute('tabindex','-1');
+    frame.innerHTML = [
+      '<div class="modalHeader">',
+        '<div class="modalTitle" id="infoTitle">Информация</div>',
+        '<button class="iconBtn small" id="infoClose" aria-label="Закрыть">✖️</button>',
+      '</div>',
+      '<div id="infoTabs" class="tabs" role="tablist" aria-label="Информация">',
+        '<button class="tab active" id="tab-instr" role="tab" aria-controls="panel-instr" aria-selected="true" tabindex="0"></button>',
+        '<button class="tab" id="tab-about" role="tab" aria-controls="panel-about" aria-selected="false" tabindex="-1"></button>',
+      '</div>',
+      '<div class="modalBody">',
+        '<section id="panel-instr" class="tabPanel" role="tabpanel" aria-labelledby="tab-instr">',
+          '<div id="infoContent" class="infoContent scrollArea"></div>',
+          '<label class="dontShowRow" style="display:flex;align-items:center;gap:8px;margin-top:12px">',
+            '<input type="checkbox" id="infoDontShow">',
+            '<span data-i18n="dontShowAgain"></span>',
+          '</label>',
+        '</section>',
+        '<section id="panel-about" class="tabPanel hidden" role="tabpanel" aria-labelledby="tab-about">',
+          '<div class="aboutGrid">',
+            '<div class="aboutRow">',
+              '<div class="aboutLabel" data-i18n="version">Версия</div>',
+              '<div class="aboutValue"><span id="appVersion">—</span></div>',
+            '</div>',
+            '<div class="aboutRow">',
+              '<div class="aboutLabel" data-i18n="status">Статус</div>',
+              '<div class="aboutValue">',
+                '<span id="licStatus">—</span>',
+                '<span id="licUser" class="muted"></span>',
+              '</div>',
+            '</div>',
+          '</div>',
+          '<div class="actionsRow">',
+            '<button id="btnCheckUpdates" class="secondary"></button>',
+          '</div>',
+          '<div class="regBlock">',
+            '<label for="regKey" id="regKeyLabel"></label>',
+            '<div class="regRow">',
+              '<input id="regKey" type="text" inputmode="latin" autocomplete="off" placeholder="XXXX-XXXX-XXXX-XXXX">',
+              '<button id="btnRegister" class="primary"></button>',
+            '</div>',
+            '<div id="regHint" class="muted"></div>',
+          '</div>',
+        '</section>',
+      '</div>',
+      '<div class="modalActions" style="text-align:center">',
+        '<button id="infoOk" class="primary">OK</button>',
+      '</div>'
+    ].join('');
+
+    // Helpers
+    function tr(){
+      var lang = (window.App && App.settings && App.settings.lang) || 'uk';
+      var t = (window.I18N && I18N[lang]) || (window.I18N && I18N.uk) || {};
+      // Defaults if keys missing
+      return Object.assign({
+        infoTitle: (lang==='en'?'Information': (lang==='uk'?'Інформація':'Информация')),
+        tabInstruction: (lang==='en'?'Instruction': (lang==='uk'?'Інструкція':'Инструкция')),
+        tabAbout: (lang==='en'?'About': (lang==='uk'?'Про програму':'О программе')),
+        dontShowAgain: (lang==='en'?'Don’t show again': (lang==='uk'?'Більше не показувати':'Не показывать снова')),
+        ok: 'OK',
+        checkUpdates: (lang==='en'?'Check for updates': (lang==='uk'?'Перевірити оновлення':'Проверить обновления')),
+        regKey: (lang==='en'?'Registration key': (lang==='uk'?'Ключ реєстрації':'Ключ регистрации')),
+        register: (lang==='en'?'Register': (lang==='uk'?'Зареєструвати':'Зарегистрировать')),
+        version: (lang==='en'?'Version': (lang==='uk'?'Версія':'Версия')),
+        status: (lang==='en'?'Status': (lang==='uk'?'Статус':'Статус')),
+        licensedTo: (lang==='en'?'Licensed to: {name}': (lang==='uk'?'Зареєстровано на: {name}':'Зарегистрировано на: {name}')),
+        notLicensed: (lang==='en'?'Not licensed': (lang==='uk'?'Не зареєстровано':'Не зарегистрировано')),
+        licensed: (lang==='en'?'Licensed': (lang==='uk'?'Зареєстровано':'Зарегистрировано')),
+        regStubHint: (lang==='en'?'Placeholder — activation logic will be added later.': (lang==='uk'?'Поки заглушка — логіку активації додамо пізніше.':'Пока заглушка — логика активации будет добавлена позже.')),
+      }, t);
+    }
+    function setText(el, text){ if (el) el.textContent = String(text||''); }
+
+    // Grab nodes
+    var titleEl = document.getElementById('infoTitle');
+    var okBtn = document.getElementById('infoOk');
+    var xBtn = document.getElementById('infoClose');
+    var tabInstr = document.getElementById('tab-instr');
+    var tabAbout = document.getElementById('tab-about');
+    var panelInstr = document.getElementById('panel-instr');
+    var panelAbout = document.getElementById('panel-about');
+    var bodyEl = document.getElementById('infoContent');
+    var dontShowEl = document.getElementById('infoDontShow');
+    var verEl = document.getElementById('appVersion');
+    var licStatusEl = document.getElementById('licStatus');
+    var licUserEl = document.getElementById('licUser');
+    var btnUpdates = document.getElementById('btnCheckUpdates');
+    var regKeyEl = document.getElementById('regKey');
+    var btnRegister = document.getElementById('btnRegister');
+    var regHintEl = document.getElementById('regHint');
+    var regKeyLabel = document.getElementById('regKeyLabel');
+
+    // Fill texts
+    var T = tr();
+    setText(titleEl, T.infoTitle);
+    setText(okBtn, T.ok);
+    setText(tabInstr, T.tabInstruction);
+    setText(tabAbout, T.tabAbout);
+    var span = dontShowEl && dontShowEl.parentElement && dontShowEl.parentElement.querySelector('span[data-i18n="dontShowAgain"]');
+    if (span) setText(span, T.dontShowAgain);
+    setText(btnUpdates, T.checkUpdates);
+    setText(btnRegister, T.register);
+    setText(regHintEl, T.regStubHint);
+    if (regKeyLabel){ setText(regKeyLabel, T.regKey); }
+
+    // Instruction content
+    if (Array.isArray(T.infoSteps) && bodyEl){
+      bodyEl.innerHTML = '<ul>' + T.infoSteps.map(function(s){return '<li>'+ String(s||'') +'</li>';}).join('') + '</ul>';
+    }
+
+    // App meta
+    function getAppMeta(){
+      var version = (window.App && App.meta && App.meta.version)
+                 || (window.App && App.version)
+                 || (window.__BUILD_VERSION)
+                 || (window.App && App.APP_VER)
+                 || '—';
+      var isActivated = false, userName = '';
+      if (window.App && App.lic){
+        isActivated = !!App.lic.isActivated;
+        userName = App.lic.userName || '';
+      } else {
+        try{
+          isActivated = (localStorage.getItem('lexitron.lic.activated') === 'true');
+          userName = localStorage.getItem('lexitron.lic.name') || '';
+        }catch(e){}
+      }
+      return { version: version, isActivated: isActivated, userName: userName };
+    }
+    var meta = getAppMeta();
+    setText(verEl, meta.version);
+    if (meta.isActivated){
+      setText(licStatusEl, T.licensed);
+      licStatusEl.classList.remove('muted');
+      if (meta.userName){
+        licUserEl.textContent = '— ' + (T.licensedTo ? T.licensedTo.replace('{name}', meta.userName) : meta.userName);
+        licUserEl.classList.remove('hidden');
+      }
+    } else {
+      setText(licStatusEl, T.notLicensed);
+      licStatusEl.classList.add('muted');
+      licUserEl.textContent = '';
+      licUserEl.classList.add('hidden');
+    }
+
+    // Tabs behavior
+    function switchTab(which){
+      var onInstr = (which === 'instr');
+      tabInstr.classList.toggle('active', onInstr);
+      tabAbout.classList.toggle('active', !onInstr);
+      tabInstr.setAttribute('aria-selected', onInstr?'true':'false');
+      tabAbout.setAttribute('aria-selected', !onInstr?'true':'false');
+      tabInstr.tabIndex = onInstr ? 0 : -1;
+      tabAbout.tabIndex = !onInstr ? 0 : -1;
+      panelInstr.classList.toggle('hidden', !onInstr);
+      panelAbout.classList.toggle('hidden', onInstr);
+      (onInstr ? tabInstr : tabAbout).focus();
+    }
+    tabInstr.addEventListener('click', function(){ switchTab('instr'); });
+    tabAbout.addEventListener('click', function(){ switchTab('about'); });
+
+    // Close / OK
+    function close(){
+      modal.classList.add('hidden');
+      try{
+        if (dontShowEl && dontShowEl.checked) localStorage.setItem('lexitron.info.dismissed', 'true');
+        else localStorage.setItem('lexitron.info.dismissed', 'false');
+      }catch(e){}
+    }
+    function open(){
+      modal.classList.remove('hidden');
+      setTimeout(function(){ try{ frame && frame.focus(); }catch(e){} }, 0);
+    }
+    var okBtnNode = okBtn; var xBtnNode = xBtn;
+    okBtnNode && okBtnNode.addEventListener('click', close);
+    xBtnNode && xBtnNode.addEventListener('click', close);
+    modal.addEventListener('click', function(e){ if (e.target === modal) close(); });
+
+    // Keyboard
+    function onKey(e){
+      if (e.key === 'Escape'){ e.preventDefault(); close(); }
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft'){
+        var onInstr = tabInstr.classList.contains('active');
+        switchTab(onInstr ? 'about' : 'instr');
+        e.preventDefault();
+      }
+    }
+    document.addEventListener('keydown', onKey, true);
+
+    // Updates: SW + version compare
+    function currentVersion(){
+      return (window.App && (App.APP_VER || App.version)) || '—';
+    }
+    async function fetchRemoteVersion(){
+      try{
+        var res = await fetch('./app.core.js?ts=' + Date.now(), { cache: 'no-store' });
+        var txt = await res.text();
+        var m = txt.match(/APP_VER\s*=\s*['"]([^'"]+)['"]/);
+        return m ? m[1] : null;
+      }catch(e){ return null; }
+    }
+    async function updateServiceWorker(){
+      if (!('serviceWorker' in navigator)) return { waiting:false, reg:null };
+      try{
+        var reg = await navigator.serviceWorker.getRegistration();
+        if (!reg) return { waiting:false, reg:null };
+        await reg.update().catch(function(){});
+        if (reg.waiting) return { waiting:true, reg:reg };
+        if (reg.installing){
+          await new Promise(function(resolve){
+            var sw = reg.installing;
+            sw.addEventListener('statechange', function(){
+              if (sw.state === 'installed') resolve();
+            });
+            if (sw.state === 'installed') resolve();
+          });
+          return { waiting: !!reg.waiting, reg: reg };
+        }
+        return { waiting:false, reg:reg };
+      }catch(e){ return { waiting:false, reg:null }; }
+    }
+    async function applyUpdate(reg){
+      try{
+        var worker = reg.waiting || reg.installing || reg.active;
+        if (!worker) return;
+        var changed = new Promise(function(resolve){
+          navigator.serviceWorker.addEventListener('controllerchange', function(){ resolve(); }, { once:true });
+        });
+        worker.postMessage({ type: 'SKIP_WAITING' });
+        await changed;
+        location.reload();
+      }catch(e){}
+    }
+    btnUpdates && btnUpdates.addEventListener('click', async function(){
+      var cver = currentVersion();
+      var results = await Promise.all([fetchRemoteVersion(), updateServiceWorker()]);
+      var rver = results[0], sw = results[1];
+      var hasNew = rver && cver && (rver !== cver);
+      var canApply = sw.waiting && sw.reg;
+      if (hasNew || canApply){
+        var msg = "Доступна новая версия" + (rver?(" ("+rver+")"):"") + ". Текущая: " + cver + ". Перезагрузить для обновления?";
+        if (confirm(msg)){
+          if (canApply) await applyUpdate(sw.reg);
+          else location.reload();
+        }
+      } else {
+        alert("Обновлений не найдено. Текущая версия: " + cver + (rver?(" (сервер: "+rver+")"):"") + ".");
+      }
+    });
+
+    // Stub: registration flow (keeps placeholder, stores last key attempt)
+    btnRegister && btnRegister.addEventListener('click', function(){
+      var key = (regKeyEl && regKeyEl.value || '').trim();
+      if (!key){ alert('Введите ключ регистрации'); regKeyEl && regKeyEl.focus(); return; }
+      if (window.App && App.lic && typeof App.lic.register === 'function'){
+        App.lic.register(key);
+        return;
+      }
+      try{ localStorage.setItem('lexitron.lic.lastAttempt', key); }catch(e){}
+      alert('Проверка ключа пока не реализована.');
+    });
+
+    // Autopopup once after setup
+    try{
+      var setupDone = localStorage.getItem('lexitron.setupDone') === 'true';
+      var hidden = localStorage.getItem('lexitron.info.dismissed') === 'true';
+      if (setupDone && !hidden){
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', open, { once:true });
+        } else {
+          open();
+        }
+      }
+    }catch(e){}
+  }catch(e){
+    console.warn('Info modal injection failed', e);
+  }
+})();

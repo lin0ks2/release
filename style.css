@@ -886,3 +886,49 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
 .heart.is-fav svg * { fill: currentColor !important; stroke: currentColor !important; }
 :root[data-theme="dark"] .heart { color: var(--icon-muted, #9aa3af) !important; }
 :root[data-theme="dark"] .heart.is-fav { color: var(--icon-active, #facc15) !important; }
+
+
+/* === Info modal tabs & scroll (auto-injected) === */
+.tabs {
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px 0;
+  border-bottom: 1px solid rgba(0,0,0,.1);
+}
+.tab {
+  border: none;
+  background: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+.tab.active {
+  border-bottom-color: var(--accent, #888);
+  font-weight: 600;
+}
+.tab:focus { outline: 2px solid var(--accent, #888); outline-offset: 2px; }
+
+.tabPanel.hidden { display: none; }
+
+/* Scroll area for Instruction tab */
+.scrollArea {
+  max-height: 38vh;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+/* About tab layout */
+.aboutGrid { display: grid; gap: 10px; margin-top: 10px; }
+.aboutRow { display: grid; grid-template-columns: 140px 1fr; align-items: center; gap: 8px; }
+.aboutLabel { opacity: .7; }
+.aboutValue .muted, .muted { opacity: .6; }
+
+.actionsRow { margin: 12px 0; }
+
+.regBlock { margin-top: 12px; display: grid; gap: 6px; }
+.regRow { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.regRow input[type="text"] { padding: 8px 10px; border: 1px solid rgba(0,0,0,.2); border-radius: 6px; }
+.regRow button { white-space: nowrap; }
+
+/* Focus outline for modal frame */
+.modal .modalFrame:focus { outline: 2px solid var(--accent, #888); outline-offset: 2px; }
