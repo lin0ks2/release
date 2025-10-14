@@ -428,7 +428,10 @@ if (!w) return;
       const dictKey = (key === 'mistakes')
         ? ((w && (w._mistakeSourceKey || (App.Mistakes && App.Mistakes.sourceKeyFor && App.Mistakes.sourceKeyFor(w.id)))) || 'mistakes')
         : key;
-      D.favBtn.textContent = (App.isFavorite && App.isFavorite(dictKey, w.id)) ? '♥' : '♡';
+      const __isFav = (App.isFavorite && App.isFavorite(dictKey, w.id));
+      D.favBtn.textContent = __isFav ? '♥' : '♡';
+      if (D.favBtn.classList) D.favBtn.classList.toggle('is-fav', !!__isFav);
+      D.favBtn.setAttribute('aria-pressed', __isFav ? 'true' : 'false');
     }
 
     addIDontKnowButton();
@@ -587,14 +590,20 @@ if (!w) return;
       ? ((w && (w._mistakeSourceKey || (App.Mistakes && App.Mistakes.sourceKeyFor && App.Mistakes.sourceKeyFor(w.id)))) || 'mistakes')
       : activeKey;
 
-    App.toggleFavorite && App.toggleFavorite(dictKey, w.id);
+    var willFav = !(App.isFavorite && App.isFavorite(dictKey, w.id));
+  App.toggleFavorite && App.toggleFavorite(dictKey, w.id);
+  if (D && D.favBtn){
+    D.favBtn.textContent = willFav ? '♥' : '♡';
+    if (D.favBtn.classList) D.favBtn.classList.toggle('is-fav', !!willFav);
+    D.favBtn.setAttribute('aria-pressed', willFav ? 'true' : 'false');
+    D.favBtn.style.transform = 'scale(1.2)';
+    setTimeout(function(){ if (D && D.favBtn) D.favBtn.style.transform=''; }, 140);
+  }
     if (D.favBtn) {
       D.favBtn.textContent = (App.isFavorite && App.isFavorite(dictKey, w.id)) ? '♥' : '♡';
       D.favBtn.style.transform = 'scale(1.2)';
       setTimeout(() => { D.favBtn.style.transform = 'scale(1)'; }, 140);
-    }
-    if (typeof App._renderSetsBarOriginal === 'function') App._renderSetsBarOriginal();
-  try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
+    }try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
       try{ if (typeof updateSpoilerHeader==='function') updateSpoilerHeader(); }catch(_){ } try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
       }
 
