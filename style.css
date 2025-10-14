@@ -240,7 +240,7 @@ a#donate, .donate, .donate a, .donate-btn, .donate-btn a, .icon-donate,
   width:min( 560px, 92vw); background:var(--card); color:var(--text);
   border-radius:16px; box-shadow: 0 10px 30px rgba(0,0,0,.15); border:1px solid var(--border);
 }#infoModal .modalBody{ padding:14px; font-size:14px; line-      min-height: 240px; 
-  padding-bottom: 8px;
+  padding-bottom: 7px;
   height: var(--info-modal-body-h, 360px);
   overflow-y: auto;}#infoModal .iconBtn.small{ width:36px; height:36px; border-radius:12px; }.infoContent p{ margin: 0 0 8px; }.infoContent ul{ margin: 6px 0 0 18px; }/* Dicts modal — symmetric spacing around flags + list breathing + footer divider */
 #modal #langFlags, #modal .flagsRow{ margin:8px 0; padding:0 14px 14px; border-bottom:1px solid var(--border); }#modal .dictList{ margin-top:8px; padding-top:4px; padding-bottom:14px; max-height:230px; overflow-y:auto; }#modal .modalActions{ display:flex; justify-content:center; padding:14px 16px 20px; border-top:1px solid var(--border); }/* === Info modal: inset dividers to match Dicts modal === */
@@ -923,7 +923,7 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
 #infoModal .aboutRow { display: grid; grid-template-columns: auto auto; align-items: center; gap: 8px; }
 #infoModal .aboutLabel { color: var(--text); font-weight: 600; text-align:left; }
 #infoModal .actionsRow { margin: 10px 0 8px; display: flex; justify-content: center; }
-#infoModal .regBlock { margin-top: 10px; display: grid; gap: 4px; }
+#infoModal .regBlock { margin-top: 10px; display: grid; gap: 3px; }
 #infoModal .regRow { display: flex; flex-direction: column; align-items: center; gap: 8px; }
 #infoModal .regRow input[type="text"] { width: 100%; max-width: 320px; padding: 8px 10px; border: 1px solid var(--tool-border); border-radius: 6px;  background: var(--tool-bg); color: var(--tool-fg); caret-color: var(--text);}
 #infoModal .tabs .tab, 
@@ -1039,7 +1039,7 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
 
 
 #infoModal .regBlock .actionsRow{
-  margin: 4px 0 2px;
+  margin: 3px 0 2px;
 }
 
 @media (max-height: 640px) {
