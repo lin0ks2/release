@@ -923,7 +923,7 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
 #infoModal .regBlock { margin-top: 12px; display: grid; gap: 6px; }
 #infoModal .regRow { display: flex; flex-direction: column; align-items: center; gap: 8px; }
 #infoModal .regRow input[type="text"] { width: 100%; max-width: 320px; padding: 8px 10px; border: 1px solid var(--tool-border); border-radius: 6px;  background: var(--tool-bg); color: var(--tool-fg); caret-color: var(--text);}
-#infoModal .tabs .tab, #infoModal .btnPill { color: inherit; }
+#infoModal .tabs .tab, 
 
 /* === [PATCH 2025-10-14] Info modal visuals: mint active tab + stacked rows (scoped) === */
 #infoModal .tabs .tab.active{
@@ -951,16 +951,7 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
 #infoModal .regRow input[type="text"]::placeholder{ color: var(--muted); }
 
 
-#infoModal .btnPill{
-  padding:9px 20px;
-  font-size:15px;
-  border-radius:12px;
-  background: var(--mint);
-  border: none;
-  color: #073b3a;
-  font-weight:600;
-}
-#infoModal .btnPill:hover{ background: var(--mint-strong); color:#fff; }
+
 #infoModal .btnPill:disabled{
   opacity:.6;
   background: var(--btn-disabled-bg, rgba(0,0,0,.12));
@@ -969,3 +960,28 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
   cursor: default;
 }
 
+
+
+#infoModal .btnPill{
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-size: 15px;
+  padding: 9px 20px;
+  font-weight: 500;
+  box-shadow: none;
+}
+#infoModal .btnPill:hover{
+  background: rgba(0,0,0,0.05);
+}
+#infoModal .btnPill:disabled{
+  opacity: .6;
+  background: var(--card);
+  color: var(--muted);
+  border: 1px solid var(--border);
+  cursor: default;
+}
+
+
+#infoModal #regKeyLabel{ color: var(--text); font-weight:600; text-align:left; }
