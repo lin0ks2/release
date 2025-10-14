@@ -51,50 +51,35 @@ App.starKey = function(wid, dk){
   };
 
   // Apply localized tooltips from App.i18n() for elements with [data-title-key]
-  App.applyI18nTitles = function(root){
+  
+App.applyI18nTitles = function(root){
+  try{
+    var t = null;
     try{
-      var lang = (App.settings && (App.settings.uiLang || App.settings.lang)) ||
+      var lang = (App && App.settings && (App.settings.uiLang || App.settings.lang)) ||
                  document.documentElement.getAttribute('lang') || 'ru';
-      var t = (App.i18n && App.i18n(lang)) || {};
-      
-  // --- Tooltip auto-refresh guard ---
-  (function(){
-    var LAST_LANG = (App.settings && (App.settings.uiLang || App.settings.lang)) ||
-                    document.documentElement.getAttribute('lang') || 'ru';
-    setInterval(function(){
-      var cur = (App.settings && (App.settings.uiLang || App.settings.lang)) ||
-                document.documentElement.getAttribute('lang') || 'ru';
-      if (cur !== LAST_LANG){
-        LAST_LANG = cur;
-        try{ App.applyI18nTitles(); }catch(_){}
-      }
-    }, 500);
-
-    // Defensive: re-apply on hover over header controls (ensures freshest text)
-    document.addEventListener('mouseover', function(ev){
-      var el = ev.target && ev.target.closest && ev.target.closest('[data-title-key]');
-      if (el) { try{ App.applyI18nTitles(el); }catch(_){ } }
-    }, true);
-  })();
-
-(root || document).querySelectorAll('[data-title-key]').forEach(function(el){
-        var k = el.getAttribute('data-title-key');
-        var val = (t && t[k]) || el.getAttribute('data-title-fallback') || el.getAttribute('title') || '';
-
-        // Dynamic tooltip text for the UI-language toggle button
-        if (k === 'tt_ui_lang') {
-          var pretty = (t && t.langNameCurrent) || null;
-          if (!pretty) {
-            var names = { ru:'Русский язык', uk:'Українська мова', ua:'Українська мова', en:'English language' };
-            pretty = names[(lang||'').toLowerCase()] || val || '';
-          }
-          if (pretty) val = pretty;
-        }
-
-        if (val) el.setAttribute('title', val);
-      });
+      t = (App && App.i18n && App.i18n[lang]) || null;
     }catch(_){}
-  };
+
+    (root || document).querySelectorAll('[data-title-key]').forEach(function(el){
+      try{
+        var k = el.getAttribute('data-title-key');
+        if (!k) return;
+        var pretty = el.getAttribute('data-title-pretty') || '';
+        var val = (t && t[k]) || el.getAttribute('data-title-fallback') || '';
+        if (pretty) val = (pretty === 'auto') ? (val || '') : pretty;
+        if (val) el.setAttribute('title', val);
+      }catch(_){}
+    });
+  }catch(_){}
+};
+
+// Apply i18n titles once at startup (no polling, no hover listeners)
+try{
+  if (document.readyState !== 'loading') { App.applyI18nTitles(); }
+  else { document.addEventListener('DOMContentLoaded', function(){ try{ App.applyI18nTitles(); }catch(_){} }); }
+}catch(_){}
+;
 
   // Apply once at startup (handles both defer and non-defer loads)
   try{
