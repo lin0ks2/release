@@ -926,13 +926,11 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
 #infoModal .tabs .tab, #infoModal .btnPill { color: inherit; }
 
 /* === [PATCH 2025-10-14] Info modal visuals: mint active tab + stacked rows (scoped) === */
-#infoModal .tabs .tab.active,
-#infoModal div.tabs > button.tab.active{
-  background: var(--btn-ok-bg, var(--ok-bg, #2dd6a7)) !important;
-  color: var(--btn-ok-fg, var(--ok-fg, #ffffff)) !important;
-  border-color: transparent !important;
-  border-radius: 999px !important;
-  box-shadow: 0 1px 0 rgba(0,0,0,.10) inset !important;
+#infoModal .tabs .tab.active{
+  background: rgba(16,185,129,.28) !important;
+  border-color: #10b981 !important;
+  box-shadow: inset 0 0 0 2px rgba(16,185,129,.4);
+  color: var(--text);
 }
 #infoModal .tabs .tab{ color: var(--text); border:1px solid var(--border); border-radius:999px; background:transparent; }
 
