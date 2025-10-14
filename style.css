@@ -902,7 +902,7 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
 #panel-about { text-align: center; }
 .aboutGrid { justify-items: start; }
 .aboutRow { grid-template-columns: auto auto; }
-.aboutLabel, .aboutValue { text-align: center; }
+.aboutLabel, .aboutValue { text-align: left; }
 .actionsRow { margin: 12px 0; display: flex; justify-content: center; }
 
 /* Separator between update button and registration key (same look as modal bottom line) */
@@ -915,10 +915,10 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
 
 /* === [PATCH 2025-10-14] Info modal scoped tweaks — safe === */
 #infoModal .aboutSep { margin: 8px 0 12px; height: 1px; background: var(--border); }
-#infoModal #panel-about { text-align: center; }
+#infoModal #panel-about { text-align: left; }
 #infoModal .aboutGrid { justify-items: start; }
 #infoModal .aboutRow { display: grid; grid-template-columns: auto auto; align-items: center; gap: 8px; }
-#infoModal .aboutLabel { color: var(--text); font-weight: 600; }
+#infoModal .aboutLabel { color: var(--text); font-weight: 600; text-align:left; }
 #infoModal .actionsRow { margin: 12px 0; display: flex; justify-content: center; }
 #infoModal .regBlock { margin-top: 12px; display: grid; gap: 6px; }
 #infoModal .regRow { display: flex; flex-direction: column; align-items: center; gap: 8px; }
@@ -934,7 +934,7 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
   border-radius: 999px !important;
   box-shadow: 0 1px 0 rgba(0,0,0,.10) inset !important;
 }
-#infoModal .tabs .tab{ color: var(--text); border:1px solid var(--border); border-radius:999px; }
+#infoModal .tabs .tab{ color: var(--text); border:1px solid var(--border); border-radius:999px; background:transparent; }
 
 :root[data-theme="dark"] #infoModal .aboutRow,
 .theme-dark #infoModal .aboutRow,
@@ -951,3 +951,23 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
 }
 
 #infoModal .regRow input[type="text"]::placeholder{ color: var(--muted); }
+
+
+#infoModal .btnPill{
+  padding:9px 20px;
+  font-size:15px;
+  border-radius:12px;
+  background: var(--mint);
+  border: none;
+  color: #073b3a;
+  font-weight:600;
+}
+#infoModal .btnPill:hover{ background: var(--mint-strong); color:#fff; }
+#infoModal .btnPill:disabled{
+  opacity:.6;
+  background: var(--btn-disabled-bg, rgba(0,0,0,.12));
+  color: var(--muted);
+  border: none;
+  cursor: default;
+}
+
