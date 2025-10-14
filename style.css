@@ -924,3 +924,28 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
 #infoModal .regRow { display: flex; flex-direction: column; align-items: center; gap: 8px; }
 #infoModal .regRow input[type="text"] { width: 100%; max-width: 320px; padding: 8px 10px; border: 1px solid rgba(0,0,0,.2); border-radius: 6px; }
 #infoModal .tabs .tab, #infoModal .btnPill { color: inherit; }
+
+/* === [PATCH 2025-10-14] Info modal visuals: mint active tab + stacked rows (scoped) === */
+#infoModal .tabs .tab.active,
+#infoModal div.tabs > button.tab.active{
+  background: var(--btn-ok-bg, var(--ok-bg, #2dd6a7)) !important;
+  color: var(--btn-ok-fg, var(--ok-fg, #ffffff)) !important;
+  border-color: transparent !important;
+  border-radius: 999px !important;
+  box-shadow: 0 1px 0 rgba(0,0,0,.10) inset !important;
+}
+#infoModal .tabs .tab{ color: inherit; }
+
+:root[data-theme="dark"] #infoModal .aboutRow,
+.theme-dark #infoModal .aboutRow,
+:root[data-skin="alt"] #infoModal .aboutRow,
+.skin-alt #infoModal .aboutRow{
+  grid-template-columns: 1fr !important;
+  justify-items: center;
+}
+:root[data-theme="dark"] #infoModal .aboutRow .aboutValue,
+.theme-dark #infoModal .aboutRow .aboutValue,
+:root[data-skin="alt"] #infoModal .aboutRow .aboutValue,
+.skin-alt #infoModal .aboutRow .aboutValue{
+  margin-top: 4px;
+}
