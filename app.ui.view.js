@@ -1628,12 +1628,13 @@ if (document.readyState === 'loading') {
 // applyFromUI removed, handled by App.init()
 
 
-/* === Info Modal: Информация (tabs + i18n-safe) — 2025-10-14 === */
+/* === Info Modal: Информация (robust show + i18n + tabs) — 2025-10-14 === */
 (function(){
   try{
     const modal = document.getElementById('infoModal');
     if (!modal) return;
 
+    // Build/ensure frame and UI
     let frame = modal.querySelector('.modalFrame');
     if (!frame){
       frame = document.createElement('div');
@@ -1648,14 +1649,13 @@ if (document.readyState === 'loading') {
         <button class="iconBtn small" id="infoClose" aria-label="Close">✖️</button>
       </div>
       <div id="infoTabs" class="tabs" role="tablist" aria-label="Info">
-        <button class="tab active" id="tab-instr" role="tab" aria-controls="panel-instr" aria-selected="true" tabindex="0"></button>
+        <button class="tab" id="tab-instr" role="tab" aria-controls="panel-instr" aria-selected="true" tabindex="0"></button>
         <button class="tab" id="tab-about" role="tab" aria-controls="panel-about" aria-selected="false" tabindex="-1"></button>
       </div>
       <div class="modalBody">
         <section id="panel-instr" class="tabPanel" role="tabpanel" aria-labelledby="tab-instr">
           <div id="infoContent" class="infoContent scrollArea"></div>
         </section>
-
         <section id="panel-about" class="tabPanel hidden" role="tabpanel" aria-labelledby="tab-about">
           <div class="aboutGrid">
             <div class="aboutRow">
@@ -1670,11 +1670,9 @@ if (document.readyState === 'loading') {
               </div>
             </div>
           </div>
-
           <div class="actionsRow">
             <button id="btnCheckUpdates" class="btnPill"></button>
           </div>
-
           <div class="regBlock">
             <label for="regKey" id="regKeyLabel"></label>
             <div class="regRow">
@@ -1685,7 +1683,6 @@ if (document.readyState === 'loading') {
           </div>
         </section>
       </div>
-
       <div class="modalActions" style="text-align:center">
         <button id="infoOk" class="primary">OK</button>
       </div>
@@ -1709,56 +1706,37 @@ if (document.readyState === 'loading') {
     const licStatusEl = document.getElementById('licStatus');
     const licUserEl = document.getElementById('licUser');
 
-    // i18n with robust fallbacks
+    // i18n helpers
     function lang(){ return (window.App && App.settings && App.settings.lang) || 'uk'; }
-    function Tkey(k, def){
+    function pack(){
       const L = lang();
-      const pack = (window.I18N && (I18N[L] || I18N.uk)) || {};
-      if (pack && pack[k] != null) return pack[k];
-      if (def != null) return def;
-      // language-specific defaults
+      return (window.I18N && (I18N[L] || I18N.uk)) || {};
+    }
+    function T(k, def){
+      const p = pack();
+      if (p && p[k] != null) return p[k];
       const d = {
-        ru: {infoTitle:'Информация', tabInstruction:'Инструкция', tabAbout:'О программе', ok:'OK', checkUpdates:'Проверить обновления', regKey:'Ключ регистрации', register:'Зарегистрировать'},
-        uk: {infoTitle:'Інформація', tabInstruction:'Інструкція', tabAbout:'Про програму', ok:'OK', checkUpdates:'Перевірити оновлення', regKey:'Ключ реєстрації', register:'Зареєструвати'},
-        en: {infoTitle:'Information', tabInstruction:'Instruction', tabAbout:'About', ok:'OK', checkUpdates:'Check for updates', regKey:'Registration key', register:'Register'}
+        ru: {infoTitle:'Информация', tabInstruction:'Инструкция', tabAbout:'О программе', ok:'OK', checkUpdates:'Проверить обновления', regKey:'Ключ регистрации', register:'Зарегистрировать', licensed:'Зарегистрировано', notLicensed:'Не зарегистрировано', regStubHint:'Пока заглушка — логика активации будет добавлена позже.'},
+        uk: {infoTitle:'Інформація', tabInstruction:'Інструкція', tabAbout:'Про програму', ok:'OK', checkUpdates:'Перевірити оновлення', regKey:'Ключ реєстрації', register:'Зареєструвати', licensed:'Зареєстровано', notLicensed:'Не зареєстровано', regStubHint:'Поки заглушка — логіку активації додамо пізніше.'},
+        en: {infoTitle:'Information', tabInstruction:'Instruction', tabAbout:'About', ok:'OK', checkUpdates:'Check for updates', regKey:'Registration key', register:'Register', licensed:'Licensed', notLicensed:'Not licensed', regStubHint:'Placeholder — activation logic will be added later.'}
       };
-      return (d[L] && d[L][k]) || (d.ru[k]) || '';
-    }
-
-    // Fill titles/labels with safe fallbacks
-    titleEl.textContent = Tkey('infoTitle');
-    tabInstr.textContent = Tkey('tabInstruction');
-    tabAbout.textContent = Tkey('tabAbout');
-    okBtn.textContent = Tkey('ok','OK');
-    btnUpdates.textContent = Tkey('checkUpdates');
-    regKeyLabel.textContent = Tkey('regKey');
-    btnRegister.textContent = Tkey('register');
-    regHintEl.textContent = Tkey('regStubHint', Tkey('regStubHint','Пока заглушка — логика активации будет добавлена позже.'));
-
-    // Instruction content
-    try{
       const L = lang();
-      const pack = (window.I18N && (I18N[L] || I18N.uk)) || {};
-      if (Array.isArray(pack.infoSteps))
-        bodyEl.innerHTML = '<ul>' + pack.infoSteps.map(s=>`<li>${String(s||'')}</li>`).join('') + '</ul>';
-    }catch(_){}
-
-    // Version / license
-    const meta = {
-      version: (window.App && (App.meta && App.meta.version)) || (window.App && App.version) || (window.App && App.APP_VER) || '—',
-      isActivated: !!(window.App && App.lic && App.lic.isActivated),
-      userName: (window.App && App.lic && App.lic.userName) || ''
-    };
-    verEl.textContent = meta.version;
-    if (meta.isActivated){
-      licStatusEl.textContent = Tkey('licensed','Зарегистрировано');
-      if (meta.userName) licUserEl.textContent = '— ' + meta.userName;
-    } else {
-      licStatusEl.textContent = Tkey('notLicensed','Не зарегистрировано');
-      licStatusEl.classList.add('muted');
+      return (d[L] && d[L][k]) || (d.ru[k]) || def || '';
     }
 
-    // Tabs
+    // Fill labels
+    function fillLabels(){
+      titleEl.textContent = T('infoTitle');
+      tabInstr.textContent = T('tabInstruction');
+      tabAbout.textContent = T('tabAbout');
+      okBtn.textContent = T('ok','OK');
+      btnUpdates.textContent = T('checkUpdates');
+      regKeyLabel.textContent = T('regKey');
+      btnRegister.textContent = T('register');
+      regHintEl.textContent = T('regStubHint');
+    }
+
+    // Tabs control
     function switchTab(which){
       const instr = which==='instr';
       tabInstr.classList.toggle('active', instr);
@@ -1771,23 +1749,49 @@ if (document.readyState === 'loading') {
     tabInstr.addEventListener('click', ()=> switchTab('instr'));
     tabAbout.addEventListener('click', ()=> switchTab('about'));
 
-    // Open/close
-    function close(){ modal.classList.add('hidden'); }
-    function open(){
-      // ensure labels in case lang changed dynamically
-      titleEl.textContent = Tkey('infoTitle');
-      tabInstr.textContent = Tkey('tabInstruction');
-      tabAbout.textContent = Tkey('tabAbout');
-      switchTab('instr');
-      modal.classList.remove('hidden');
-      setTimeout(()=>{ try{ frame && frame.focus(); }catch(_){} }, 0);
+    // Ensure state when modal becomes visible (even if opened by external code)
+    function ensureOnShow(){
+      fillLabels();                      // refresh i18n
+      switchTab('instr');                // show only Instruction
     }
+    // run once
+    ensureOnShow();
+    // observe class changes to detect show/hide
+    try{
+      const obs = new MutationObserver(()=>{ if (!modal.classList.contains('hidden')) ensureOnShow(); });
+      obs.observe(modal, { attributes:true, attributeFilter:['class'] });
+    }catch(_){}
+
+    // Content for Instruction
+    try{
+      const p = pack();
+      if (Array.isArray(p.infoSteps)){
+        bodyEl.innerHTML = '<ul>' + p.infoSteps.map(s=>`<li>${String(s||'')}</li>`).join('') + '</ul>';
+      }
+    }catch(_){}
+
+    // About content
+    const meta = {
+      version: (window.App && (App.meta && App.meta.version)) || (window.App && App.version) || (window.App && App.APP_VER) || '—',
+      isActivated: !!(window.App && App.lic && App.lic.isActivated),
+      userName: (window.App && App.lic && App.lic.userName) || ''
+    };
+    verEl.textContent = meta.version;
+    if (meta.isActivated){
+      licStatusEl.textContent = T('licensed');
+      if (meta.userName) licUserEl.textContent = '— ' + meta.userName;
+    } else {
+      licStatusEl.textContent = T('notLicensed');
+      licStatusEl.classList.add('muted');
+    }
+
+    // Close buttons
+    function close(){ modal.classList.add('hidden'); }
     okBtn.addEventListener('click', close);
     xBtn.addEventListener('click', close);
     modal.addEventListener('click', e=>{ if (e.target===modal) close(); });
-    const infoBtn = document.getElementById('btnInfo');
-    if (infoBtn) infoBtn.addEventListener('click', open);
 
+    // Keyboard
     document.addEventListener('keydown', e=>{
       if (e.key==='Escape') close();
       if (e.key==='ArrowLeft' || e.key==='ArrowRight'){
@@ -1795,7 +1799,7 @@ if (document.readyState === 'loading') {
       }
     });
 
-    // Update check via SW (unchanged)
+    // Update check via SW stays same
     async function fetchRemoteVersion(){
       try{
         const r = await fetch('./app.core.js?ts='+Date.now(), {cache:'no-store'});
@@ -1824,13 +1828,17 @@ if (document.readyState === 'loading') {
       const remote = await fetchRemoteVersion();
       const sw = await updateServiceWorker();
       if ((remote && remote !== current) || sw.waiting){
-        if (confirm(`${Tkey('checkUpdates')} — ${Tkey('infoTitle')}: ${Tkey('tabAbout')}. Перезагрузить?`)){
+        if (confirm(`${T('checkUpdates')}: ${remote || ''}. Перезагрузить?`)){
           if (sw.waiting) await applyUpdate(sw.reg);
           else location.reload();
         }
       } else {
-        alert(`${Tkey('checkUpdates')}: обновлений нет. (${current})`);
+        alert(`${T('checkUpdates')}: обновлений нет. (${current})`);
       }
     });
-  }catch(e){ console.warn('Info modal i18n-safe error', e); }
+
+    // Expose opener if exists
+    const infoBtn = document.getElementById('btnInfo');
+    if (infoBtn) infoBtn.addEventListener('click', ensureOnShow);
+  }catch(e){ console.warn('Info modal robust error', e); }
 })();
