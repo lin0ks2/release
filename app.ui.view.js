@@ -657,7 +657,32 @@ if (!w) return;
     })();
 
     for (const k of Object.keys(App.dictRegistry.user || {})) host.appendChild(makeDictRow(k));
-  }
+  
+
+    // auto-select default deck if none active for current filter language
+    (function autoSelectDefaultDeck(){
+      try{
+        const host = D.dictListHost;
+        if (!host) return;
+        const lg = (App.settings && App.settings.dictsLangFilter) || null;
+        const rows = Array.from(host.querySelectorAll('.dictRow'));
+        if (!rows.length) return;
+        const hasActive = rows.some(r => r.classList.contains('active') && (!lg || (typeof keyLang==='function' ? keyLang(r.dataset.key)===lg : true)));
+        if (hasActive) return;
+
+        const remember = (App.settings && App.settings.lastActivePerLang && lg) ? App.settings.lastActivePerLang[lg] : null;
+        let target = null;
+        if (remember) target = rows.find(r => r.dataset.key === remember) || null;
+        if (!target) target = rows.find(r => /_verbs$/i.test(String(r.dataset.key))) || null;
+        if (!target) target = rows[0];
+
+        if (target && !target.classList.contains('disabled')) {
+          target.click();
+        }
+      }catch(_){}
+    })();
+    
+}
 
   function canShowFav() {
   try {
@@ -798,6 +823,14 @@ if (!w) return;
       try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
 if (row.classList.contains('disabled')) return;
       App.dictRegistry.activeKey = key;
+      try{
+        App.settings = App.settings || {};
+        App.settings.lastActivePerLang = App.settings.lastActivePerLang || {};
+        var __lang = (typeof keyLang==='function') ? keyLang(key) : (String(key).split('_')[0]||'');
+        if (__lang){ App.settings.lastActivePerLang[__lang] = key; }
+        App.saveSettings && App.saveSettings(App.settings);
+      }catch(_){}
+        
         try{ localStorage.setItem('lexitron.deckKey', String(key)); localStorage.setItem('lexitron.activeKey', String(key)); }catch(_){}
 
       App.saveDictRegistry();
@@ -843,38 +876,6 @@ if (row.classList.contains('disabled')) return;
         App.saveSettings && App.saveSettings(App.settings);
         renderDictList();
         App.renderLangFlags();
-        // Auto-activate default set for selected language
-        try{
-          App.settings.lastActivePerLang = App.settings.lastActivePerLang || {};
-          var remembered = App.settings.lastActivePerLang[lg];
-
-          function __keyLang(k){
-            try{ if (typeof keyLang==='function') return keyLang(k); }catch(_){}
-            k = k || ''; var idx = k.indexOf('_'); return idx>0 ? k.slice(0, idx) : k.slice(0,2);
-          }
-
-          var allKeys = (App.Decks && App.Decks.builtinKeys && App.Decks.builtinKeys()) || [];
-          var keys = allKeys.filter(function(k){ try{ return __keyLang(k) === lg; }catch(_){ return false; } });
-
-          var hasActive = false;
-          try{
-            var ak = App.dictRegistry && App.dictRegistry.activeKey;
-            hasActive = !!(ak && __keyLang(ak) === lg);
-          }catch(_){ hasActive = false; }
-
-          var preferred = null;
-          if (remembered && keys.indexOf(remembered) !== -1) {
-            preferred = remembered;
-          } else if (keys && keys.length){
-            for (var i=0;i<keys.length;i++){ if (/_verbs$/i.test(keys[i])) { preferred = keys[i]; break; } }
-            if (!preferred) preferred = keys[0];
-          }
-
-          if (!hasActive && preferred && App.dictRegistry && typeof App.dictRegistry.setActive==='function'){
-            App.dictRegistry.setActive(preferred);
-          }
-        }catch(_){}
-
       });
       D.langFlags.appendChild(b);
     });
@@ -1658,81 +1659,3 @@ if (document.readyState === 'loading') {
 })();
 
 // applyFromUI removed, handled by App.init()
-
-
-/* Remember last active set per language */
-(function(){
-  try{
-    if (App && App.dictRegistry && typeof App.dictRegistry.setActive==='function' && !App.dictRegistry.__wrapSetActiveRemembered){
-      var __origSetActive = App.dictRegistry.setActive;
-      App.dictRegistry.setActive = function(key){
-        var res = __origSetActive.apply(this, arguments);
-        try{
-          App.settings = App.settings || {};
-          App.settings.lastActivePerLang = App.settings.lastActivePerLang || {};
-          function __keyLang(k){
-            try{ if (typeof keyLang==='function') return keyLang(k); }catch(_){}
-            k = k || ''; var idx = k.indexOf('_'); return idx>0 ? k.slice(0, idx) : k.slice(0,2);
-          }
-          var lg = __keyLang(key);
-          if (lg){
-            App.settings.lastActivePerLang[lg] = key;
-            App.saveSettings && App.saveSettings(App.settings);
-          }
-        }catch(_){}
-        return res;
-      };
-      App.dictRegistry.__wrapSetActiveRemembered = true;
-    }
-  }catch(_){}
-})();
-
-
-
-/* Ensure active set matches dicts language on modal close and flag click */
-(function(){
-  function __keyLang(k){
-    try{ if (typeof keyLang==='function') return keyLang(k); }catch(_){}
-    k = k || ''; var idx = k.indexOf('_'); return idx>0 ? k.slice(0, idx) : k.slice(0,2);
-  }
-  function __ensureForLang(lg){
-    try{
-      if (!lg) return;
-      var ak = App && App.dictRegistry && App.dictRegistry.activeKey;
-      if (ak && __keyLang(ak) === lg) return; // already good
-
-      var allKeys = (App.Decks && App.Decks.builtinKeys && App.Decks.builtinKeys()) || [];
-      var keys = allKeys.filter(function(k){ return __keyLang(k) === lg; });
-      if (!keys.length) return;
-
-      var remembered = (App.settings && App.settings.lastActivePerLang && App.settings.lastActivePerLang[lg]) || null;
-      var preferred = null;
-      if (remembered && keys.indexOf(remembered) !== -1) preferred = remembered;
-      if (!preferred){
-        for (var i=0;i<keys.length;i++){ if (/_verbs$/i.test(keys[i])) { preferred = keys[i]; break; } }
-      }
-      if (!preferred) preferred = keys[0];
-
-      if (preferred && App.dictRegistry && typeof App.dictRegistry.setActive==='function'){
-        App.dictRegistry.setActive(preferred);
-      }
-    }catch(_){}
-  }
-
-  // Delegate: click on flags in dicts modal
-  document.addEventListener('click', function(ev){
-    var el = ev.target && ev.target.closest && ev.target.closest('[data-dicts-lang], [data-lang], [data-language]');
-    if (!el) return;
-    var lg = el.getAttribute('data-dicts-lang') || el.getAttribute('data-lang') || el.getAttribute('data-language');
-    if (lg) __ensureForLang(lg);
-  }, true);
-
-  // On modal close: try to enforce default for current filter
-  document.addEventListener('click', function(ev){
-    var close = ev.target && ev.target.closest && ev.target.closest('[data-modal="dicts"][data-action="close"], .dicts-modal .close, .modal-close, [data-close="dicts"]');
-    if (!close) return;
-    var lg = (App && App.settings && App.settings.dictsLangFilter) || null;
-    if (lg) __ensureForLang(lg);
-  }, true);
-})();
-
