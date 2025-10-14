@@ -186,7 +186,7 @@
     const seen = new Set();
     const push = (w) => {
       if (!w || !w.id || String(w.id) === String(currentWord.id)) return;
-      const label = ((App.settings.lang === 'ru') ? (w.ru || w.uk) : (w.uk || w.ru)) || w.translation || w.meaning; try{ App.applyI18nTitles(document); }catch(_){}
+      const label = ((App.settings.lang === 'ru') ? (w.ru || w.uk) : (w.uk || w.ru)) || w.translation || w.meaning;
       if (!label) return;
       const key = String(w.id) + '::' + String(label);
       if (seen.has(key)) return;
@@ -401,16 +401,16 @@ if (!w) return;
       if (key === 'mistakes') {
         poolWords = getMistakesDistractorPool(w)
           .map(x => (App.settings.lang === 'ru') ? (x.ru || x.uk || x.translation || x.meaning) : (x.uk || x.ru || x.translation || x.meaning))
-          .filter(Boolean); try{ App.applyI18nTitles(document); }catch(_){}
+          .filter(Boolean);
       } else {
         poolWords = sub.filter(x => x.id !== w.id)
           .map(x => (App.settings.lang === 'ru') ? (x.ru || x.uk || x.translation || x.meaning) : (x.uk || x.ru || x.translation || x.meaning))
-          .filter(Boolean); try{ App.applyI18nTitles(document); }catch(_){}
+          .filter(Boolean);
       }
-      const correct = (App.settings.lang === 'ru') ? (w.ru || w.uk || w.translation || w.meaning || '') : (w.uk || w.ru || w.translation || w.meaning || ''); try{ App.applyI18nTitles(document); }catch(_){}
+      const correct = (App.settings.lang === 'ru') ? (w.ru || w.uk || w.translation || w.meaning || '') : (w.uk || w.ru || w.translation || w.meaning || '');
       drawOptions(correct, poolWords);
     } else {
-      if (D.wordEl) D.wordEl.textContent = (App.settings.lang === 'ru') ? (w.ru || w.uk || w.translation || w.meaning || '') : (w.uk || w.ru || w.translation || w.meaning || ''); try{ App.applyI18nTitles(document); }catch(_){}
+      if (D.wordEl) D.wordEl.textContent = (App.settings.lang === 'ru') ? (w.ru || w.uk || w.translation || w.meaning || '') : (w.uk || w.ru || w.translation || w.meaning || '');
       let poolWords;
       if (key === 'mistakes') {
         poolWords = getMistakesDistractorPool(w).map(x => x.word).filter(Boolean);
@@ -695,7 +695,7 @@ if (!w) return;
       const t = (typeof App.i18n === 'function') ? App.i18n() : null;
       name.textContent = (t && t.mistakesName) ? t.mistakesName : 'Мои ошибки';
     } else if (key === 'fav' || key === 'favorites') {
-      name.textContent = (App.settings.lang === 'ru') ? 'Избранное' : 'Обране'; try{ App.applyI18nTitles(document); }catch(_){}
+      name.textContent = (App.settings.lang === 'ru') ? 'Избранное' : 'Обране';
     } else {
       name.textContent = App.Decks.resolveNameByKey(key);
     }
@@ -714,40 +714,13 @@ if (!w) return;
     if (key === 'mistakes') {
       const delBtn = document.createElement('button');
       delBtn.className = 'iconOnly';
-      delBtn.title = (App.settings.lang === 'ru') ? 'Очистить «Мои ошибки»' : 'Очистити «Мої помилки»'; try{ App.applyI18nTitles(document); }catch(_){}
+      delBtn.title = (App.settings.lang === 'ru') ? 'Очистить «Мои ошибки»' : 'Очистити «Мої помилки»';
       delBtn.textContent = '🗑️';
       delBtn.addEventListener('click', async (e) => {
         e.stopPropagation();
         const msg = App.i18n().confirmMistakesReset;
         if (!(await App.showConfirmModal({text: msg, title: App.i18n().confirmTitle, okText: App.i18n().confirmOk, cancelText: App.i18n().confirmCancel, title: (App.i18n&&App.i18n().confirmTitle)||'Подтверждение'}))) return;
         if (App.Mistakes && typeof App.Mistakes.clearActive==='function') App.Mistakes.clearActive();
-
-        // After clearing, auto-switch to a sensible default deck (prefer verbs for current dict language)
-        var defKey = null;
-        try {
-          if (App.Decks && typeof App.Decks.pickDefaultKey === 'function') {
-            defKey = App.Decks.pickDefaultKey();
-          } else if (App.Decks && typeof App.Decks.builtinKeys === 'function') {
-            var arr = App.Decks.builtinKeys() || [];
-            var lang = (App.settings && (App.settings.dictsLangFilter || App.settings.studyLang || App.settings.lang)) || null;
-            if (lang) {
-              // prefer verbs for this language if available
-              var verbKey = null;
-              for (var i=0;i<arr.length;i++){
-                var k = arr[i];
-                if (String(k).indexOf(lang + '_') === 0 && String(k).toLowerCase().indexOf('verb') !== -1) { verbKey = k; break; }
-              }
-              if (verbKey) defKey = verbKey;
-              else defKey = arr && arr.length ? arr[0] : null;
-            } else {
-              defKey = arr && arr.length ? arr[0] : null;
-            }
-          }
-        } catch(_) {}
-        if (defKey) App.dictRegistry.activeKey = defKey;
-        try{ localStorage.setItem('lexitron.deckKey', String(defKey)); localStorage.setItem('lexitron.activeKey', String(defKey)); }catch(_){}
-
-        App.saveDictRegistry && App.saveDictRegistry();
         renderDictList(); App._renderSetsBarOriginal && App._renderSetsBarOriginal(); try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
       try{ if (typeof updateSpoilerHeader==='function') updateSpoilerHeader(); }catch(_){ } try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
       renderCard(true); updateStats();
@@ -758,11 +731,11 @@ if (!w) return;
     if (key === 'fav' || key === 'favorites') {
       const delBtn = document.createElement('button');
       delBtn.className = 'iconOnly';
-      delBtn.title = (App.settings.lang === 'ru') ? 'Очистить «Избранное»' : 'Очистити «Обране»'; try{ App.applyI18nTitles(document); }catch(_){}
+      delBtn.title = (App.settings.lang === 'ru') ? 'Очистить «Избранное»' : 'Очистити «Обране»';
       delBtn.textContent = '🗑️';
       delBtn.addEventListener('click', async (e) => {
         e.stopPropagation();
-        const msg = (App.settings.lang === 'ru') ? 'Очистить «Избранное»? Это действие нельзя отменить.' : 'Очистити «Обране»? Дію не можна скасувати.'; try{ App.applyI18nTitles(document); }catch(_){}
+        const msg = (App.settings.lang === 'ru') ? 'Очистить «Избранное»? Это действие нельзя отменить.' : 'Очистити «Обране»? Дію не можна скасувати.';
         if (!(await App.showConfirmModal({text: msg, title: App.i18n().confirmTitle, okText: App.i18n().confirmOk, cancelText: App.i18n().confirmCancel, title: (App.i18n&&App.i18n().confirmTitle)||'Подтверждение'}))) return;
         if (App.clearFavoritesForLang) App.clearFavoritesForLang();
 
@@ -895,8 +868,8 @@ if (row.classList.contains('disabled')) return;
   function bindHeaderButtons() {
     if (D.langToggleBtn) {
       D.langToggleBtn.addEventListener('click', () => {
-        App.settings.lang = (App.settings.lang === 'ru') ? 'uk' : 'ru'; try{ App.applyI18nTitles(document); }catch(_){}
-        D.langToggleBtn.textContent = (App.settings.lang === 'ru') ? '🇷🇺' : '🇺🇦'; try{ App.applyI18nTitles(document); }catch(_){}
+        App.settings.lang = (App.settings.lang === 'ru') ? 'uk' : 'ru';
+        D.langToggleBtn.textContent = (App.settings.lang === 'ru') ? '🇷🇺' : '🇺🇦';
         App.saveSettings(App.settings);
         applyLang();
         App.applyTheme && App.applyTheme();
