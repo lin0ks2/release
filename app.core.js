@@ -54,25 +54,25 @@ App.starKey = function(wid, dk){
   
 App.applyI18nTitles = function(root){
   try{
-    var t = null;
-    try{
-      var lang = (App && App.settings && (App.settings.uiLang || App.settings.lang)) ||
-                 document.documentElement.getAttribute('lang') || 'ru';
-      t = (App && App.i18n && App.i18n[lang]) || null;
-    }catch(_){}
+    var lang = (App && App.settings && (App.settings.uiLang || App.settings.lang)) ||
+               document.documentElement.getAttribute('lang') || 'ru';
+    var T = (window.I18N && window.I18N[lang]) || (App && App.i18n && App.i18n[lang]) || null;
 
     (root || document).querySelectorAll('[data-title-key]').forEach(function(el){
       try{
-        var k = el.getAttribute('data-title-key');
-        if (!k) return;
+        var key = el.getAttribute('data-title-key');
+        if (!key) return;
         var pretty = el.getAttribute('data-title-pretty') || '';
-        var val = (t && t[k]) || el.getAttribute('data-title-fallback') || '';
+        var val = (T && T[key]) || el.getAttribute('data-title-fallback') || '';
         if (pretty) val = (pretty === 'auto') ? (val || '') : pretty;
-        if (val) el.setAttribute('title', val);
+        if (val){
+          el.setAttribute('title', val);
+          el.setAttribute('aria-label', val); // keep a11y in sync to avoid mixed tooltips
+        }
       }catch(_){}
     });
   }catch(_){}
-};
+};;
 
 // Apply i18n titles once at startup (no polling, no hover listeners)
 try{
@@ -377,3 +377,11 @@ App.clearFavoritesAll = function(){
     trainerStrategy: "medium+penalties"
   };
 })();
+
+
+/* i18n titles at startup */
+try{
+  if (document.readyState !== 'loading') App.applyI18nTitles();
+  else document.addEventListener('DOMContentLoaded', function(){ try{ App.applyI18nTitles(); }catch(_){
+  } });
+}catch(_){}
