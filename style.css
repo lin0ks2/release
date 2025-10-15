@@ -237,7 +237,7 @@ a#donate, .donate, .donate a, .donate-btn, .donate-btn a, .icon-donate,
 
 /* Info modal */
 #infoModal.modal{ display:flex; align-items:center; justify-content:center; }#infoModal.hidden{ display:none; }#infoModal .modalFrame{
-  width:min( 560px, 92vw); background:var(--card); color:var(--text);
+  width:min( 640px, 94vw); background:var(--card); color:var(--text);
   border-radius:16px; box-shadow: 0 10px 30px rgba(0,0,0,.15); border:1px solid var(--border);
 }#infoModal .modalBody{ padding:14px; font-size:14px; line-      min-height: 240px; }#infoModal .iconBtn.small{ width:36px; height:36px; border-radius:12px; }.infoContent p{ margin: 0 0 8px; }.infoContent ul{ margin: 6px 0 0 18px; }/* Dicts modal — symmetric spacing around flags + list breathing + footer divider */
 #modal #langFlags, #modal .flagsRow{ margin:8px 0; padding:0 14px 14px; border-bottom:1px solid var(--border); }#modal .dictList{ margin-top:8px; padding-top:4px; padding-bottom:14px; max-height:230px; overflow-y:auto; }#modal .modalActions{ display:flex; justify-content:center; padding:14px 16px 20px; border-top:1px solid var(--border); }/* === Info modal: inset dividers to match Dicts modal === */
@@ -1008,7 +1008,7 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
 #infoModal .modalBody{      min-height: 240px; }
 
 
-#infoModal .modalFrame{ width: min(560px, 92vw) !important; }
+#infoModal .modalFrame{ width:min(640px, 94vw) !important; }
 
 #infoModal #panel-about .aboutGrid{     row-gap:6px !important; }
 #infoModal #panel-about .aboutRow{   gap:6px !important; }
