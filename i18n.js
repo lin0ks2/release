@@ -185,36 +185,3 @@ settingsTitle: "Налаштування",
   } catch(_) {}
 
 })();
-
-// --- Info modal additions (tabs + about) ---
-; (function(){
-  try{
-    var RU = (window.I18N && window.I18N.ru) || {};
-    RU.tabInstruction = RU.tabInstruction || "Инструкция";
-    RU.tabAbout = RU.tabAbout || "О программе";
-    RU.aboutVersion = RU.aboutVersion || "Версия";
-    RU.aboutStatus = RU.aboutStatus || "Статус";
-    RU.aboutNotRegistered = RU.aboutNotRegistered || "Не зарегистрировано";
-    RU.aboutRegistered = RU.aboutRegistered || "Зарегистрировано";
-    RU.checkUpdates = RU.checkUpdates || "Проверить обновления";
-    RU.regKey = RU.regKey || "Ключ регистрации";
-    RU.register = RU.register || "Зарегистрировать";
-    RU.checkUpdatesDone = RU.checkUpdatesDone || "Проверка обновлений…";
-    RU.registerSaved = RU.registerSaved || "Ключ сохранён";
-    window.I18N.ru = RU;
-
-    var UK = (window.I18N && window.I18N.uk) || {};
-    UK.tabInstruction = UK.tabInstruction || "Інструкція";
-    UK.tabAbout = UK.tabAbout || "Про програму";
-    UK.aboutVersion = UK.aboutVersion || "Версія";
-    UK.aboutStatus = UK.aboutStatus || "Статус";
-    UK.aboutNotRegistered = UK.aboutNotRegistered || "Не зареєстровано";
-    UK.aboutRegistered = UK.aboutRegistered || "Зареєстровано";
-    UK.checkUpdates = UK.checkUpdates || "Перевірити оновлення";
-    UK.regKey = UK.regKey || "Ключ реєстрації";
-    UK.register = UK.register || "Зареєструвати";
-    UK.checkUpdatesDone = UK.checkUpdatesDone || "Перевірка оновлень…";
-    UK.registerSaved = UK.registerSaved || "Ключ збережено";
-    window.I18N.uk = UK;
-  }catch(_){}
-})();    

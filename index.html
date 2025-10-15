@@ -78,9 +78,8 @@
 #modal .dictList > *:last-child{margin-bottom:8px!important}
 </style>
   
-<link rel="stylesheet" href="./theme.ios-glass.css?v=1">
 </head>
-<body class="theme-ios-glass">
+<body>
 
 <header>
     <div class="brand">
@@ -200,38 +199,8 @@
           <button class="iconBtn small" id="infoClose" aria-label="Close">✖️</button>
         </div>
         <div class="modalBody">
-  <div class="tabs" role="tablist" aria-label="Info tabs">
-    <button class="tab active" id="tab-instruction" role="tab" aria-controls="panel-instruction" aria-selected="true" data-i18n="tabInstruction">Інструкція</button>
-    <button class="tab" id="tab-about" role="tab" aria-controls="panel-about" aria-selected="false" data-i18n="tabAbout">Про програму</button>
-  </div>
-  <div class="tabPanels">
-    <section class="tabPanel" id="panel-instruction" role="tabpanel" aria-labelledby="tab-instruction">
-      <div id="infoContent" class="infoContent"></div>
-    </section>
-    <section class="tabPanel hidden" id="panel-about" role="tabpanel" aria-labelledby="tab-about">
-      <div class="aboutGrid">
-        <div class="aboutRow"><div class="aboutLabel" data-i18n="aboutVersion">Версія</div><div class="aboutValue"><span id="aboutVersion">—</span></div></div>
-        <div class="aboutRow"><div class="aboutLabel" data-i18n="aboutStatus">Статус</div><div class="aboutValue"><span id="aboutStatus">—</span></div></div>
-      </div>
-
-      <div class="actionsRow">
-        <button class="btn outline" id="btnCheckUpdates" data-i18n="checkUpdates">Перевірити оновлення</button>
-      </div>
-
-      <hr class="aboutSep" />
-
-      <div class="regBlock">
-        <div class="regRow">
-          <label for="regKey" class="regLabel" data-i18n="regKey">Ключ реєстрації</label>
-          <input type="text" id="regKey" placeholder="XXXX-XXXX-XXXX-XXXX" inputmode="latin-prose" autocomplete="off" />
+          <div id="infoContent" class="infoContent"></div>
         </div>
-        <div class="actionsRow">
-          <button class="btn primary" id="btnRegister" data-i18n="register">Зареєструвати</button>
-        </div>
-      </div>
-    </section>
-  </div>
-</div>
         <div class="modalActions" style="text-align:center">
           <button id="infoOk" class="primary">OK</button>
         </div>
