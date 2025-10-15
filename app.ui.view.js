@@ -1739,6 +1739,15 @@ regStubHint:'Placeholder — activation logic will be added later.'}
       regKeyLabel.textContent = T('regKey');
       btnRegister.textContent = T('register');
       regHintEl.textContent = T('regStubHint');
+    
+      // also refresh status text to current language
+      try{
+        const licStatusEl = document.getElementById('licStatus');
+        if (licStatusEl){
+          const isAct = !!(window.App && App.lic && App.lic.isActivated);
+          licStatusEl.textContent = T(isAct ? 'licensed' : 'notLicensed');
+        }
+      }catch(_){}
     }
 
     // Tabs control
