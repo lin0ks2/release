@@ -1748,13 +1748,32 @@ if (document.readyState === 'loading') {
       tabInstr.setAttribute('aria-selected', instr?'true':'false');
       tabAbout.setAttribute('aria-selected', !instr?'true':'false');
     }
-    tabInstr.addEventListener('click', ()=> switchTab('instr'));
-    tabAbout.addEventListener('click', ()=> switchTab('about'));
+    // Fix: lock modal body height to max of both tabs to avoid jumps
+    function lockBodyHeight(){
+      const body = modal.querySelector('.modalBody');
+      if (!body) return;
+      // preserve which is active
+      const instrActive = !panelInstr.classList.contains('hidden');
+      // temporarily show both to measure
+      panelInstr.classList.remove('hidden');
+      panelAbout.classList.remove('hidden');
+      const h1 = panelInstr.scrollHeight;
+      const h2 = panelAbout.scrollHeight;
+      const maxH = Math.max(h1, h2, 240);
+      // restore visibility
+      panelInstr.classList.toggle('hidden', !instrActive);
+      panelAbout.classList.toggle('hidden', instrActive);
+      body.style.height = maxH + 'px';
+    }
+
+    tabInstr.addEventListener('click', ()=> { switchTab('instr'); lockBodyHeight(); });
+    tabAbout.addEventListener('click', ()=> { switchTab('about'); lockBodyHeight(); });
 
     // Ensure state when modal becomes visible (even if opened by external code)
     function ensureOnShow(){
       fillLabels();                      // refresh i18n
       switchTab('instr');                // show only Instruction
+      lockBodyHeight();                // fix height
     }
     // run once
     ensureOnShow();

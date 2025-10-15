@@ -239,7 +239,7 @@ a#donate, .donate, .donate a, .donate-btn, .donate-btn a, .icon-donate,
 #infoModal.modal{ display:flex; align-items:center; justify-content:center; }#infoModal.hidden{ display:none; }#infoModal .modalFrame{
   width:min( 560px, 92vw); background:var(--card); color:var(--text);
   border-radius:16px; box-shadow: 0 10px 30px rgba(0,0,0,.15); border:1px solid var(--border);
-}#infoModal .modalBody{ padding:14px; font-size:14px; line-      min-height: 240px; }#infoModal .iconBtn.small{ width:36px; height:36px; border-radius:12px; }.infoContent p{ margin: 0 0 8px; }.infoContent ul{ margin: 6px 0 0 18px; }/* Dicts modal — symmetric spacing around flags + list breathing + footer divider */
+}#infoModal .modalBody{ padding:14px; font-size:14px; line-height:1.45; min-height:240px; max-height:min(70vh, 520px); overflow:hidden; transition:height .25s ease; }#infoModal .iconBtn.small{ width:36px; height:36px; border-radius:12px; }.infoContent p{ margin: 0 0 8px; }.infoContent ul{ margin: 6px 0 0 18px; }/* Dicts modal — symmetric spacing around flags + list breathing + footer divider */
 #modal #langFlags, #modal .flagsRow{ margin:8px 0; padding:0 14px 14px; border-bottom:1px solid var(--border); }#modal .dictList{ margin-top:8px; padding-top:4px; padding-bottom:14px; max-height:230px; overflow-y:auto; }#modal .modalActions{ display:flex; justify-content:center; padding:14px 16px 20px; border-top:1px solid var(--border); }/* === Info modal: inset dividers to match Dicts modal === */
 #infoModal .modalFrame{ overflow:visible; }#infoModal .modalHeader{display: flex;
   align-items: center;
@@ -888,6 +888,9 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
 :root[data-theme="dark"] .heart.is-fav { color: var(--icon-active, #facc15) !important; }
 
 /* === Tabs visibility fix (2025-10-14) === */
+/* Modal tab content scroll area */
+#infoModal .tabPanel .scrollArea{ overflow:auto; max-height:inherit; }
+
 .tabPanel.hidden { display: none; }
 .tabs { display:flex; gap:8px; padding:8px 12px 0; border-bottom:1px solid rgba(0,0,0,.1); }
 .tab { border:none; background:none; padding:8px 12px; cursor:pointer; border-bottom:2px solid transparent; }
