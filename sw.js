@@ -3,8 +3,8 @@
  Version: 1.5 • Updated: 2025-10-10 • File: release-main/sw.js 
 ***************************************************************
 */
-const CACHE_VERSION = 'v1.0.5';
-const CACHE_NAME='lexitron-'+CACHE_VERSION;
+const CACHE_VERSION = 'v1.6.0';
+const CACHE_NAME='lexitron-v1.6.0'+CACHE_VERSION;
 const CORE=[
   './','./index.html','./style.css','./site.webmanifest',
   './app.core.js','./app.decks.js','./app.trainer.js','./app.ui.view.js',
