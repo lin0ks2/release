@@ -1659,11 +1659,11 @@ if (document.readyState === 'loading') {
         <section id="panel-about" class="tabPanel hidden" role="tabpanel" aria-labelledby="tab-about">
           <div class="aboutGrid">
             <div class="aboutRow">
-              <div class="aboutLabel" id="labelVersion"></div>
+              <div class="aboutLabel">Версия</div>
               <div class="aboutValue"><span id="appVersion">—</span></div>
             </div>
             <div class="aboutRow">
-              <div class="aboutLabel" id="labelStatus"></div>
+              <div class="aboutLabel">Статус</div>
               <div class="aboutValue">
                 <span id="licStatus">—</span>
                 <span id="licUser" class="muted"></span>
@@ -1718,9 +1718,12 @@ if (document.readyState === 'loading') {
       const p = pack();
       if (p && p[k] != null) return p[k];
       const d = {
-        ru: {infoTitle:'Информация', tabInstruction:'Инструкция', tabAbout:'О программе', ok:'OK', checkUpdates:'Проверить обновления', regKey:'Ключ регистрации', register:'Зарегистрировать', licensed:'Зарегистрировано', notLicensed:'Не зарегистрировано', regStubHint:'Пока заглушка — логика активации будет добавлена позже.', version:'Версия' , status:'Статус' },
-        uk: {infoTitle:'Інформація', tabInstruction:'Інструкція', tabAbout:'Про програму', ok:'OK', checkUpdates:'Перевірити оновлення', regKey:'Ключ реєстрації', register:'Зареєструвати', licensed:'Зареєстровано', notLicensed:'Не зареєстровано', regStubHint:'Поки заглушка — логіку активації додамо пізніше.', version:'Версія' , status:'Статус' },
-        en: {infoTitle:'Information', tabInstruction:'Instruction', tabAbout:'About', ok:'OK', checkUpdates:'Check for updates', regKey:'Registration key', register:'Register', licensed:'Licensed', notLicensed:'Not licensed', regStubHint:'Placeholder — activation logic will be added later.', version:'Version' , status:'Status' }
+        ru: {infoTitle:'Информация', tabInstruction:'Инструкция', tabAbout:'О программе', ok:'OK', checkUpdates:'Проверить обновления', regKey:'Ключ регистрации', register:'Зарегистрировать',
+regStubHint:'Пока заглушка — логика активации будет добавлена позже.'},
+        uk: {infoTitle:'Інформація', tabInstruction:'Інструкція', tabAbout:'Про програму', ok:'OK', checkUpdates:'Перевірити оновлення', regKey:'Ключ реєстрації', register:'Зареєструвати',
+regStubHint:'Поки заглушка — логіку активації додамо пізніше.'},
+        en: {infoTitle:'Information', tabInstruction:'Instruction', tabAbout:'About', ok:'OK', checkUpdates:'Check for updates', regKey:'Registration key', register:'Register',
+regStubHint:'Placeholder — activation logic will be added later.'}
       };
       const L = lang();
       return (d[L] && d[L][k]) || (d.ru[k]) || def || '';
@@ -1736,9 +1739,6 @@ if (document.readyState === 'loading') {
       regKeyLabel.textContent = T('regKey');
       btnRegister.textContent = T('register');
       regHintEl.textContent = T('regStubHint');
-    
-      const lv=document.getElementById('labelVersion'); if(lv) lv.textContent=T('version','Версия');
-      const ls=document.getElementById('labelStatus'); if(ls) ls.textContent=T('status','Статус');
     }
 
     // Tabs control
