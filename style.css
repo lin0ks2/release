@@ -3,10 +3,7 @@
  Version: 1.5 • Updated: 2025-10-10 • File: release-main/style.css 
 *******************************************************************
 */
-:root{ --radius-base:16px; --border-width:1px;   --text-main: #2a2a2a;
-  --text-muted: #6b7280;
-  --bg-soft: #f6f7f8;
-}/*!
+:root{ --radius-base:16px; --border-width:1px; }/*!
  * style.css — Lexitron styles
  * Version: 1.5.0
  * Date: 2025-09-22
@@ -241,10 +238,8 @@ a#donate, .donate, .donate a, .donate-btn, .donate-btn a, .icon-donate,
 /* Info modal */
 #infoModal.modal{ display:flex; align-items:center; justify-content:center; }#infoModal.hidden{ display:none; }#infoModal .modalFrame{
   width:min( 640px, 94vw); background:var(--card); color:var(--text);
-  border-radius: var(--radius-base); box-shadow: 0 8px 28px rgba(0,0,0,0.15); border:1px solid var(--border);
-}#infoModal .modalBody{ padding: 16px 18px; font-size:14px; line-      min-height: 240px; }#infoModal .iconBtn.small{ width:36px; height:36px; border-radius:12px;   font-size: 18px;
-  opacity: .9;
-}.infoContent p{ margin: 0 0 8px; }.infoContent ul{ margin: 6px 0 0 18px; }/* Dicts modal — symmetric spacing around flags + list breathing + footer divider */
+  border-radius:16px; box-shadow: 0 10px 30px rgba(0,0,0,.15); border:1px solid var(--border);
+}#infoModal .modalBody{ padding:14px; font-size:14px; line-      min-height: 240px; }#infoModal .iconBtn.small{ width:36px; height:36px; border-radius:12px; }.infoContent p{ margin: 0 0 8px; }.infoContent ul{ margin: 6px 0 0 18px; }/* Dicts modal — symmetric spacing around flags + list breathing + footer divider */
 #modal #langFlags, #modal .flagsRow{ margin:8px 0; padding:0 14px 14px; border-bottom:1px solid var(--border); }#modal .dictList{ margin-top:8px; padding-top:4px; padding-bottom:14px; max-height:230px; overflow-y:auto; }#modal .modalActions{ display:flex; justify-content:center; padding:14px 16px 20px; border-top:1px solid var(--border); }/* === Info modal: inset dividers to match Dicts modal === */
 #infoModal .modalFrame{ overflow:visible; }#infoModal .modalHeader{display: flex;
   align-items: center;
@@ -401,8 +396,8 @@ a#donate, .donate, .donate a, .donate-btn, .donate-btn a, .icon-donate,
 }#settingsModal.hidden{display: none !important;}#settingsModal .modalFrame{width: min(680px, 92vw);
   background: var(--card);
   color: var(--text);
-  border-radius: var(--radius-base);
-  box-shadow: 0 8px 28px rgba(0,0,0,0.15);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.15);
   border: 1px solid var(--border);
   overflow: hidden;}#settingsModal .modalHeader{display: flex;
   align-items: center;
@@ -417,7 +412,7 @@ a#donate, .donate, .donate a, .donate-btn, .donate-btn a, .icon-donate,
   right: 14px;
   bottom: 0;
   height: 1px;
-  background: var(--border);}#settingsModal .modalBody{padding: 16px 18px;
+  background: var(--border);}#settingsModal .modalBody{padding: 14px;
   font-size: 14px;
   line-height: 1.5;
   color: var(--text);}#settingsModal .modalActions{display: flex;
@@ -444,8 +439,8 @@ a#donate, .donate, .donate a, .donate-btn, .donate-btn a, .icon-donate,
   width: min(680px, 92vw);
   background: var(--card);
   color: var(--text);
-  border-radius: var(--radius-base);
-  box-shadow: 0 8px 28px rgba(0,0,0,0.15);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.15);
   border: 1px solid var(--border);
   overflow: hidden;
 }#donateModal .modalHeader{
@@ -461,7 +456,7 @@ a#donate, .donate, .donate a, .donate-btn, .donate-btn a, .icon-donate,
   left: 14px; right: 14px; bottom: 0;
   height: 1px; background: var(--border);
 }#donateModal .modalBody{
-  padding: 16px 18px;
+  padding: 14px;
   font-size: 14px;
   line-height: 1.5;
   color: var(--text);
@@ -919,15 +914,15 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
 }
 
 /* === [PATCH 2025-10-14] Info modal scoped tweaks — safe === */
-#infoModal .aboutSep { margin: 8px 0 12px; height: 1px; background: var(--border); }
+#infoModal .aboutSep { margin: 8px 0 4px; height: 1px; background: var(--border); }
 #infoModal #panel-about:not(.hidden){ text-align: left;  display:flex !important; flex-direction:column !important; overflow-y:visible; }
 #infoModal .aboutGrid { justify-items: start; }
 #infoModal .aboutRow { display: grid; grid-template-columns: auto auto; align-items: center; gap: 8px; }
 #infoModal .aboutLabel { color: var(--text); font-weight: 600; text-align:left; }
-#infoModal .actionsRow { margin: 10px 0 8px; display: flex; justify-content: center; }
+#infoModal .actionsRow { margin: 8px 0 8px; display: flex; justify-content: center; }
 #infoModal .regBlock { margin-top: 10px; display: grid; gap: 6px; }
 #infoModal .regRow { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-#infoModal .regRow input[type="text"] { width: 100%; max-width: 320px; padding: 8px 10px; border: 1px solid var(--border, #d1d5db); border-radius: var(--radius-base);  background: var(--tool-bg, var(--bg-soft)); color: var(--tool-fg); caret-color: var(--text);}
+#infoModal .regRow input[type="text"] { width: 100%; max-width: 320px; padding: 8px 10px; border: 1px solid var(--tool-border); border-radius: 6px;  background: var(--tool-bg); color: var(--tool-fg); caret-color: var(--text);}
 #infoModal .tabs .tab, 
 
 /* === [PATCH 2025-10-14] Info modal visuals: mint active tab + stacked rows (scoped) === */
@@ -966,15 +961,14 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
   background: var(--card);
   color: var(--text);
   border: 1px solid var(--border);
-  border-radius: var(--radius-base);
+  border-radius: 12px;
   font-size: 15px;
   
   font-weight: 500;
   box-shadow: none;
- padding: 10px 14px; }
+ padding:8px 16px; }
 #infoModal .btnPill:hover{
   background: rgba(0,0,0,0.05);
-  filter: brightness(1.05);
 }
 #infoModal .btnPill:disabled{
   opacity: .6;
@@ -1044,7 +1038,7 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
 
 /* ===== Info modal compact spacing override (2025-10-15) ===== */
 /* Force higher specificity and priority to beat any earlier rules */
-#infoModal .actionsRow{ margin:4px 0 2px !important; display:flex !important; justify-content:center !important; }
-#infoModal .aboutSep{ margin:2px 0 4px !important; height:1px !important; background: var(--border) !important; }
+#infoModal .actionsRow { margin: 8px 0 8px; display: flex; justify-content: center; }
+#infoModal .aboutSep { margin: 8px 0 4px; height: 1px; background: var(--border); }
 #infoModal .regBlock{ margin-top:2px !important; }
 
