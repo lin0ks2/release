@@ -914,12 +914,12 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
 }
 
 /* === [PATCH 2025-10-14] Info modal scoped tweaks — safe === */
-#infoModal .aboutSep { margin: 8px 0 4px; height: 1px; background: var(--border); }
+#infoModal .aboutSep { margin: 8px 0 12px; height: 1px; background: var(--border); }
 #infoModal #panel-about:not(.hidden){ text-align: left;  display:flex !important; flex-direction:column !important; overflow-y:visible; }
 #infoModal .aboutGrid { justify-items: start; }
 #infoModal .aboutRow { display: grid; grid-template-columns: auto auto; align-items: center; gap: 8px; }
 #infoModal .aboutLabel { color: var(--text); font-weight: 600; text-align:left; }
-#infoModal .actionsRow { margin: 8px 0 8px; display: flex; justify-content: center; }
+#infoModal .actionsRow { margin: 10px 0 8px; display: flex; justify-content: center; }
 #infoModal .regBlock { margin-top: 10px; display: grid; gap: 6px; }
 #infoModal .regRow { display: flex; flex-direction: column; align-items: center; gap: 8px; }
 #infoModal .regRow input[type="text"] { width: 100%; max-width: 320px; padding: 8px 10px; border: 1px solid var(--tool-border); border-radius: 6px;  background: var(--tool-bg); color: var(--tool-fg); caret-color: var(--text);}
@@ -1038,7 +1038,17 @@ html:has(#setupModal:not(.hidden)) main .card{ opacity:0; visibility:hidden; poi
 
 /* ===== Info modal compact spacing override (2025-10-15) ===== */
 /* Force higher specificity and priority to beat any earlier rules */
-#infoModal .actionsRow { margin: 8px 0 8px; display: flex; justify-content: center; }
-#infoModal .aboutSep { margin: 8px 0 4px; height: 1px; background: var(--border); }
+#infoModal .actionsRow{ margin:4px 0 2px !important; display:flex !important; justify-content:center !important; }
+#infoModal .aboutSep{ margin:2px 0 4px !important; height:1px !important; background: var(--border) !important; }
 #infoModal .regBlock{ margin-top:2px !important; }
+
+/* ===== Utilities (layout helpers) ===== */
+.center{ text-align:center; }
+.flex-center{ display:flex; align-items:center; justify-content:center; }
+.flex-between{ display:flex; align-items:center; justify-content:space-between; }
+.gap-10{ gap:10px; }
+.mt-10{ margin-top:10px; }
+.mt-20{ margin-top:20px; }
+.m-10{ margin:10px; }
+.cursor-pointer{ cursor:pointer; }
 

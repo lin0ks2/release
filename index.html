@@ -143,8 +143,8 @@
         <div class="modalBody">
           <div id="settingsContent" class="infoContent">
 <!-- Mode toggle -->
-  <div id="modeToggleWrap" class="field" style="margin-top:10px;display:flex;align-items:center;gap:10px;justify-content:center">
-    <label for="modeToggle" style="display:flex;align-items:center;gap:10px;cursor:pointer">
+  <div id="modeToggleWrap" class="field flex-center gap-10 mt-10">
+    <label for="modeToggle" class="flex-center gap-10 cursor-pointer">
       <span data-i18n="modeNormal">Обычный режим</span>
       <input id="modeToggle" type="checkbox" role="switch" aria-checked="false" />
       <span data-i18n="modeHard">Сложный режим</span>
@@ -153,7 +153,7 @@
 
 </div>
         </div>
-        <div class="modalActions">
+        <div class="modalActions center">
           <button id="settingsOk" class="btn primary" data-i18n="ok">OK</button>
         </div>
       </div>
@@ -168,8 +168,8 @@
           <button class="iconBtn small" id="donateClose" aria-label="Close">✖️</button>
         </div>
         <div class="modalBody">
-          <div id="donateContent" class="infoContent" style="text-align:center">
-  <div id="donate-button-container" style="margin-top:20px">
+          <div id="donateContent" class="infoContent center">
+  <div id="donate-button-container" class="mt-20">
     <div id="donate-button"></div>
     <script src="https://www.paypalobjects.com/donate/sdk/donate-sdk.js" charset="UTF-8"></script>
     <script>
@@ -186,7 +186,7 @@
   </div>
 </div>
         </div>
-        <div class="modalActions">
+        <div class="modalActions center">
           <button id="donateOk" class="btn primary" data-i18n="ok">OK</button>
         </div>
       </div>
@@ -201,7 +201,7 @@
         <div class="modalBody">
           <div id="infoContent" class="infoContent"></div>
         </div>
-        <div class="modalActions" style="text-align:center">
+        <div class="modalActions center">
           <button id="infoOk" class="primary">OK</button>
         </div>
       </div>
@@ -221,14 +221,14 @@
 
     <!-- Тело -->
     <div class="modalBody">
-      <div id="langFlags" class="flagsRow" style="display:flex;gap:10px;align-items:center;justify-content:center;margin:10px 10px 10px;"></div>
+      <div id="langFlags" class="flagsRow flex-center gap-10 m-10"></div>
       <div class="field">
         <div class="dictList" id="dictList"></div>
       </div>
     </div>
 
     <!-- Футер -->
-    <div class="modalActions" style="text-align:center">
+    <div class="modalActions center">
       <button id="okBtn" class="primary">OK</button>
     </div>
   </div>
@@ -300,7 +300,7 @@
       <div class="modalBody">
         <div id="confirmText" class="infoContent">Вы уверены?</div>
       </div>
-      <div class="modalActions">
+      <div class="modalActions center">
         <button id="confirmOk" class="btn primary">OK</button>
         <button id="confirmCancel" class="btn">Отмена</button>
       </div>

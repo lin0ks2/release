@@ -85,8 +85,8 @@
           </div>
 
         <!-- Mode toggle in setup -->
-        <div id="setupModeToggleWrap" class="field" style="margin-top:10px;display:flex;align-items:center;gap:10px;justify-content:center">
-          <label for="setupModeToggle" style="display:flex;align-items:center;gap:10px;cursor:pointer">
+        <div id="setupModeToggleWrap" class="field flex-center gap-10 mt-10">
+          <label for="setupModeToggle" class="flex-center gap-10 cursor-pointer">
             <span data-i18n="modeNormal">${T('modeNormal', (L(eff).modeNormal||'Обычный режим'), eff)}</span>
             <input id="setupModeToggle" type="checkbox" role="switch" aria-checked="false" />
             <span data-i18n="modeHard">${T('modeHard', (L(eff).modeHard||'Сложный режим'), eff)}</span>

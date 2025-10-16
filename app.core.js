@@ -27,6 +27,12 @@ App.starKey = function(wid, dk){
 };
 
   App.dictRegistry = loadDictRegistrySafe();
+  // ensure map of last used dictionary per language exists (migration-safe)
+  try{
+    if (!App.dictRegistry || typeof App.dictRegistry !== 'object') App.dictRegistry = { activeKey:null, user:{}, lastByLang:{} };
+    if (!App.dictRegistry.user || typeof App.dictRegistry.user !== 'object') App.dictRegistry.user = {};
+    if (!App.dictRegistry.lastByLang || typeof App.dictRegistry.lastByLang !== 'object') App.dictRegistry.lastByLang = {};
+  }catch(_){}
 
   // ── миграция под наборы: setSize=50 по умолчанию, map под активные наборы ──
   (function migrateSets(){
@@ -169,7 +175,7 @@ App.saveState = function(){
 })();
 ;
 
-  function loadDictRegistrySafe(){ try{ const raw=localStorage.getItem(LS_DICTS); if(raw) return JSON.parse(raw);}catch(e){} return { activeKey:null, user:{} }; }
+  function loadDictRegistrySafe(){ try{ const raw=localStorage.getItem(LS_DICTS); if(raw) return JSON.parse(raw);}catch(e){} return { activeKey:null, user:{}, lastByLang:{} }; }
   App.saveDictRegistry = function(){ try{ localStorage.setItem(LS_DICTS, JSON.stringify(App.dictRegistry)); }catch(e){} };
 
   // DOM map

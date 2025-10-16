@@ -598,7 +598,33 @@ if (!w) return;
       try{ if (typeof updateSpoilerHeader==='function') updateSpoilerHeader(); }catch(_){ } try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
       }
 
-  function renderDictList() {
+  
+  function _applyActiveKeyChange(key){
+    try{
+      if (!key) return;
+      App.dictRegistry.activeKey = key;
+      try{
+        localStorage.setItem('lexitron.deckKey', String(key));
+        localStorage.setItem('lexitron.activeKey', String(key));
+      }catch(_){}
+      App.saveDictRegistry && App.saveDictRegistry();
+      // reset trainer indices to start from beginning like manual row click
+      if (App.state){
+        App.state.index = 0;
+        try{
+          if (typeof App.getStarStep==='function') App.state.lastIndex = - App.getStarStep();
+          else App.state.lastIndex = 0;
+        }catch(_){ App.state.lastIndex = 0; }
+      }
+      // refresh UI to reflect new deck
+      try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){}
+      try{ if (typeof updateSpoilerHeader==='function') updateSpoilerHeader(); }catch(_){}
+      try{ App._renderSetsBarOriginal && App._renderSetsBarOriginal(); }catch(_){}
+      try{ renderCard && renderCard(true); }catch(_){}
+      try{ updateStats && updateStats(); }catch(_){}
+    }catch(_){}
+  }
+function renderDictList() {
     const host = D.dictListHost;
     if (!host) return;
     host.innerHTML = '';
@@ -748,6 +774,16 @@ if (!w) return;
         try{ localStorage.setItem('lexitron.deckKey', String(defKey)); localStorage.setItem('lexitron.activeKey', String(defKey)); }catch(_){}
 
         App.saveDictRegistry && App.saveDictRegistry();
+        (function(){
+          const key = pickPreferredKeyForLang(lg);
+          if (key) {
+            App.dictRegistry.activeKey = key;
+            if (!App.dictRegistry.lastByLang) App.dictRegistry.lastByLang = {};
+            App.dictRegistry.lastByLang[lg] = key;
+            App.saveDictRegistry && App.saveDictRegistry();
+            try{ localStorage.setItem('lexitron.deckKey', String(key)); localStorage.setItem('lexitron.activeKey', String(key)); }catch(_){}
+          }
+        })();
         renderDictList(); App._renderSetsBarOriginal && App._renderSetsBarOriginal(); try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
       try{ if (typeof updateSpoilerHeader==='function') updateSpoilerHeader(); }catch(_){ } try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
       renderCard(true); updateStats();
@@ -798,6 +834,16 @@ if (!w) return;
       try{ if (typeof renderSetStats==='function') renderSetStats(); }catch(_){ }
 if (row.classList.contains('disabled')) return;
       App.dictRegistry.activeKey = key;
+        try{
+          var m = String(key||'').match(/^([a-z]{2})[_-]/i);
+          var lang = m ? m[1].toLowerCase() : null;
+          if (lang) {
+            if (!App.dictRegistry.lastByLang) App.dictRegistry.lastByLang = {};
+            App.dictRegistry.lastByLang[lang] = key;
+            App.saveDictRegistry && App.saveDictRegistry();
+          }
+        }catch(_){}
+
         try{ localStorage.setItem('lexitron.deckKey', String(key)); localStorage.setItem('lexitron.activeKey', String(key)); }catch(_){}
 
       App.saveDictRegistry();
@@ -816,7 +862,21 @@ if (row.classList.contains('disabled')) return;
   }
 
   const FLAG_EMOJI = { ru:'🇷🇺', uk:'🇺🇦', en:'🇬🇧', de:'🇩🇪', es:'🇪🇸', fr:'🇫🇷', it:'🇮🇹', pl:'🇵🇱', sr:'🇷🇸', tr:'🇹🇷' };
-  App.renderLangFlags = function(){
+  
+  // Preferred key for a language = the FIRST key from the currently used sorted order
+  function pickPreferredKeyForLang(langCode) {
+    try{
+      const all = (App.Decks && typeof App.Decks.builtinKeys === 'function')
+        ? (App.Decks.builtinKeys() || [])
+        : Object.keys(window.decks || {});
+      let byLang = all.filter(k => String(k).indexOf(langCode + '_') === 0);
+      // use the same sort routine the list uses (verbs appear first visually)
+      try{ byLang = (typeof _sortKeysByCategory==='function') ? _sortKeysByCategory(byLang) : byLang; }catch(_){}
+      return byLang.length ? byLang[0] : null;
+    }catch(_){ return null; }
+  }
+
+App.renderLangFlags = function(){
     if (!D.langFlags) return;
     const set = new Set();
     try {
@@ -840,8 +900,17 @@ if (row.classList.contains('disabled')) return;
       b.textContent = FLAG_EMOJI[lg] || lg.toUpperCase();
       b.addEventListener('click', () => {
         App.settings.dictsLangFilter = lg;
-        App.saveSettings && App.saveSettings(App.settings);
-        renderDictList();
+        /* do not persist settings here to avoid clobbering registration flags */
+        /* AUTOFILL-PICK-FIRST */
+        try{
+          var _pref = (typeof pickPreferredKeyForLang==='function') ? pickPreferredKeyForLang(lg) : null;
+          if (_pref) {
+                        if (!App.dictRegistry.lastByLang) App.dictRegistry.lastByLang = {};
+            App.dictRegistry.lastByLang[lg] = _pref;
+            _applyActiveKeyChange(_pref);
+          }
+        }catch(_){}
+renderDictList();
         App.renderLangFlags();
       });
       D.langFlags.appendChild(b);
@@ -918,7 +987,25 @@ if (row.classList.contains('disabled')) return;
       });
       updateIcon();
     }
-    if (D.dictsBtn) { D.dictsBtn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); openModal(); App.renderLangFlags && App.renderLangFlags(); }); }
+    if (D.dictsBtn) { D.dictsBtn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); /* PREFER-ON-OPEN */
+      try{
+        if (!App.settings.dictsLangFilter){
+          var lg = (App.settings && (App.settings.studyLang || App.settings.lang)) || 'en';
+          App.settings.dictsLangFilter = String(lg).toLowerCase();
+        }
+        var _lg = App.settings && App.settings.dictsLangFilter;
+        if (_lg && typeof pickPreferredKeyForLang==='function'){
+          var _pref = pickPreferredKeyForLang(_lg);
+          if (_pref){
+            App.dictRegistry.activeKey = _pref;
+            if (!App.dictRegistry.lastByLang) App.dictRegistry.lastByLang = {};
+            App.dictRegistry.lastByLang[_lg] = _pref;
+            App.saveDictRegistry && App.saveDictRegistry();
+            try{ localStorage.setItem('lexitron.deckKey', String(_pref)); localStorage.setItem('lexitron.activeKey', String(_pref)); }catch(_){}
+          }
+        }
+      }catch(_){}
+      openModal(); App.renderLangFlags && App.renderLangFlags(); }); }
     if (D.okBtn) { D.okBtn.addEventListener('click', () => { closeModal(); }); }
     if (D.backdrop) { D.backdrop.addEventListener('click', () => { closeModal(); }); }
     if (D.favBtn) { D.favBtn.addEventListener('click', toggleFav); }
@@ -1031,7 +1118,8 @@ if (row.classList.contains('disabled')) return;
     }
   }
   function open(){ fill(); modal.classList.remove('hidden'); }
-  function close(){ modal.classList.add('hidden'); }
+      window.addEventListener('lexi:lang-changed', function(){ try{ renderAboutDynamic(); }catch(_){} });
+function close(){ modal.classList.add('hidden'); }
 
   if (infoBtn) infoBtn.addEventListener('click', open);
   if (okBtn)   okBtn.addEventListener('click', close);
@@ -1709,7 +1797,7 @@ if (document.readyState === 'loading') {
     const licUserEl = document.getElementById('licUser');
 
     // i18n helpers
-    function lang(){ return (window.App && App.settings && App.settings.lang) || 'uk'; }
+    function lang(){ return (window.App && App.settings && App.settings.lang) || (App.settings && (App.settings.uiLang || App.settings.lang)) || 'uk'; }
     function pack(){
       const L = lang();
       return (window.I18N && (I18N[L] || I18N.uk)) || {};
@@ -1739,15 +1827,6 @@ regStubHint:'Placeholder — activation logic will be added later.'}
       regKeyLabel.textContent = T('regKey');
       btnRegister.textContent = T('register');
       regHintEl.textContent = T('regStubHint');
-    
-      // also refresh status text to current language
-      try{
-        const licStatusEl = document.getElementById('licStatus');
-        if (licStatusEl){
-          const isAct = !!(window.App && App.lic && App.lic.isActivated);
-          licStatusEl.textContent = T(isAct ? 'licensed' : 'notLicensed');
-        }
-      }catch(_){}
     }
 
     // Tabs control
@@ -1783,7 +1862,8 @@ regStubHint:'Placeholder — activation logic will be added later.'}
 
     // Ensure state when modal becomes visible (even if opened by external code)
     function ensureOnShow(){
-      fillLabels();                      // refresh i18n
+      fillLabels();                            renderAboutDynamic();
+// refresh i18n
       switchTab('instr');                // show only Instruction
       lockBodyHeight();                // fix height
     }
@@ -1803,21 +1883,29 @@ regStubHint:'Placeholder — activation logic will be added later.'}
       }
     }catch(_){}
 
-    // About content
-    const meta = {
-      version: (window.App && (App.meta && App.meta.version)) || (window.App && App.version) || (window.App && App.APP_VER) || '—',
-      isActivated: !!(window.App && App.lic && App.lic.isActivated),
-      userName: (window.App && App.lic && App.lic.userName) || ''
-    };
-    verEl.textContent = meta.version;
-    if (meta.isActivated){
-      licStatusEl.textContent = T('licensed');
-      if (meta.userName) licUserEl.textContent = '— ' + meta.userName;
-    } else {
-      licStatusEl.textContent = T('notLicensed');
-      licStatusEl.classList.add('muted');
+    
+    // About content — render dynamic bits (version, license status) per current i18n/lang
+    function renderAboutDynamic(){
+      try{
+        const meta = {
+          version: (window.App && (App.meta && App.meta.version)) || (window.App && App.version) || (window.App && App.APP_VER) || '—',
+          isActivated: !!(window.App && App.lic && App.lic.isActivated),
+          userName: (window.App && App.lic && App.lic.userName) || ''
+        };
+        if (verEl) verEl.textContent = meta.version;
+        if (licStatusEl){
+          if (meta.isActivated){
+            licStatusEl.textContent = T('licensed');
+            if (licUserEl) licUserEl.textContent = meta.userName ? ('— ' + meta.userName) : '';
+          } else {
+            licStatusEl.textContent = T('notLicensed');
+            licStatusEl.classList.add('muted');
+            if (licUserEl) licUserEl.textContent = '';
+          }
+        }
+      }catch(_){}
     }
-
+    renderAboutDynamic();
     // Close buttons
     function close(){ modal.classList.add('hidden'); }
     okBtn.addEventListener('click', close);
@@ -1882,7 +1970,7 @@ regStubHint:'Placeholder — activation logic will be added later.'}
     var modal = document.getElementById('infoModal');
     if (!modal) return;
 
-    function lang(){ try{ return (window.App && App.settings && App.settings.lang) || 'uk'; }catch(_){ return 'uk'; } }
+    function lang(){ try{ return (window.App && App.settings && App.settings.lang) || (App.settings && (App.settings.uiLang || App.settings.lang)) || 'uk'; }catch(_){ return 'uk'; } }
     function pack(){
       var L = lang();
       return (window.I18N && (I18N[L] || I18N.uk)) || {};

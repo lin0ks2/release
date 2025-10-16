@@ -30,9 +30,9 @@
     }
 
     // Флекс-раскладка (на случай отсутствия CSS)
-    header.style.display = 'flex';
-    header.style.alignItems = 'center';
-    header.style.justifyContent = 'space-between';
+    header.classList.add('flex-between');
+    
+    
 
     // 2) Заголовок #modalTitle
     let title = dialog.querySelector('#modalTitle');
